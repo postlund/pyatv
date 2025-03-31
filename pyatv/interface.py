@@ -7,6 +7,7 @@ all its features.
 from abc import ABC, abstractmethod
 import asyncio
 from dataclasses import dataclass
+from enum import Enum
 import hashlib
 import inspect
 import io
@@ -1067,6 +1068,47 @@ class DeviceInfo:
 
         return output
 
+    def to_dict(self) -> dict:
+        """Serialize the DeviceInfo to a dictionary.
+
+        Enum values are converted to their name strings.
+        """
+        os_name = self._os.name if isinstance(self._os, Enum) else self._os
+        model_name = self._model.name if isinstance(self._model, Enum) else self._model
+        return {
+            self.OPERATING_SYSTEM: os_name,
+            self.BUILD_NUMBER: self._build_number,
+            self.MODEL: model_name,
+            self.RAW_MODEL: self._devinfo.get(self.RAW_MODEL),  # Maybe None
+            self.MAC: self._mac,
+            self.OUTPUT_DEVICE_ID: self._output_device_id,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "DeviceInfo":
+        """Create a DeviceInfo instance from a dictionary.
+
+        This method converts enum values from their name strings back to enums.
+        """
+        # Make a copy to avoid modifying the input dictionary.
+        d = data.copy()
+
+        # Convert the operating system field if present.
+        if cls.OPERATING_SYSTEM in d and isinstance(d[cls.OPERATING_SYSTEM], str):
+            try:
+                d[cls.OPERATING_SYSTEM] = OperatingSystem[d[cls.OPERATING_SYSTEM]]
+            except KeyError:
+                d[cls.OPERATING_SYSTEM] = OperatingSystem.Unknown
+
+        # Convert the model field if present.
+        if cls.MODEL in d and isinstance(d[cls.MODEL], str):
+            try:
+                d[cls.MODEL] = DeviceModel[d[cls.MODEL]]
+            except KeyError:
+                d[cls.MODEL] = DeviceModel.Unknown
+
+        return cls(d)
+
 
 class Features:
     """Base class for supported feature functionality."""
@@ -1452,6 +1494,64 @@ class BaseConfig(ABC):
     @abstractmethod
     def __deepcopy__(self, memo) -> "BaseConfig":
         """Return deep-copy of instance."""
+
+    def to_dict(self) -> dict:
+        """Serialize the BaseConfig to a dictionary."""
+        base_data = {
+            "address": str(self.address),
+            "name": self.name,
+            "deep_sleep": self.deep_sleep,
+            "properties": self.properties,
+            "device_info": self.device_info.to_dict() if self.device_info else None,
+            "CLASS_TYPE": self.__class__.class_type,
+        }
+        # Merge in subclass-specific data.
+        return base_data
+
+    @classmethod
+    def class_type(cls) -> str:
+        """Return a string that uniquely identifies this subclass type.
+
+        Subclasses must override this.
+        """
+        return "BaseConfig"
+
+    @classmethod
+    def _common_from_dict(cls, data: dict) -> dict:
+        """Help extract common fields from a dictionary."""
+        device_info_dict = data.get("device_info")
+        if device_info_dict:
+            device_info_dict = DeviceInfo.from_dict(device_info_dict)
+        return {
+            "address": IPv4Address(data["address"]),
+            "name": data["name"],
+            "deep_sleep": data["deep_sleep"],
+            "properties": data["properties"],
+            "device_info": device_info_dict,
+        }
+
+    @classmethod
+    @abstractmethod
+    def from_dict(cls, data: dict) -> "BaseConfig":
+        """Return a new instance from a dictionary."""
+
+    @classmethod
+    def config_from_dict(cls, data: dict) -> "BaseConfig":
+        """Create a new instance from a dictionary."""
+        class_type = data.get("__CLASS_TYPE")
+        if class_type is None:
+            raise ValueError("Missing device_type discriminator in data")
+
+        subclasses = BaseConfig.__subclasses__()
+
+        config_class = next(
+            (sub for sub in subclasses if sub.class_type() == class_type),
+            None,
+        )
+
+        if config_class is None:
+            raise ValueError(f"Unknown device_type {class_type}")
+        return config_class.from_dict(data)
 
 
 class Storage(ABC):

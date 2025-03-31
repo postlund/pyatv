@@ -22,6 +22,11 @@ class AppleTV(BaseConfig):
     AirPlay.
     """
 
+    @classmethod
+    def class_type(cls):
+        """Return type used for deserializing into this subclass."""
+        return "AppleTV"
+
     def __init__(
         self,
         address: IPv4Address,
@@ -94,6 +99,25 @@ class AppleTV(BaseConfig):
         for service in self.services:
             copy.add_service(deepcopy(service))
         return copy
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "AppleTV":
+        """Create an AppleTV instance from a dictionary.
+
+        Uses the base class helper for common fields and handles AppleTV-specific data.
+        """
+        # Extract common fields using the base helper.
+        common = super()._common_from_dict(data)
+        # Create the instance using the AppleTV constructor.
+        instance = cls(
+            address=common["address"],
+            name=common["name"],
+            deep_sleep=common["deep_sleep"],
+            properties=common["properties"],
+            device_info=common["device_info"],
+        )
+
+        return instance
 
 
 class ManualService(BaseService):

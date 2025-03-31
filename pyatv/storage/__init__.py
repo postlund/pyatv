@@ -6,7 +6,7 @@ from typing import List, Sequence
 from pyatv.const import Protocol
 from pyatv.exceptions import DeviceIdMissingError, SettingsError
 from pyatv.interface import BaseConfig, Storage
-from pyatv.settings import Settings
+from pyatv.settings import Settings, TargetDeviceConfig
 from pyatv.support.pydantic_compat import BaseModel, model_copy
 
 __pdoc_dev_page__ = "/development/storage"
@@ -142,6 +142,11 @@ class AbstractStorage(Storage):
 
     @staticmethod
     def _update_settings_from_config(config: BaseConfig, settings: Settings) -> None:
+        try:
+            settings.target_device = TargetDeviceConfig.model_validate(config.to_dict())
+        except Exception as ex:
+            raise SettingsError(f"failed to update settings: {ex}") from ex
+
         for service in config.services:
             # TODO: Clean this up/make more general
             if service.protocol == Protocol.AirPlay:

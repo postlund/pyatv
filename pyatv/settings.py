@@ -161,8 +161,32 @@ class ProtocolSettings(BaseModel, extra="ignore"):  # type: ignore[call-arg]
     raop: RaopSettings = Field(default_factory=RaopSettings)
 
 
-class Settings(BaseModel, extra="ignore"):  # type: ignore[call-arg]
+class TargetDeviceInfo(BaseModel, extra="ignore"):  # type: ignore[call-arg]
+    """Information about the target device."""
+
+    os_name: str
+    os_version: str
+    os_build: str
+    model: str
+    raw_model: Optional[str]
+    mac: str
+    output_device_id: str
+
+
+class TargetDeviceConfig(BaseModel, extra="ignore"):  # type: ignore[call-arg]
+    """Configuration for a target device."""
+
+    address: str
+    name: str
+    deep_sleep: bool
+    properties: dict
+    device_info: TargetDeviceInfo = Field(default_factory=TargetDeviceInfo)
+    CLASS_TYPE: str
+
+
+class Settings(BaseModel, extra="ignore"):
     """Settings container class."""
 
     info: InfoSettings = Field(default_factory=InfoSettings)
     protocols: ProtocolSettings = Field(default_factory=ProtocolSettings)
+    target_device: TargetDeviceConfig = Field(default_factory=TargetDeviceConfig)
