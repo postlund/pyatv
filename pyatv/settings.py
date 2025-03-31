@@ -164,24 +164,24 @@ class ProtocolSettings(BaseModel, extra="ignore"):  # type: ignore[call-arg]
 class TargetDeviceInfo(BaseModel, extra="ignore"):  # type: ignore[call-arg]
     """Information about the target device."""
 
-    os_name: str
-    os_version: str
-    os_build: str
-    model: str
+    os_name: str = "Unknown"
+    os_version: str = "Unknown"
+    os_build: str = "Unknown"
+    model: str = "Unknown"
     raw_model: Optional[str]
-    mac: str
-    output_device_id: str
+    mac: Optional[str] = "00:00:00:00:00:00"
+    output_device_id: str = "Unknown"
 
 
 class TargetDeviceConfig(BaseModel, extra="ignore"):  # type: ignore[call-arg]
     """Configuration for a target device."""
 
-    address: str
-    name: str
-    deep_sleep: bool
-    properties: dict
-    device_info: TargetDeviceInfo = Field(default_factory=TargetDeviceInfo)
-    CLASS_TYPE: str
+    address: str = "127.0.0.1"
+    name: str = "Test Device"
+    deep_sleep: bool = False
+    properties: dict = {}
+    device_info: Optional[TargetDeviceInfo] = Field(default_factory=TargetDeviceInfo)
+    CLASS_TYPE: str = "DefaultType"
 
 
 class Settings(BaseModel, extra="ignore"):  # type: ignore[call-arg]
@@ -190,3 +190,4 @@ class Settings(BaseModel, extra="ignore"):  # type: ignore[call-arg]
     info: InfoSettings = Field(default_factory=InfoSettings)
     protocols: ProtocolSettings = Field(default_factory=ProtocolSettings)
     target_device: TargetDeviceConfig = Field(default_factory=TargetDeviceConfig)
+

@@ -1497,13 +1497,17 @@ class BaseConfig(ABC):
 
     def to_dict(self) -> dict:
         """Serialize the BaseConfig to a dictionary."""
+        def convert_mapping(obj):
+            if isinstance(obj, Mapping):
+                return {k: convert_mapping(v) for k, v in obj.items()}
+            return obj
         base_data = {
             "address": str(self.address),
-            "name": self.name,
+            "name": self.name or "",
             "deep_sleep": self.deep_sleep,
-            "properties": self.properties,
+            "properties": convert_mapping(self.properties),
             "device_info": self.device_info.to_dict() if self.device_info else None,
-            "CLASS_TYPE": self.__class__.class_type,
+            "CLASS_TYPE": self.__class__.class_type(),
         }
         # Merge in subclass-specific data.
         return base_data

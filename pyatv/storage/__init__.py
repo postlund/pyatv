@@ -143,7 +143,7 @@ class AbstractStorage(Storage):
     @staticmethod
     def _update_settings_from_config(config: BaseConfig, settings: Settings) -> None:
         try:
-            settings.target_device = TargetDeviceConfig.model_validate(config.to_dict())
+            settings.target_device = TargetDeviceConfig.parse_obj(config.to_dict())
         except Exception as ex:
             raise SettingsError(f"failed to update settings: {ex}") from ex
 

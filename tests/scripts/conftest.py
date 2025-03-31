@@ -89,6 +89,8 @@ def scriptenv(fake_atv, udns, mockfs):
     ):
         loop = asyncio.get_running_loop()
 
+
+
         argv = [script]
         if persistent_storage:
             argv += ["--storage", "file", "--storage-file", "/pyatv.conf"]
@@ -99,16 +101,13 @@ def scriptenv(fake_atv, udns, mockfs):
 
         with capture_output(argv, inputs) as (out, err):
             udns_port = str(udns.port)
-            with patch.dict("os.environ", {"PYATV_UDNS_PORT": udns_port}):
+            with patch.dict("os.environ", {"PYATV_UDNS_PORT": udns_port, "PYTHONASYNCIODEBUG": "1"}):
                 with fake_udns.stub_multicast(udns, loop):
                     with faketime("pyatv", 0):
                         # Stub away port knocking and ignore result (not tested here)
                         with patch("pyatv.support.knock.knock") as mock_knock:
 
-                            async def _no_action(*args):
-                                pass
 
-                            mock_knock.side_effect = _no_action
 
                             module = import_module(f"pyatv.scripts.{script}")
                             exit_code = await module.appstart(loop)

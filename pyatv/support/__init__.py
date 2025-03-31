@@ -5,7 +5,7 @@ import binascii
 import functools
 import logging
 from os import environ, path
-from typing import Any, List, Sequence, Union
+from typing import Any, List, Sequence, Union, get_origin, get_args
 import warnings
 
 from google.protobuf.text_format import MessageToString
@@ -162,12 +162,16 @@ def shift_hex_identifier(identifier: str) -> str:
     return shifted + rest
 
 
+
+
+
 def stringify_model(model: BaseModel) -> Sequence[str]:
     """Recursively traverse a pydantic model and print values.
 
-    This method will traverse a model and present each field with a "dotted" string
-    path, current value and data type. It is supposed to be used with pyatv.settings.
-    It is assumed optional field does not contain other models (only basic types).
+    This version no longer assumes that optional fields contain only basic types.
+    If an optional field’s type annotation includes a BaseModel, then if a non-None
+    value is present it will be recursed into. Otherwise, the field’s value and its
+    annotated type (including that it is optional) are printed.
     """
 
     def _lookup_type(current_model: BaseModel, type_path: str) -> str:
@@ -179,17 +183,35 @@ def stringify_model(model: BaseModel) -> Sequence[str]:
             return value.__name__
         return _lookup_type(value, splitted_path[1])
 
-    def _recurse_into(
-        current_model: BaseModel, prefix: str, output: List[str]
-    ) -> Sequence[str]:
+    def _recurse_into(current_model: BaseModel, prefix: str, output: List[str]) -> Sequence[str]:
         for name, field in dict(current_model).items():
+            # If the field is itself a pydantic model, recurse into it.
             if hasattr(field, "__annotations__"):
-                _recurse_into(
-                    getattr(current_model, name), (prefix or "") + f"{name}.", output
-                )
+                _recurse_into(getattr(current_model, name), f"{prefix or ''}{name}.", output)
+            # Special handling for dictionaries: iterate over its items.
+            elif isinstance(field, dict):
+                for key, subvalue in field.items():
+                    # If the value is a dict, iterate one level deeper.
+                    if isinstance(subvalue, dict):
+                        for inner_key, inner_value in subvalue.items():
+                            output.append(
+                                f"{prefix}{name}[\"{key}\"].{inner_key} = {repr(inner_value)}"
+                            )
+                    else:
+                        output.append(
+                            f"{prefix}{name}[\"{key}\"] = {repr(subvalue)}"
+                        )
+            # Handle Optional[BaseModel] fields.
+            elif get_origin(field) is Union and get_args(field)[1] is not type(None):
+                if getattr(current_model, name) is not None:
+                    if (isinstance(current_model, BaseModel)):
+                        _recurse_into(getattr(current_model, name), f"{prefix}{name}.", output)
+                    output.append(f"{prefix}{name} = {repr(field)}")
+                else:
+                    field_type = _lookup_type(current_model, f"{prefix}{name}")
+                    output.append(f"{prefix}{name} = {field} ({field_type})")
             else:
-                field_type = _lookup_type(model, f"{prefix}{name}")
-                output.append(f"{prefix}{name} = {field} ({field_type})")
+                output.append(f"{prefix}{name} = {repr(field)}")
         return output
 
     return _recurse_into(model, "", [])

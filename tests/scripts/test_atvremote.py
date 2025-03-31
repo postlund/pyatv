@@ -1,12 +1,14 @@
 """Smoke test for atvremote."""
 
 import asyncio
+import sys
 
 import pytest
 
 from pyatv.auth.hap_pairing import parse_credentials
 from pyatv.auth.server_auth import CLIENT_CREDENTIALS
 from pyatv.const import Protocol
+from pyatv.scripts import atvremote
 
 from tests.fake_device.airplay import DEVICE_AUTH_KEY, DEVICE_CREDENTIALS, DEVICE_PIN
 from tests.scripts.conftest import AIRPLAY_ID, DMAP_ID, IP_1, IP_2, MRP_ID
@@ -115,7 +117,7 @@ async def test_mrp_auth_error(scriptenv, fake_atv):
 
 
 async def test_manual_connect(scriptenv, fake_atv):
-    stdout, _, exit_code = await scriptenv(
+    stdout, stdErr, exit_code = await scriptenv(
         "atvremote",
         "--address",
         IP_2,
@@ -126,6 +128,8 @@ async def test_manual_connect(scriptenv, fake_atv):
         "--id",
         MRP_ID,
         "--manual",
+        "--name",
+        "Apple TV 2",
         "playing",
         inputs=[str(DEVICE_PIN)],
     )
@@ -138,6 +142,8 @@ async def test_settings(scriptenv):
     stdout, _, exit_code = await scriptenv(
         "atvremote", "--id", MRP_ID, "print_settings", persistent_storage=True
     )
+
+
     assert all_in(stdout, "protocols.raop.password = None")
     assert exit_code == 0
 
