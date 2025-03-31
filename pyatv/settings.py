@@ -184,7 +184,7 @@ class TargetDeviceConfig(BaseModel, extra="ignore"):  # type: ignore[call-arg]
     CLASS_TYPE: str
 
 
-class Settings(BaseModel, extra="ignore"): # type: ignore[call-arg]
+class Settings(BaseModel, extra="ignore"):  # type: ignore[call-arg]
     """Settings container class."""
 
     info: InfoSettings = Field(default_factory=InfoSettings)
