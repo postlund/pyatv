@@ -190,4 +190,3 @@ class Settings(BaseModel, extra="ignore"):  # type: ignore[call-arg]
     info: InfoSettings = Field(default_factory=InfoSettings)
     protocols: ProtocolSettings = Field(default_factory=ProtocolSettings)
     target_device: TargetDeviceConfig = Field(default_factory=TargetDeviceConfig)
-

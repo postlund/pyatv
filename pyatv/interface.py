@@ -1497,10 +1497,12 @@ class BaseConfig(ABC):
 
     def to_dict(self) -> dict:
         """Serialize the BaseConfig to a dictionary."""
+
         def convert_mapping(obj):
             if isinstance(obj, Mapping):
                 return {k: convert_mapping(v) for k, v in obj.items()}
             return obj
+
         base_data = {
             "address": str(self.address),
             "name": self.name or "",

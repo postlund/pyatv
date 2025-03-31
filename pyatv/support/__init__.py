@@ -5,7 +5,7 @@ import binascii
 import functools
 import logging
 from os import environ, path
-from typing import Any, List, Sequence, Union, get_origin, get_args
+from typing import Any, List, Union, get_args, get_origin
 import warnings
 
 from google.protobuf.text_format import MessageToString
@@ -163,13 +163,12 @@ def shift_hex_identifier(identifier: str) -> str:
 
 
 def stringify_model(model: BaseModel) -> List[str]:
-    """
-    Recursively traverse a pydantic BaseModel to produce a list of strings
-    describing field values and their annotated types.
+    """Recursively traverse BaseModel to produce a list of strings describing fields.
 
     - For nested BaseModels, the function recurses.
     - For dictionary fields, it recursively iterates over keys and nested values.
-    - If a field’s annotation is a Union (e.g. Optional[...]), all constituent type names are shown.
+    - If a field’s annotation is a Union (e.g. Optional[...]), all constituent
+    type names are shown.
     """
 
     def lookup_type(annotation: Any, value: Any) -> str:
@@ -180,17 +179,20 @@ def stringify_model(model: BaseModel) -> List[str]:
             args = get_args(annotation)
             types = []
             for arg in args:
-                if arg != type(None):
+                if arg is not None:
                     types.append(getattr(arg, "__name__", str(arg)))
                 elif value is None:
                     types.append("None")
-            if types.count == 1:
+            if len(types) == 1:
                 return types[0]
             return ", ".join(getattr(arg, "__name__", str(arg)) for arg in args)
         return getattr(annotation, "__name__", str(annotation))
 
     def recurse(instance: Any, prefix: str = "") -> List[str]:
-        """Recursively traverse a BaseModel (or dict) and collect string representations."""
+        """Recursively traverse a BaseModel (or dict).
+
+        and collect string representations.
+        """
         lines: List[str] = []
         if isinstance(instance, BaseModel):
             # Retrieve annotations from the model.
@@ -205,7 +207,8 @@ def stringify_model(model: BaseModel) -> List[str]:
                 elif isinstance(field_value, dict):
                     lines.extend(process_dict(field_value, full_field_name))
                 else:
-                    # Look up the annotated type; if missing, fall back on the runtime type.
+                    # Look up the annotated type; if missing,
+                    # fall back on the runtime type.
                     annotation = annotations.get(field_name, type(field_value))
                     type_str = lookup_type(annotation, field_value)
                     lines.append(f"{full_field_name} = {field_value} ({type_str})")
@@ -219,16 +222,19 @@ def stringify_model(model: BaseModel) -> List[str]:
         lines: List[str] = []
         for key, value in d.items():
             # Use repr(key) to account for keys that are strings, numbers, etc.
-            full_field_name = f'{prefix}[{repr(key)}]'
+            full_field_name = f"{prefix}[{repr(key)}]"
             if isinstance(value, dict):
                 lines.extend(process_dict(value, full_field_name))
             elif isinstance(value, BaseModel):
                 lines.extend(recurse(value, full_field_name + "."))
             else:
-                lines.append(f"{full_field_name} = {repr(value)} ({type(value).__name__})")
+                lines.append(
+                    f"{full_field_name} = {repr(value)} ({type(value).__name__})"
+                )
         return lines
 
     return recurse(model, "")
+
 
 def update_model_field(
     model: BaseModel, field: str, value: Union[str, int, float, None]
