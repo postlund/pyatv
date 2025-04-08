@@ -861,6 +861,10 @@ class MrpAudio(Audio):
         if self.is_volume_absolute and self._volume != level:
             await asyncio.wait_for(self._volume_event.wait(), timeout=5.0)
 
+    async def set_device_volume(self, device_uid: str, level: float) -> None:
+        """Change current volume level for given device."""
+        await self.protocol.send(messages.set_volume(device_uid, level / 100.0))
+
     async def volume_up(self) -> None:
         """Increase volume by one step."""
         if self.is_volume_absolute and self._volume == 100.0:

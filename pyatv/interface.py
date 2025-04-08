@@ -1174,6 +1174,14 @@ class Audio(ABC, StateProducer):
         """
         raise exceptions.NotSupportedError()
 
+    @feature(66, "SetDeviceVolume", "Set device volume level.")
+    async def set_device_volume(self, device_uid: str, level: float) -> None:
+        """Change current volume level of given device.
+
+        Range is in percent, i.e. [0.0-100.0].
+        """
+        raise exceptions.NotSupportedError()
+
     @feature(12, "VolumeUp", "Increase volume.")
     async def volume_up(self) -> None:
         """Increase volume by one step.
