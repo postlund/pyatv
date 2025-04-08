@@ -484,9 +484,9 @@ class FacadeAudio(Relayer, interface.Audio):
     async def set_device_volume(self, device_uid: str, level: float) -> None:
         """Change current volume level of given device."""
         if 0.0 <= level <= 100.0:
-            await self.relay("set_device_volume")(level)
+            await self.relay("set_device_volume")(device_uid, level)
         else:
-            raise exceptions.ProtocolError(f"volume {level} is out of range")
+            raise exceptions.ProtocolError(f"volume {level} is out of range for device {device_uid}")
 
     @property
     @shield.guard

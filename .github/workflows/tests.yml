@@ -48,7 +48,7 @@ jobs:
       shell: bash
       run: echo "::set-output name=timestamp::$(timestamp +%s)"
     - name: Restore the previous run result
-      uses: actions/cache@v4
+      uses: actions/cache@v2
       with:
         path: |
           run_result
