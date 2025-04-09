@@ -1,4 +1,4 @@
-FROM python:3.13.2-alpine
+FROM python:3.14.0a7-alpine
 ARG VERSION
 
 WORKDIR .
