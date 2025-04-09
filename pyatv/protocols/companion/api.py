@@ -197,7 +197,7 @@ class CompanionAPI(
                 "_bf": 0,
                 "_cf": 512,
                 "_clFl": 128,
-                "_i": os.urandom(6).hex(),
+                "_i": "cafecafecafe",  # TODO: Figure out what to put here
                 "_idsID": creds.client_id,
                 # Not really device id here, but better then anything...
                 "_pubID": info.device_id,

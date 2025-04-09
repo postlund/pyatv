@@ -414,9 +414,6 @@ class FeatureName(Enum):
     SetVolume = 46
     """Set volume level."""
 
-    SetDeviceVolume = 66
-    """Set volume level for given device."""
-
     OutputDevices = 59
     """Current output devices."""
 

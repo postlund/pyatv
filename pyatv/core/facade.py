@@ -19,7 +19,13 @@ from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union, cast
 
 from pyatv import const, exceptions, interface
 from pyatv.const import FeatureName, FeatureState, InputAction, Protocol, TouchAction
-from pyatv.core import CoreStateDispatcher, SetupData, StateMessage, UpdatedState
+from pyatv.core import (
+    CoreStateDispatcher,
+    OutputDeviceState,
+    SetupData,
+    StateMessage,
+    UpdatedState,
+)
 from pyatv.core.relayer import Relayer
 from pyatv.interface import OutputDevice
 from pyatv.settings import Settings
@@ -458,8 +464,7 @@ class FacadeAudio(Relayer, interface.Audio):
 
     def _output_device_volume_changed(self, message: StateMessage) -> None:
         """State of output device volume changed."""
-        device_state = cast(interface.OutputDeviceState, message.value)
-        old_volume = 0.0
+        device_state = cast(OutputDeviceState, message.value)
         output_device = next(
             (
                 device
@@ -471,10 +476,10 @@ class FacadeAudio(Relayer, interface.Audio):
         if output_device:
             old_volume = output_device.volume
             output_device.volume = device_state.volume
-        if device_state.volume != old_volume:
-            self.listener.volume_device_update(
-                device_state.identifier, old_volume, device_state.volume
-            )
+            if device_state.volume != old_volume:
+                self.listener.volume_device_update(
+                    output_device, old_volume, device_state.volume
+                )
 
     @shield.guard
     async def volume_up(self) -> None:
@@ -496,22 +501,14 @@ class FacadeAudio(Relayer, interface.Audio):
         raise exceptions.ProtocolError(f"volume {volume} is out of range")
 
     @shield.guard
-    async def set_volume(self, level: float) -> None:
+    async def set_volume(
+        self, level: float, output_device: Optional[OutputDevice] = None
+    ) -> None:
         """Change current volume level."""
         if 0.0 <= level <= 100.0:
-            await self.relay("set_volume")(level)
+            await self.relay("set_volume")(level, output_device)
         else:
             raise exceptions.ProtocolError(f"volume {level} is out of range")
-
-    @shield.guard
-    async def set_device_volume(self, device_uid: str, level: float) -> None:
-        """Change current volume level of given device."""
-        if 0.0 <= level <= 100.0:
-            await self.relay("set_device_volume")(device_uid, level)
-        else:
-            raise exceptions.ProtocolError(
-                f"volume {level} is out of range for device {device_uid}"
-            )
 
     @property
     @shield.guard

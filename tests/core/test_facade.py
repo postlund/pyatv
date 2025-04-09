@@ -23,7 +23,7 @@ from pyatv.const import (
     PowerState,
     Protocol,
 )
-from pyatv.core import AbstractPushUpdater, SetupData, UpdatedState
+from pyatv.core import AbstractPushUpdater, OutputDeviceState, SetupData, UpdatedState
 from pyatv.core.facade import FacadeAppleTV, SetupData
 from pyatv.interface import (
     AppleTV,
@@ -216,7 +216,7 @@ class SavingAudioListener(AudioListener):
         self.all_updates.append(new_devices)
 
     def volume_device_update(
-        self, output_device_id: str, old_level: float, new_level: float
+        self, output_device: OutputDevice, old_level: float, new_level: float
     ) -> None:
         pass
 
@@ -804,6 +804,21 @@ async def dispatch_volume_update(mrp_state_dispatcher, level, protocol=Protocol.
     await event.wait()
 
 
+async def dispatch_volume_device_update(
+    mrp_state_dispatcher, output_device_state: OutputDeviceState, protocol=Protocol.MRP
+):
+    event = asyncio.Event()
+
+    # Add a listener last in the last and make it set an asyncio.Event. That way we
+    # can synchronize and know that all other listeners have been called.
+    mrp_state_dispatcher.listen_to(
+        UpdatedState.OutputDeviceVolume, lambda message: event.set()
+    )
+    mrp_state_dispatcher.dispatch(UpdatedState.OutputDeviceVolume, output_device_state)
+
+    await event.wait()
+
+
 async def dispatch_output_devices_update(
     mrp_state_dispatcher, devices, protocol=Protocol.MRP
 ):
@@ -836,21 +851,21 @@ async def test_audio_no_listener_volume_duplicates(mrp_state_dispatcher, audio_s
 async def test_audio_listener_output_devices_updates(mrp_state_dispatcher, audio_setup):
     await dispatch_output_devices_update(
         mrp_state_dispatcher,
-        [OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE", 0.0)],
+        [OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")],
     )
     assert audio_setup.listener.last_update == [
-        OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE", 0.0)
+        OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")
     ]
     await dispatch_output_devices_update(
         mrp_state_dispatcher,
         [
-            OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE", 0.0),
-            OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ", 0.0),
+            OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE"),
+            OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ"),
         ],
     )
     assert audio_setup.listener.last_update == [
-        OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE", 0.0),
-        OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ", 0.0),
+        OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE"),
+        OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ"),
     ]
 
 
@@ -859,15 +874,25 @@ async def test_audio_no_listener_output_devices_duplicates(
 ):
     await dispatch_output_devices_update(
         mrp_state_dispatcher,
-        [OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE", 0.0)],
+        [OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")],
     )
     await dispatch_output_devices_update(
         mrp_state_dispatcher,
-        [OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE", 0.0)],
+        [OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")],
     )
     assert len(audio_setup.listener.all_updates) == 1
     assert audio_setup.listener.last_update == [
-        OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE", 0.0)
+        OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")
+    ]
+
+
+async def test_audio_listener_volume_device_updates(mrp_state_dispatcher, audio_setup):
+    await dispatch_volume_device_update(
+        mrp_state_dispatcher,
+        OutputDeviceState("AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE", 10.0),
+    )
+    assert audio_setup.listener.last_update == [
+        OutputDeviceState("AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE", 10.0)
     ]
 
 

@@ -1,6 +1,7 @@
 """Core module of pyatv."""
 
 import asyncio
+from dataclasses import dataclass
 from enum import Enum
 from typing import (
     Any,
@@ -264,3 +265,11 @@ async def create_core(
             service.protocol, core_dispatcher or CoreStateDispatcher()
         ),
     )
+
+
+@dataclass
+class OutputDeviceState:
+    """State information of an output device."""
+
+    identifier: str
+    volume: float = 0.0

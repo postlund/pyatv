@@ -1154,7 +1154,7 @@ class AudioListener(ABC):
 
     @abstractmethod
     def volume_device_update(
-        self, output_device_id: str, old_level: float, new_level: float
+        self, output_device: OutputDevice, old_level: float, new_level: float
     ) -> None:
         """Output device volume was updated."""
         raise NotImplementedError()
@@ -1186,16 +1186,10 @@ class Audio(ABC, StateProducer):
         raise exceptions.NotSupportedError()
 
     @feature(46, "SetVolume", "Set volume level.")
-    async def set_volume(self, level: float) -> None:
+    async def set_volume(
+        self, level: float, output_device: Optional[OutputDevice] = None
+    ) -> None:
         """Change current volume level.
-
-        Range is in percent, i.e. [0.0-100.0].
-        """
-        raise exceptions.NotSupportedError()
-
-    @feature(66, "SetDeviceVolume", "Set device volume level.")
-    async def set_device_volume(self, device_uid: str, level: float) -> None:
-        """Change current volume level of given device.
 
         Range is in percent, i.e. [0.0-100.0].
         """
@@ -1611,22 +1605,3 @@ class AppleTV(ABC, StateProducer[DeviceListener]):
     @abstractmethod
     def touch(self) -> TouchGestures:
         """Return touch gestures interface."""
-
-
-class OutputDeviceState:
-    """State information of an output device."""
-
-    def __init__(self, identifier: str, volume: float) -> None:
-        """Initialize a new OutputDevice state instance."""
-        self._identifier = identifier
-        self._volume = volume
-
-    @property
-    def identifier(self) -> str:
-        """Identifier of output device."""
-        return self._identifier
-
-    @property
-    def volume(self) -> float:
-        """Volume of output device."""
-        return self._volume

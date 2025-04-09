@@ -116,7 +116,7 @@ class AudioPrinter(AudioListener):
         )
 
     def volume_device_update(
-        self, output_device_id: str, old_level: float, new_level: float
+        self, output_device: OutputDevice, old_level: float, new_level: float
     ) -> None:
         """State of output device volume changed."""
         print(
@@ -124,7 +124,7 @@ class AudioPrinter(AudioListener):
                 output(
                     True,
                     values={
-                        "output_device_id": output_device_id,
+                        "output_device_id": output_device.identifier,
                         "old_level": old_level,
                         "new_level": new_level,
                     },
