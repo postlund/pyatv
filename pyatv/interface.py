@@ -1147,7 +1147,9 @@ class AudioListener(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def volume_device_update(self, output_device_id: str, old_level: float, new_level: float) -> None:
+    def volume_device_update(
+        self, output_device_id: str, old_level: float, new_level: float
+    ) -> None:
         """Output device volume was updated."""
         raise NotImplementedError()
 
@@ -1157,7 +1159,6 @@ class AudioListener(ABC):
     ) -> None:
         """Output devices were updated."""
         raise NotImplementedError()
-
 
 
 class Audio(ABC, StateProducer):

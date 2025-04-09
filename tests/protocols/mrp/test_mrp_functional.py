@@ -755,7 +755,9 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await until(
             lambda: self.atv.audio.output_devices
             == [
-                OutputDevice("Fake MRP ATV", "E510C430-B01D-45DF-B558-6EA6F8251069", 0.0),
+                OutputDevice(
+                    "Fake MRP ATV", "E510C430-B01D-45DF-B558-6EA6F8251069", 0.0
+                ),
                 OutputDevice("Device AA", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE", 0.0),
             ]
         )
@@ -771,5 +773,9 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         await self.atv.audio.set_output_devices("E510C430-B01D-45DF-B558-6EA6F8251069")
         await until(
             lambda: self.atv.audio.output_devices
-            == [OutputDevice("Fake MRP ATV", "E510C430-B01D-45DF-B558-6EA6F8251069", 0.0)]
+            == [
+                OutputDevice(
+                    "Fake MRP ATV", "E510C430-B01D-45DF-B558-6EA6F8251069", 0.0
+                )
+            ]
         )

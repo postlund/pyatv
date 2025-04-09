@@ -215,7 +215,9 @@ class SavingAudioListener(AudioListener):
         self.last_update = new_devices
         self.all_updates.append(new_devices)
 
-    def volume_device_update(self, output_device_id: str, old_level: float, new_level: float) -> None:
+    def volume_device_update(
+        self, output_device_id: str, old_level: float, new_level: float
+    ) -> None:
         pass
 
 

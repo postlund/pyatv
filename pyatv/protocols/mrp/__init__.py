@@ -848,9 +848,15 @@ class MrpAudio(Audio):
             self._volume_event.clear()
         else:
             volume = round(inner.volume * 100.0, 1)
-            _LOGGER.debug("Volume changed to %0.1f for output device %s", volume, inner.outputDeviceUID)
-            self.state_dispatcher.dispatch(UpdatedState.OutputDeviceVolume,
-                                           interface.OutputDeviceState(inner.outputDeviceUID, volume))
+            _LOGGER.debug(
+                "Volume changed to %0.1f for output device %s",
+                volume,
+                inner.outputDeviceUID,
+            )
+            self.state_dispatcher.dispatch(
+                UpdatedState.OutputDeviceVolume,
+                interface.OutputDeviceState(inner.outputDeviceUID, volume),
+            )
             self._output_device_volume_event.set()
             self._output_device_volume_event.clear()
 
