@@ -754,7 +754,6 @@ class MrpAudio(Audio):
         self._volume_controls_relative: bool = False
         self._volume: float = 0.0
         self._volume_event: asyncio.Event = asyncio.Event()
-        self._output_device_volume_event: asyncio.Event = asyncio.Event()
         self._output_devices: List[OutputDevice] = []
         self._output_devices_event: asyncio.Event = asyncio.Event()
         self._add_listeners()
@@ -836,16 +835,6 @@ class MrpAudio(Audio):
             _LOGGER.debug("Volume changed to %0.1f", self.volume)
 
             self.state_dispatcher.dispatch(UpdatedState.Volume, self._volume)
-
-            # There are no responses to the volume_up/down commands sent to the device.
-            # So when calling volume_up/down here, they will wait for the volume to
-            # change to know when done. Here, a single asyncio.Event is used which
-            # works as long as no more than one task is calling either function at the
-            # same time. If two or more call those functions, all of them will return
-            # at once (when first volume update occurs) instead of one by one. This is
-            # generally fine, but can be improved if there's a need for it.
-            self._volume_event.set()
-            self._volume_event.clear()
         else:
             volume = round(inner.volume * 100.0, 1)
             _LOGGER.debug(
@@ -857,8 +846,16 @@ class MrpAudio(Audio):
                 UpdatedState.OutputDeviceVolume,
                 interface.OutputDeviceState(inner.outputDeviceUID, volume),
             )
-            self._output_device_volume_event.set()
-            self._output_device_volume_event.clear()
+
+        # There are no responses to the volume_up/down commands sent to the device.
+        # So when calling volume_up/down here, they will wait for the volume to
+        # change to know when done. Here, a single asyncio.Event is used which
+        # works as long as no more than one task is calling either function at the
+        # same time. If two or more call those functions, all of them will return
+        # at once (when first volume update occurs) instead of one by one. This is
+        # generally fine, but can be improved if there's a need for it.
+        self._volume_event.set()
+        self._volume_event.clear()
 
     @property
     def volume(self) -> float:
@@ -878,6 +875,8 @@ class MrpAudio(Audio):
     async def set_device_volume(self, device_uid: str, level: float) -> None:
         """Change current volume level for given device."""
         await self.protocol.send(messages.set_volume(device_uid, level / 100.0))
+        if self.is_volume_absolute:
+            await asyncio.wait_for(self._volume_event.wait(), timeout=5.0)
 
     async def volume_up(self) -> None:
         """Increase volume by one step."""
