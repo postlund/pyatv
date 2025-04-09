@@ -428,6 +428,7 @@ class FacadeAudio(Relayer, interface.Audio):
         core_dispatcher.listen_to(
             UpdatedState.OutputDevices, self._output_devices_changed
         )
+        core_dispatcher.listen_to(UpdatedState.OutputDeviceVolume, self._output_device_volume_changed)
 
     def _volume_changed(self, message: StateMessage) -> None:
         """State of something changed."""
@@ -452,6 +453,18 @@ class FacadeAudio(Relayer, interface.Audio):
         # Do not update state in case it didn't change
         if new_devices != old_devices:
             self.listener.outputdevices_update(old_devices, new_devices)
+
+    def _output_device_volume_changed(self, message: StateMessage) -> None:
+        """State of output device volume changed."""
+        device_state = cast(interface.OutputDeviceState, message.value)
+        old_volume = 0.0
+        output_device = next((device for device in self._output_devices
+                              if device.identifier == device_state.identifier), None)
+        if output_device:
+            old_volume = output_device.volume
+            output_device._volume = device_state.volume
+        if device_state.volume != old_volume:
+            self.listener.volume_device_update(device_state.identifier, old_volume, device_state.volume)
 
     @shield.guard
     async def volume_up(self) -> None:

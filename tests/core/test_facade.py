@@ -215,6 +215,9 @@ class SavingAudioListener(AudioListener):
         self.last_update = new_devices
         self.all_updates.append(new_devices)
 
+    def volume_device_update(self, output_device_id: str, old_level: float, new_level: float) -> None:
+        pass
+
 
 class SavingKeyboardListener(KeyboardListener):
     def __init__(self):
@@ -831,21 +834,21 @@ async def test_audio_no_listener_volume_duplicates(mrp_state_dispatcher, audio_s
 async def test_audio_listener_output_devices_updates(mrp_state_dispatcher, audio_setup):
     await dispatch_output_devices_update(
         mrp_state_dispatcher,
-        [OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")],
+        [OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE", 0.0)],
     )
     assert audio_setup.listener.last_update == [
-        OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")
+        OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE", 0.0)
     ]
     await dispatch_output_devices_update(
         mrp_state_dispatcher,
         [
-            OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE"),
-            OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ"),
+            OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE", 0.0),
+            OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ", 0.0),
         ],
     )
     assert audio_setup.listener.last_update == [
-        OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE"),
-        OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ"),
+        OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE", 0.0),
+        OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ", 0.0),
     ]
 
 
@@ -854,15 +857,15 @@ async def test_audio_no_listener_output_devices_duplicates(
 ):
     await dispatch_output_devices_update(
         mrp_state_dispatcher,
-        [OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")],
+        [OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE", 0.0)],
     )
     await dispatch_output_devices_update(
         mrp_state_dispatcher,
-        [OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")],
+        [OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE", 0.0)],
     )
     assert len(audio_setup.listener.all_updates) == 1
     assert audio_setup.listener.last_update == [
-        OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE")
+        OutputDevice("Apple TV", "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE", 0.0)
     ]
 
 

@@ -168,17 +168,17 @@ async def test_audio_set_volume_no_output_device(protocol_mock, audio):
         (
             True,
             False,
-            [OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ")],
+            [OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ", 0.0)],
             [
                 OutputDevice(DEVICE_NAME, DEVICE_UID),
-                OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ"),
+                OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ", 0.0),
             ],
         ),
         (
             True,
             True,
-            [OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ")],
-            [OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ")],
+            [OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ", 0.0)],
+            [OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ", 0.0)],
         ),
         (False, False, [], []),
     ],
@@ -197,17 +197,17 @@ async def test_audio_update_output_devices(
         (
             True,
             False,
-            [OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ")],
+            [OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ", 0.0)],
             [
                 OutputDevice(DEVICE_NAME, DEVICE_UID),
-                OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ"),
+                OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ", 0.0),
             ],
         ),
         (
             True,
             True,
-            [OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ")],
-            [OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ")],
+            [OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ", 0.0)],
+            [OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ", 0.0)],
         ),
         (False, False, [], []),
     ],

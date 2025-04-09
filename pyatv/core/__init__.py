@@ -46,6 +46,9 @@ class UpdatedState(Enum):
     OutputDevices = 4
     """AirPlay output devices were updated."""
 
+    OutputDeviceVolume = 5
+    """Output device volume was updated."""
+
 
 # pylint: enable=invalid-name
 

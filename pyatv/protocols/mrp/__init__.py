@@ -10,7 +10,7 @@ from typing import Any, Dict, Generator, List, Mapping, Optional, Set, Tuple, ca
 
 from aiohttp import ClientError, ClientSession
 
-from pyatv import exceptions
+from pyatv import exceptions, interface
 from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.const import (
     DeviceState,
@@ -754,6 +754,7 @@ class MrpAudio(Audio):
         self._volume_controls_relative: bool = False
         self._volume: float = 0.0
         self._volume_event: asyncio.Event = asyncio.Event()
+        self._output_device_volume_event: asyncio.Event = asyncio.Event()
         self._output_devices: List[OutputDevice] = []
         self._output_devices_event: asyncio.Event = asyncio.Event()
         self._add_listeners()
@@ -845,6 +846,13 @@ class MrpAudio(Audio):
             # generally fine, but can be improved if there's a need for it.
             self._volume_event.set()
             self._volume_event.clear()
+        else:
+            volume = round(inner.volume * 100.0, 1)
+            _LOGGER.debug("Volume changed to %0.1f for output device %s", volume, inner.outputDeviceUID)
+            self.state_dispatcher.dispatch(UpdatedState.OutputDeviceVolume,
+                                           interface.OutputDeviceState(inner.outputDeviceUID, volume))
+            self._output_device_volume_event.set()
+            self._output_device_volume_event.clear()
 
     @property
     def volume(self) -> float:
@@ -895,9 +903,9 @@ class MrpAudio(Audio):
         inner = cast(protobuf.DeviceInfoMessage, message.inner())
         devices = []
         if inner.isGroupLeader and not inner.isProxyGroupPlayer:
-            devices.append(OutputDevice(inner.name, inner.uniqueIdentifier))
+            devices.append(OutputDevice(inner.name, inner.uniqueIdentifier, 0.0))
         for device in list(inner.groupedDevices):
-            devices.append(OutputDevice(device.name, device.deviceUID))
+            devices.append(OutputDevice(device.name, device.deviceUID, 0.0))
         self._output_devices = devices
         self._output_devices_event.set()
         self._output_devices_event.clear()

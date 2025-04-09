@@ -1106,10 +1106,11 @@ class Features:
 class OutputDevice:
     """Information about an output device."""
 
-    def __init__(self, name: Optional[str], identifier: str) -> None:
+    def __init__(self, name: Optional[str], identifier: str, volume: float) -> None:
         """Initialize a new OutputDevice instance."""
         self._name = name
         self._identifier = identifier
+        self._volume = volume
 
     @property
     def name(self) -> Optional[str]:
@@ -1120,6 +1121,11 @@ class OutputDevice:
     def identifier(self) -> str:
         """Return a unique id for the output device."""
         return self._identifier
+
+    @property
+    def volume(self) -> float:
+        """Return the current volume of the output device."""
+        return self._volume
 
     def __str__(self) -> str:
         """Convert app info to readable string."""
@@ -1141,11 +1147,17 @@ class AudioListener(ABC):
         raise NotImplementedError()
 
     @abstractmethod
+    def volume_device_update(self, output_device_id: str, old_level: float, new_level: float) -> None:
+        """Output device volume was updated."""
+        raise NotImplementedError()
+
+    @abstractmethod
     def outputdevices_update(
         self, old_devices: List[OutputDevice], new_devices: List[OutputDevice]
     ) -> None:
         """Output devices were updated."""
         raise NotImplementedError()
+
 
 
 class Audio(ABC, StateProducer):
@@ -1592,3 +1604,22 @@ class AppleTV(ABC, StateProducer[DeviceListener]):
     @abstractmethod
     def touch(self) -> TouchGestures:
         """Return touch gestures interface."""
+
+
+class OutputDeviceState:
+    """State information of an output device."""
+
+    def __init__(self, identifier: str, volume: float) -> None:
+        """Initialize a new OutputDevice state instance."""
+        self._identifier = identifier
+        self._volume = volume
+
+    @property
+    def identifier(self) -> str:
+        """Identifier of output device."""
+        return self._identifier
+
+    @property
+    def volume(self) -> float:
+        """Volume of output device."""
+        return self._volume
