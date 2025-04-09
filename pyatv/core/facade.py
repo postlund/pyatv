@@ -470,7 +470,7 @@ class FacadeAudio(Relayer, interface.Audio):
         )
         if output_device:
             old_volume = output_device.volume
-            output_device._volume = device_state.volume
+            output_device.volume = device_state.volume
         if device_state.volume != old_volume:
             self.listener.volume_device_update(
                 device_state.identifier, old_volume, device_state.volume

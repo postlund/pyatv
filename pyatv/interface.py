@@ -1106,7 +1106,9 @@ class Features:
 class OutputDevice:
     """Information about an output device."""
 
-    def __init__(self, name: Optional[str], identifier: str, volume: float) -> None:
+    def __init__(
+        self, name: Optional[str], identifier: str, volume: float = 0.0
+    ) -> None:
         """Initialize a new OutputDevice instance."""
         self._name = name
         self._identifier = identifier
@@ -1126,6 +1128,10 @@ class OutputDevice:
     def volume(self) -> float:
         """Return the current volume of the output device."""
         return self._volume
+
+    @volume.setter
+    def volume(self, volume: float):
+        self._volume = volume
 
     def __str__(self) -> str:
         """Convert app info to readable string."""
