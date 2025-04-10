@@ -43,6 +43,7 @@ class FakeAppleTV:
         self.loop = loop
         self.test_mode = test_mode
         self._has_started = False
+        self.name = "Fake Apple TV"
         if test_mode:
             self.app.on_startup.append(self._app_start)
 

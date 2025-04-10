@@ -105,11 +105,6 @@ def scriptenv(fake_atv, udns, mockfs):
                         # Stub away port knocking and ignore result (not tested here)
                         with patch("pyatv.support.knock.knock") as mock_knock:
 
-                            async def _no_action(*args):
-                                pass
-
-                            mock_knock.side_effect = _no_action
-
                             module = import_module(f"pyatv.scripts.{script}")
                             exit_code = await module.appstart(loop)
                             stdout = out.getvalue()
