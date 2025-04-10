@@ -39,6 +39,7 @@ from pyatv.const import (
     Protocol,
     TouchAction,
 )
+from pyatv.core import OutputDevice
 from pyatv.settings import Settings
 from pyatv.support import prettydataclass
 from pyatv.support.device_info import lookup_version
@@ -1101,47 +1102,6 @@ class Features:
             if info.state not in expected_states:
                 return False
         return True
-
-
-class OutputDevice:
-    """Information about an output device."""
-
-    def __init__(
-        self, name: Optional[str], identifier: str, volume: float = 0.0
-    ) -> None:
-        """Initialize a new OutputDevice instance."""
-        self._name = name
-        self._identifier = identifier
-        self._volume = volume
-
-    @property
-    def name(self) -> Optional[str]:
-        """User friendly name of output device."""
-        return self._name
-
-    @property
-    def identifier(self) -> str:
-        """Return a unique id for the output device."""
-        return self._identifier
-
-    @property
-    def volume(self) -> float:
-        """Return the current volume of the output device."""
-        return self._volume
-
-    @volume.setter
-    def volume(self, volume: float):
-        self._volume = volume
-
-    def __str__(self) -> str:
-        """Convert app info to readable string."""
-        return f"Device: {self.name} ({self.identifier})"
-
-    def __eq__(self, other) -> bool:
-        """Return self==other."""
-        if isinstance(other, OutputDevice):
-            return self.name == other.name and self.identifier == other.identifier
-        return False
 
 
 class AudioListener(ABC):

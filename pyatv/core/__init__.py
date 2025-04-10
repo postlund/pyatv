@@ -273,3 +273,11 @@ class OutputDeviceState:
 
     identifier: str
     volume: float = 0.0
+
+
+@dataclass
+class OutputDevice:
+    """Information about an output device."""
+    identifier: str
+    name: Optional[str] = None
+    volume: float = 0.0
