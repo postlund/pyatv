@@ -37,18 +37,13 @@ class FileStorage(AbstractStorage):
 
     async def save(self) -> None:
         """Save settings to active storage."""
-        if self.changed:
+        dumped = dict(self)
+        if self.has_changed(dumped):
             _LOGGER.debug("Saving settings to %s", self._filename)
-            await self._loop.run_in_executor(None, self._save_file)
-            self.mark_as_saved()
+            await self._loop.run_in_executor(None, self._save_file, dumped)
+            self.update_hash(dumped)
 
-    def _save_file(self) -> None:
-        # If settings are empty for a device (e.e. no settings overridden or credentials
-        # saved), then the output will just be an empty dict. To not pollute the output
-        # with those, we do some filtering here.
-        dumped = self.storage_model.dict(exclude_defaults=True)
-        dumped["devices"] = [device for device in dumped["devices"] if device != {}]
-
+    def _save_file(self, dumped: dict) -> None:
         with open(self._filename, "w", encoding="utf-8") as _fh:
             _fh.write(json.dumps(dumped) + "\n")
 
@@ -57,8 +52,14 @@ class FileStorage(AbstractStorage):
         if path.exists(self._filename):
             _LOGGER.debug("Loading settings from %s", self._filename)
             model_json = await self._loop.run_in_executor(None, self._read_file)
-            self.storage_model = StorageModel(**json.loads(model_json))
-            self.mark_as_saved()
+            raw_data = json.loads(model_json)
+            self.storage_model = StorageModel.parse_obj(raw_data)
+
+            # Update hash based on what we read from file rather than serializing the
+            # model. The reasonf for this is that pydantic might (because of
+            # validators) modify the data we read and in that case we want to ensure
+            # catch the update and actually save to file again when save is called.
+            self.update_hash(raw_data)
 
     def _read_file(self) -> str:
         with open(self._filename, "r", encoding="utf-8") as _fh:
