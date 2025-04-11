@@ -115,6 +115,24 @@ class AudioPrinter(AudioListener):
             flush=True,
         )
 
+    def volume_device_update(
+        self, output_device: OutputDevice, old_level: float, new_level: float
+    ) -> None:
+        """State of output device volume changed."""
+        print(
+            self.formatter(
+                output(
+                    True,
+                    values={
+                        "output_device_id": output_device.identifier,
+                        "old_level": old_level,
+                        "new_level": new_level,
+                    },
+                )
+            ),
+            flush=True,
+        )
+
 
 class KeyboardPrinter(KeyboardListener):
     """Listen for keyboard updates and print changes."""

@@ -33,6 +33,7 @@ from pyatv.interface import (
     FeatureInfo,
     Features,
     Keyboard,
+    OutputDevice,
     PairingHandler,
     Power,
     RemoteControl,
@@ -439,7 +440,9 @@ class CompanionAudio(Audio):
         """
         return self._volume
 
-    async def set_volume(self, level: float) -> None:
+    async def set_volume(
+        self, level: float, output_device: Optional[OutputDevice] = None
+    ) -> None:
         """Change current volume level.
 
         Range is in percent, i.e. [0.0-100.0].
