@@ -196,7 +196,7 @@ class CompanionAPI(
                 "_bf": 0,
                 "_cf": 512,
                 "_clFl": 128,
-                "_i": "cafecafecafe",  # TODO: Figure out what to put here
+                "_i": info.rp_id,
                 "_idsID": creds.client_id,
                 # Not really device id here, but better then anything...
                 "_pubID": info.device_id,
