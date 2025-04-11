@@ -473,13 +473,14 @@ class FacadeAudio(Relayer, interface.Audio):
             ),
             None,
         )
-        if output_device:
-            old_volume = output_device.volume
-            output_device.volume = device_state.volume
-            if device_state.volume != old_volume:
-                self.listener.volume_device_update(
-                    output_device, old_volume, device_state.volume
-                )
+        if output_device is None:
+            output_device = OutputDevice(device_state.identifier)
+        old_volume = output_device.volume
+        output_device.volume = device_state.volume
+        if device_state.volume != old_volume:
+            self.listener.volume_device_update(
+                output_device, old_volume, device_state.volume
+            )
 
     @shield.guard
     async def volume_up(self) -> None:

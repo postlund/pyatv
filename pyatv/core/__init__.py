@@ -274,10 +274,12 @@ class OutputDeviceState:
     identifier: str
     volume: float = 0.0
 
+    def __str__(self) -> str:
+        """Convert app info to readable string."""
+        return f"Device: {self.identifier} ({self.volume})"
 
-@dataclass
-class OutputDevice:
-    """Information about an output device."""
-    identifier: str
-    name: Optional[str] = None
-    volume: float = 0.0
+    def __eq__(self, other) -> bool:
+        """Return self==other."""
+        if isinstance(other, OutputDeviceState):
+            return self.identifier == other.identifier and self.volume == other.volume
+        return False

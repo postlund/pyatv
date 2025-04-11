@@ -218,7 +218,8 @@ class SavingAudioListener(AudioListener):
     def volume_device_update(
         self, output_device: OutputDevice, old_level: float, new_level: float
     ) -> None:
-        pass
+        self.last_update = OutputDeviceState(output_device.identifier, new_level)
+        self.all_updates.append(output_device)
 
 
 class SavingKeyboardListener(KeyboardListener):
@@ -891,9 +892,9 @@ async def test_audio_listener_volume_device_updates(mrp_state_dispatcher, audio_
         mrp_state_dispatcher,
         OutputDeviceState("AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE", 10.0),
     )
-    assert audio_setup.listener.last_update == [
-        OutputDeviceState("AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE", 10.0)
-    ]
+    assert audio_setup.listener.last_update == OutputDeviceState(
+        "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE", 10.0
+    )
 
 
 # KEYBOARD RELATED TESTS

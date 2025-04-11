@@ -3,7 +3,6 @@
 import asyncio
 from enum import Enum
 import logging
-import os
 from random import randint
 import time
 from typing import Any, Dict, List, Mapping, Optional, cast

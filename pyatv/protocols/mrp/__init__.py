@@ -912,7 +912,9 @@ class MrpAudio(Audio):
         inner = cast(protobuf.DeviceInfoMessage, message.inner())
         devices = []
         if inner.isGroupLeader and not inner.isProxyGroupPlayer:
-            devices.append(OutputDevice(name=inner.name, identifier=inner.uniqueIdentifier))
+            devices.append(
+                OutputDevice(name=inner.name, identifier=inner.uniqueIdentifier)
+            )
         for device in list(inner.groupedDevices):
             devices.append(OutputDevice(name=device.name, identifier=device.deviceUID))
         self._output_devices = devices
