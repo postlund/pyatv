@@ -48,6 +48,9 @@ HID_BUTTON_MAP = {
     HidCommand.ChannelIncrement: "channel_up",
     HidCommand.ChannelDecrement: "channel_down",
     HidCommand.Screensaver: "screensaver",
+    HidCommand.Guide: "guide",
+    HidCommand.PageUp: "page_up",
+    HidCommand.PageDown: "page_down",
 }
 
 MEDIA_CONTROL_MAP = {

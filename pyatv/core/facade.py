@@ -193,6 +193,20 @@ class FacadeRemoteControl(Relayer, interface.RemoteControl):
         """Activate screen saver.."""
         return await self.relay("screensaver")()
 
+    @shield.guard
+    async def guide(self) -> None:
+        """Show EPG."""
+        return await self.relay("guide")()
+
+    @shield.guard
+    async def page_up(self) -> None:
+        """Page Up."""
+        return await self.relay("page_up")()
+
+    @shield.guard
+    async def page_down(self) -> None:
+        """Page Down."""
+        return await self.relay("page_down")()
 
 class FacadeMetadata(Relayer, interface.Metadata):
     """Facade implementation for retrieving metadata from an Apple TV."""

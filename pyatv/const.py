@@ -450,6 +450,15 @@ class FeatureName(Enum):
     Click = 65
     """Touch click command."""
 
+    Guide = 66
+    """Show EPG."""
+
+    PageUp = 67
+    """Page Up."""
+
+    PageDown = 68
+    """Page Down."""
+
 
 class TouchAction(Enum):
     """Touch action constants."""
