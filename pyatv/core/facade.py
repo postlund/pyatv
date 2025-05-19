@@ -208,6 +208,7 @@ class FacadeRemoteControl(Relayer, interface.RemoteControl):
         """Page Down."""
         return await self.relay("page_down")()
 
+
 class FacadeMetadata(Relayer, interface.Metadata):
     """Facade implementation for retrieving metadata from an Apple TV."""
 

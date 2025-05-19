@@ -469,6 +469,7 @@ class RemoteControl:
         """Page Down."""
         raise exceptions.NotSupportedError()
 
+
 # TODO: Should be made into a dataclass when support for 3.6 is dropped
 class Playing(ABC):
     """Base class for retrieving what is currently playing."""
