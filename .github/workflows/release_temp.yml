@@ -1,0 +1,160 @@
+name: Publish containers and make release
+
+on:
+  push:
+    branches: ['master', 'test_release_branch']
+    tags:
+      - '*'
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  PYTHON_VERSION: 3.12
+
+jobs:
+  build_containers:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Cargo download work-around
+        run: |
+          mkdir -p ~/.cargo
+          cat <<EOF > ~/.cargo/config.toml
+          [net]
+          git-fetch-with-cli = true
+          EOF
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Build wheel
+        id: wheel
+        run: |
+          # If not a release branch, add SHA1 to patch version
+          if [ "$(python scripts/version.py is_release)" = "false" ]; then
+            python scripts/version.py sha1
+          fi
+
+          python -m pip install --upgrade setuptools pip wheel
+          python setup.py sdist bdist_wheel
+          echo "version=$(python scripts/version.py get)" >> $GITHUB_OUTPUT
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}
+          labels: |
+            org.opencontainers.image.ref.name=${{ github.ref }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr,
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          builder: ${{ steps.buildx.outputs.name }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VERSION=${{ steps.wheel.outputs.version }}
+
+      - name: Upload built artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: |
+            dist
+
+  make_release:
+    if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+    needs: build_containers
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Download pre-built packages
+        uses: actions/download-artifact@v4.1.7
+        with:
+          name: packages
+          path: dist
+
+      - name: Extract release notes and name
+        id: info
+        shell: python {0}
+        run: |
+          import os
+          import re
+
+          name = None
+          version = None
+          notes = ""
+          with open("CHANGES.md", "r", encoding="utf-8") as handle:
+            for line in handle:
+              if line.startswith("##"):
+                if name is None:
+                  version, name = re.match(r"## ([0-9.]+) ([^(]+) \(.*", line).groups()
+                else:
+                  break
+              if name is not None:
+                notes += line
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
+              fh.writelines([f"name={name}\n", f"version={version}\n"])
+
+          with open("notes.md", "w", encoding="utf-8") as handle:
+            handle.write(notes)
+
+      - name: Publish release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "dist/pyatv-${{ steps.info.outputs.version }}.tar.gz,dist/pyatv-${{ steps.info.outputs.version }}-*.whl"
+          bodyFile: "notes.md"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          draft: false
+          tag: v${{ steps.info.outputs.version }}
+          name: ${{ steps.info.outputs.name }}
+
+#      - name: Publish distribution to PyPI
+#        uses: pypa/gh-action-pypi-publish@release/v1
+#        with:
+#          password: ${{ secrets.PYPI_API_TOKEN }}
+#          skip_existing: true
