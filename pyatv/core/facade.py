@@ -199,14 +199,9 @@ class FacadeRemoteControl(Relayer, interface.RemoteControl):
         return await self.relay("guide")()
 
     @shield.guard
-    async def page_up(self) -> None:
-        """Page Up."""
-        return await self.relay("page_up")()
-
-    @shield.guard
-    async def page_down(self) -> None:
-        """Page Down."""
-        return await self.relay("page_down")()
+    async def control_center(self) -> None:
+        """Open the control center."""
+        return await self.relay("control_center")()
 
 
 class FacadeMetadata(Relayer, interface.Metadata):

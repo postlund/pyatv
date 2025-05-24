@@ -453,11 +453,8 @@ class FeatureName(Enum):
     Guide = 66
     """Show EPG."""
 
-    PageUp = 67
-    """Page Up."""
-
-    PageDown = 68
-    """Page Down."""
+    ControlCenter = 68
+    """Open the Control Center."""
 
 
 class TouchAction(Enum):

@@ -459,14 +459,9 @@ class RemoteControl:
         """Show EPG."""
         raise exceptions.NotSupportedError()
 
-    @feature(67, "PageUp", "Page Up.")
-    async def page_up(self) -> None:
-        """Page Up."""
-        raise exceptions.NotSupportedError()
-
-    @feature(68, "PageDown", "Page Down.")
-    async def page_down(self) -> None:
-        """Page Down."""
+    @feature(68, "ControlCenter", "Control Center.")
+    async def control_center(self) -> None:
+        """Open the control center."""
         raise exceptions.NotSupportedError()
 
 

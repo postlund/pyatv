@@ -140,8 +140,7 @@ SUPPORTED_FEATURES = set(
         FeatureName.ChannelDown,
         FeatureName.Screensaver,
         FeatureName.Guide,
-        FeatureName.PageUp,
-        FeatureName.PageDown,
+        FeatureName.ControlCenter,
         # Keyboard interface
         FeatureName.TextFocusState,
         FeatureName.TextGet,
@@ -387,12 +386,8 @@ class CompanionRemoteControl(RemoteControl):
         """Show EPG."""
         await self._press_button(HidCommand.Guide)
 
-    async def page_up(self) -> None:
-        """Page up."""
-        await self._press_button(HidCommand.PageUp)
-
-    async def page_down(self) -> None:
-        """Page down."""
+    async def control_center(self) -> None:
+        """Open the control center."""
         await self._press_button(HidCommand.PageDown)
 
     async def _press_button(
