@@ -369,7 +369,13 @@ class StreamClient:
 
     async def set_volume(self, volume: float) -> None:
         """Change volume on the receiver."""
-        await self.rtsp.set_parameter("volume", str(volume))
+        try:
+            await self.rtsp.set_parameter("volume", str(volume))
+        except exceptions.HttpError as ex:  # pyatv.exceptions is imported as exceptions
+            _LOGGER.debug(
+                "SAMSUNG Q70 WORKAROUND: RTSP SET_PARAMETER volume failed with '%s', "
+                "but assuming TV processed it based on audible change. Continuing.", ex
+            )
         self.context.volume = volume
 
     async def send_audio(  # pylint: disable=too-many-branches
