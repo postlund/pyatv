@@ -1103,35 +1103,13 @@ class Features:
         return True
 
 
+@dataclass
 class OutputDevice:
     """Information about an output device."""
 
-    def __init__(
-        self, name: Optional[str], identifier: str, volume: float = 0.0
-    ) -> None:
-        """Initialize a new OutputDevice instance."""
-        self._name = name
-        self._identifier = identifier
-        self._volume = volume
-
-    @property
-    def name(self) -> Optional[str]:
-        """User friendly name of output device."""
-        return self._name
-
-    @property
-    def identifier(self) -> str:
-        """Return a unique id for the output device."""
-        return self._identifier
-
-    @property
-    def volume(self) -> float:
-        """Return the current volume of the output device."""
-        return self._volume
-
-    @volume.setter
-    def volume(self, volume: float):
-        self._volume = volume
+    identifier: str
+    name: Optional[str] = None
+    volume: float = 0.0
 
     def __str__(self) -> str:
         """Convert app info to readable string."""
@@ -1140,7 +1118,11 @@ class OutputDevice:
     def __eq__(self, other) -> bool:
         """Return self==other."""
         if isinstance(other, OutputDevice):
-            return self.name == other.name and self.identifier == other.identifier
+            return (
+                self.name == other.name
+                and self.identifier == other.identifier
+                and self.volume == other.volume
+            )
         return False
 
 
