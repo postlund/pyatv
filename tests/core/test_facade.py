@@ -6,7 +6,7 @@ import inspect
 from ipaddress import IPv4Address
 import logging
 import math
-from typing import Any, Dict, List, Set
+from typing import Any, Dict, List, Set, Mapping
 from unittest.mock import MagicMock
 
 import pytest
