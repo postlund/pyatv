@@ -37,6 +37,7 @@ from pyatv.interface import (
     FeatureInfo,
     Features,
     Metadata,
+    OutputDevice,
     PairingHandler,
     Playing,
     PushUpdater,
@@ -291,7 +292,9 @@ class RaopAudio(Audio):
 
         return dbfs_to_pct(vol)
 
-    async def set_volume(self, level: float) -> None:
+    async def set_volume(
+        self, level: float, output_device: Optional[OutputDevice] = None
+    ) -> None:
         """Change current volume level."""
         raop = self.playback_manager.stream_client
         dbfs_volume = pct_to_dbfs(level)
