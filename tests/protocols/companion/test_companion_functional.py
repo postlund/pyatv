@@ -204,6 +204,8 @@ async def test_session_start_and_stop(companion_client, companion_state):
         "play_pause",
         "channel_up",
         "channel_down",
+        "guide",
+        "control_center",
         # Media Control
         "play",
         "pause",
