@@ -1,6 +1,7 @@
 """Settings for configuring pyatv."""
 
 from enum import Enum
+import os
 import re
 from typing import Optional
 
@@ -36,6 +37,7 @@ _MAC_REGEX = r"[0-9a-fA-F]{2}(:[0-9a-fA-F]{2}){5}"
 DEFAULT_NAME = "pyatv"
 DEFUALT_MAC = "02:70:79:61:74:76"  # Locally administrated (02) + "pyatv" in hex
 DEFAULT_DEVICE_ID = "FF:70:79:61:74:76"  # 0xFF + "pyatv"
+DEFAULT_RP_ID = "cafecafecafe"
 DEFAULT_MODEL = "iPhone10,6"
 DEFAULT_OS_NAME = "iPhone OS"
 DEFAULT_OS_BUILD = "18G82"
@@ -80,6 +82,7 @@ class InfoSettings(BaseModel, extra="ignore"):  # type: ignore[call-arg]
     mac: str = DEFUALT_MAC
     model: str = DEFAULT_MODEL
     device_id: str = DEFAULT_DEVICE_ID
+    rp_id: Optional[str] = None
     os_name: str = DEFAULT_OS_NAME
     os_build: str = DEFAULT_OS_BUILD
     os_version: str = DEFAULT_OS_VERSION
@@ -91,6 +94,14 @@ class InfoSettings(BaseModel, extra="ignore"):  # type: ignore[call-arg]
         if re.match(_MAC_REGEX, mac) is None:
             raise ValueError(f"{mac} is not a valid MAC address")
         return mac
+
+    @field_validator("rp_id", always=True)
+    @classmethod
+    def fill_missing_rp_id(cls, v):
+        """Generate a new random rp_id if it is missing."""
+        if v is None:
+            return os.urandom(6).hex()
+        return v
 
 
 class AirPlaySettings(BaseModel, extra="ignore"):  # type: ignore[call-arg]
