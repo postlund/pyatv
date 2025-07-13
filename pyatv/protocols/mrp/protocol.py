@@ -4,10 +4,9 @@ import asyncio
 from collections import namedtuple
 from enum import Enum
 import logging
+import sys
 from typing import Dict, NamedTuple, Optional
 import uuid
-
-import async_timeout
 
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import parse_credentials
@@ -19,6 +18,11 @@ from pyatv.protocols.mrp.auth import MrpPairVerifyProcedure
 from pyatv.protocols.mrp.connection import AbstractMrpConnection
 from pyatv.settings import InfoSettings
 from pyatv.support import error_handler
+
+if sys.version_info >= (3, 11):
+    from asyncio import timeout as async_timeout
+else:
+    from async_timeout import timeout as async_timeout
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -271,7 +275,7 @@ class MrpProtocol(MessageDispatcher[int, protobuf.ProtocolMessage]):
 
         try:
             # The connection instance will dispatch the message
-            async with async_timeout.timeout(timeout):
+            async with async_timeout(timeout):
                 await semaphore.acquire()
 
         except Exception:

@@ -8,6 +8,7 @@ import logging
 import pathlib
 import plistlib
 import re
+import sys
 from typing import (
     Any,
     Callable,
@@ -22,12 +23,16 @@ from typing import (
 
 from aiohttp import ClientSession, web
 from aiohttp.web import middleware
-import async_timeout
 from requests.structures import CaseInsensitiveDict
 
 from pyatv import const, exceptions
 from pyatv.support import log_binary
 from pyatv.support.net import unused_port
+
+if sys.version_info >= (3, 11):
+    from asyncio import timeout as async_timeout
+else:
+    from async_timeout import timeout as async_timeout
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -460,7 +465,7 @@ class HttpConnection(asyncio.Protocol):
         pending_request = HttpConnection.PendingRequest(event=asyncio.Event())
         self._requests.appendleft(pending_request)
         try:
-            async with async_timeout.timeout(timeout):
+            async with async_timeout(timeout):
                 await pending_request.event.wait()
 
             if pending_request.connection_closed:

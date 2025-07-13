@@ -1,5 +1,5 @@
 aiohttp==3.8.3,<5
-async-timeout==4.0.2
+async-timeout==4.0.2;python_version<'3.11'
 cryptography==44.0.1
 chacha20poly1305-reuseable==0.13.2
 ifaddr==0.1.7
