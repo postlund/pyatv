@@ -165,7 +165,7 @@ async def pair(
     loop: asyncio.AbstractEventLoop,
     session: aiohttp.ClientSession = None,
     storage: Optional[Storage] = None,
-    **kwargs
+    **kwargs,
 ) -> interface.PairingHandler:
     """Pair a protocol for an Apple TV."""
     service = config.get_service(protocol)

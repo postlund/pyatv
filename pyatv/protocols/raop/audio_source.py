@@ -218,7 +218,7 @@ class StreamableSourceWrapper(io.BufferedIOBase):
         source: miniaudio.StreamableSource,
         buffer: SemiSeekableBuffer,
         /,
-        name: str = "stream"
+        name: str = "stream",
     ) -> None:
         """Initialize a new StreamableSourceWrapper instance."""
         super().__init__()
