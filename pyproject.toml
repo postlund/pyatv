@@ -1,3 +1,48 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools>=77.0"]
+
+[project]
+name="pyatv"
+license = "MIT"
+license-files = ["LICENSE.md"]
+description = "A client library for Apple TV and AirPlay devices"
+readme = "README.md"
+authors = [{ name = "Pierre Ståhl", email = "pierre.staahl@gmail.com" }]
+requires-python = ">=3.9.0"
+keywords = ["apple", "tv", "airplay", "raop", "companion", "dmap", "dacp"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Home Automation",
+    "Typing :: Typed",
+]
+dynamic = ["version", "dependencies"]
+
+[project.urls]
+"Homepage" = "https://pyatv.dev"
+"Repository" = "https://github.com/postlund/pyatv"
+"Bug Reports" = "https://github.com/postlund/pyatv/issues"
+
+[project.scripts]
+atvremote = "pyatv.scripts.atvremote:main"
+atvproxy = "pyatv.scripts.atvproxy:main"
+atvscript = "pyatv.scripts.atvscript:main"
+atvlog = "pyatv.scripts.atvlog:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "pyatv.const.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["pyatv*"]
+
 [tool.black]
 target-version = ["py35", "py36", "py37", "py38"]
 extend-exclude = '(protobuf/(__init__|.*_pb2).py)|__pycache__'
