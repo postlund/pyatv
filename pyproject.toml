@@ -44,7 +44,6 @@ version = { attr = "pyatv.const.__version__" }
 include = ["pyatv*"]
 
 [tool.black]
-target-version = ["py35", "py36", "py37", "py38"]
 extend-exclude = '(protobuf/(__init__|.*_pb2).py)|__pycache__'
 include = '(pyatv|tests|examples|scripts).*\.py'
 
