@@ -4,11 +4,13 @@ from hashlib import sha256
 import json
 from typing import Any, Iterator, List, Sequence, Tuple
 
+from pydantic import BaseModel
+
 from pyatv.const import Protocol
 from pyatv.exceptions import DeviceIdMissingError, SettingsError
 from pyatv.interface import BaseConfig, Storage
 from pyatv.settings import Settings
-from pyatv.support.pydantic_compat import BaseModel, model_copy
+from pyatv.support.pydantic_compat import model_copy
 
 __pdoc_dev_page__ = "/development/storage"
 
@@ -168,7 +170,7 @@ class AbstractStorage(Storage):
         # If settings are empty for a device (e.e. no settings overridden or credentials
         # saved), then the output will just be an empty dict. To not pollute the output
         # with those, we do some filtering here.
-        dumped = self.storage_model.dict(exclude_defaults=True)
+        dumped = self.storage_model.model_dump(exclude_defaults=True)
         dumped["devices"] = [device for device in dumped["devices"] if device != {}]
         return iter(dumped.items())
 

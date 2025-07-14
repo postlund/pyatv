@@ -9,10 +9,10 @@ from typing import Any, List, Sequence, Union
 import warnings
 
 from google.protobuf.text_format import MessageToString
+from pydantic import BaseModel
 
 import pyatv
 from pyatv import exceptions
-from pyatv.support.pydantic_compat import BaseModel
 
 _PROTOBUF_LINE_LENGTH = 150
 _BINARY_LINE_LENGTH = 512
@@ -208,5 +208,5 @@ def update_model_field(
     if len(splitted_path) > 1:
         update_model_field(getattr(model, next_field), splitted_path[1], value)
     else:
-        model.parse_obj({field: value})
+        model.model_validate({field: value})
         setattr(model, field, value)
