@@ -169,21 +169,21 @@ async def test_unsupported_version_raises(memory_storage):
 
 
 async def test_change_field_reflected_in_changed_property(memory_storage):
-    assert not memory_storage.changed
+    assert memory_storage.has_changed(dict(memory_storage))
+    memory_storage.update_hash(dict(memory_storage))
+    assert not memory_storage.has_changed(dict(memory_storage))
 
     atv = AppleTV(IPv4Address("127.0.0.1"), "test")
     atv.add_service(ManualService("id1", Protocol.DMAP, 1234, {}))
     settings = await memory_storage.get_settings(atv)
 
-    assert memory_storage.changed
-    memory_storage.mark_as_saved()
-    assert not memory_storage.changed
+    assert memory_storage.has_changed(dict(memory_storage))
+    memory_storage.update_hash(dict(memory_storage))
 
     settings.info.name = "test"
-
-    assert memory_storage.changed
-    memory_storage.mark_as_saved()
-    assert not memory_storage.changed
+    assert memory_storage.has_changed(dict(memory_storage))
+    memory_storage.update_hash(dict(memory_storage))
+    assert not memory_storage.has_changed(dict(memory_storage))
 
 
 async def test_set_model_reflects_changed_property(memory_storage):
@@ -192,13 +192,13 @@ async def test_set_model_reflects_changed_property(memory_storage):
     await memory_storage.get_settings(atv)
 
     new_storage = MemoryStorage()
-    assert not new_storage.changed
+    new_storage.update_hash(dict(new_storage))
 
     new_storage.storage_model = memory_storage.storage_model
-    assert new_storage.changed
+    assert new_storage.has_changed(dict(new_storage))
 
-    new_storage.mark_as_saved()
-    assert not new_storage.changed
+    new_storage.update_hash(dict(new_storage))
+    assert not new_storage.has_changed(dict(new_storage))
 
 
 async def test_save_updates_changed_property(memory_storage):
@@ -206,6 +206,6 @@ async def test_save_updates_changed_property(memory_storage):
     atv.add_service(ManualService("id1", Protocol.DMAP, 1234, {}))
     await memory_storage.get_settings(atv)
 
-    assert memory_storage.changed
+    assert memory_storage.has_changed(dict(memory_storage))
     await memory_storage.save()
-    assert not memory_storage.changed
+    assert not memory_storage.has_changed(dict(memory_storage))

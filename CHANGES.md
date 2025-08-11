@@ -1,5 +1,114 @@
 # CHANGES
 
+## 0.16.1 Uter (2025-07-12)
+
+Hey-ho, minor release (finally) that should fix:
+
+* Connection issues with tvOS 18.4+
+* Warnings related to protobuf
+
+**Changes:**
+
+*Protocol: AirPlay:*
+
+```
+e27164ba airplay: Add setting for MRP tunnel
+```
+
+*Protocol: Companion:*
+
+```
+607c5e0c companion: Use static id for _i in _systemInfo
+```
+
+*Other:*
+
+```
+5b1ec5d7 deps: Bump protbuf generated messages
+f75e718b deps: Bump protobuf to 30.2
+d711126e deps: Set cryptography 44.0.1 as base version
+9c221d18 cq: Fix issues with new black
+2e20e41b cq: Fix some spelling issues
+93707a9d favor companion protocol for power state
+cc615074 Fix typo, expand acronym at first use
+```
+
+**All changes:**
+
+```
+6f1a6bd0 build(deps): Bump pytest from 8.3.5 to 8.4.1 in /requirements
+f532a9e3 build(deps): Bump cryptography from 45.0.4 to 45.0.5 in /requirements
+4d93611a build(deps): Bump pytest-cov from 6.1.1 to 6.2.1 in /requirements
+4b65ed9a build(deps): Bump flake8 from 7.2.0 to 7.3.0 in /requirements
+bca12f6b build(deps): Bump mypy from 1.15.0 to 1.16.1 in /requirements
+c4fa39fa build(deps): Bump types-requests in /requirements
+607c5e0c companion: Use static id for _i in _systemInfo
+16285cf9 build(deps): Bump protobuf from 6.31.0 to 6.31.1 in /base_versions.txt
+5b1ec5d7 deps: Bump protbuf generated messages
+4b0a53a7 build(deps): Bump types-protobuf in /requirements
+b1f6f0c1 build(deps): Bump pytest-xdist from 3.6.1 to 3.8.0 in /requirements
+80f4f330 build(deps): Bump pyfakefs from 5.8.0 to 5.9.1 in /requirements
+20af0ebc build(deps): Bump deepdiff from 8.4.2 to 8.5.0 in /requirements
+49f9c9e9 build(deps): Bump tinytag from 2.1.0 to 2.1.1 in /requirements
+620adf37 build(deps): Bump aiohttp from 3.11.16 to 3.12.13 in /requirements
+b42625f3 build(deps): Bump pydantic from 2.11.3 to 2.11.7 in /requirements
+ef5c1050 build(deps): Bump pylint from 3.3.6 to 3.3.7 in /requirements
+8fdb6f49 build(deps): Bump zeroconf from 0.146.3 to 0.147.0 in /requirements
+2bacfd29 build(deps): Bump pytest-httpserver from 1.1.2 to 1.1.3 in /requirements
+99c53cd8 build(deps): Bump pytest-timeout from 2.3.1 to 2.4.0 in /requirements
+1aa3e48a build(deps): Bump cryptography from 44.0.2 to 45.0.4 in /requirements
+7bfb6f8f build(deps): Bump requests from 2.32.3 to 2.32.4 in /requirements
+bd95e619 build(deps): Bump python from 3.13.2-alpine to 3.13.5-alpine
+6d802da9 build(deps): Bump protobuf from 6.30.2 to 6.31.1 in /requirements
+2fbdbd44 build(deps): Bump types-requests in /requirements
+b39f231b build(deps): Bump deepdiff from 8.2.0 to 8.4.2 in /requirements
+d0d82782 build(deps): Bump pdoc3 from 0.11.5 to 0.11.6 in /requirements
+2b26c678 build(deps): Bump pyfakefs from 5.7.4 to 5.8.0 in /requirements
+41cae432 build(deps): Bump pylint from 3.3.4 to 3.3.6 in /requirements
+e47a83d1 build(deps): Bump pytest-cov from 6.0.0 to 6.1.1 in /requirements
+505f326b build(deps): Bump aiohttp from 3.11.13 to 3.11.16 in /requirements
+817f4a06 build(deps): Bump pydantic from 2.10.6 to 2.11.3 in /requirements
+a0e23125 build(deps): Bump pytest-asyncio from 0.25.3 to 0.26.0 in /requirements
+d5db5541 build(deps): Bump types-protobuf in /requirements
+788302e4 build(deps): Bump flake8 from 7.1.2 to 7.2.0 in /requirements
+cf96948b build(deps): Bump zeroconf from 0.145.1 to 0.146.3 in /requirements
+f75e718b deps: Bump protobuf to 30.2
+a6cb277e build(deps): Bump pytest-asyncio from 0.24.0 to 0.25.3 in /requirements
+8d0789be build(deps): Bump mypy from 1.13.0 to 1.15.0 in /requirements
+ab395235 build(deps): Bump types-requests in /requirements
+3c3f03c8 build(deps): Bump pytest-httpserver from 1.1.0 to 1.1.2 in /requirements
+fb13d6aa build(deps): Bump pytest from 8.3.4 to 8.3.5 in /requirements
+1ef9b792 build(deps): Bump cryptography from 44.0.1 to 44.0.2 in /requirements
+e27164ba airplay: Add setting for MRP tunnel
+d711126e deps: Set cryptography 44.0.1 as base version
+9c221d18 cq: Fix issues with new black
+1a23ed27 build(deps): Bump black from 24.10.0 to 25.1.0 in /requirements
+593da8a3 build(deps): Bump zeroconf from 0.144.1 to 0.145.1 in /requirements
+487904d5 build(deps): Bump aiohttp from 3.11.12 to 3.11.13 in /requirements
+2e20e41b cq: Fix some spelling issues
+ecb66554 build(deps): Bump codespell from 2.3.0 to 2.4.1 in /requirements
+93707a9d favor companion protocol for power state
+d65d9250 build(deps): Bump types-tabulate in /requirements
+0d4fdc9c build(deps): Bump tinytag from 2.0.0 to 2.1.0 in /requirements
+0bdcb33e build(deps): Bump deepdiff from 8.0.1 to 8.2.0 in /requirements
+b6127538 build(deps): Bump types-protobuf in /requirements
+851fb466 build(deps): Bump isort from 5.13.2 to 6.0.1 in /requirements
+b2d8519c build(deps): Bump flake8 from 7.1.1 to 7.1.2 in /requirements
+742c87b5 build(deps): Bump pyfakefs from 5.7.1 to 5.7.4 in /requirements
+ec1f17e9 build(deps): Bump python from 3.13.0-alpine to 3.13.2-alpine
+a16feaab build(deps): Bump cryptography from 43.0.3 to 44.0.1 in /requirements
+cc615074 Fix typo, expand acronym at first use
+35abdb2c build(deps): Bump pdoc3 from 0.11.1 to 0.11.5 in /requirements
+3e9e15f1 build(deps): Bump pydantic from 2.9.2 to 2.10.6 in /requirements
+245bd900 build(deps): Bump pytest from 8.3.3 to 8.3.4 in /requirements
+74dda728 build(deps): Bump async-timeout from 4.0.3 to 5.0.1 in /requirements
+3edf6b15 build(deps): Bump protobuf from 5.28.3 to 5.29.3 in /requirements
+b5e2fa84 build(deps): Bump pylint from 3.3.1 to 3.3.4 in /requirements
+c1391200 build(deps): Bump aiohttp from 3.10.10 to 3.11.12 in /requirements
+2ebb4b0a build(deps): Bump zeroconf from 0.136.0 to 0.144.1 in /requirements
+49bd01d3 build(deps): Bump types-protobuf in /requirements
+```
+
 ## 0.16.0 Troy (2024-11-03)
 
 Okie-dokie, let's do this. Due to Python 3.13 removing some deprecated

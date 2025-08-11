@@ -14,7 +14,7 @@ class MemoryStorage(AbstractStorage):
 
     async def save(self) -> None:
         """Save settings to active storage."""
-        self.mark_as_saved()
+        self.update_hash(dict(self))
 
     async def load(self) -> None:
         """Load settings from active storage."""

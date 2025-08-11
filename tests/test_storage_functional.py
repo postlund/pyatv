@@ -5,7 +5,7 @@ Uses MemoryStorage as storage for simplicity.
 """
 
 import asyncio
-from unittest.mock import MagicMock, patch
+import os
 
 from deepdiff import DeepDiff
 import pytest
@@ -13,7 +13,6 @@ import pytest
 from pyatv import connect, pair
 from pyatv.const import Protocol
 from pyatv.interface import Storage
-from pyatv.protocols import ProtocolMethods
 from pyatv.storage.file_storage import FileStorage
 
 from tests.fake_udns import airplay_service
@@ -56,8 +55,13 @@ async def test_scan_inserts_into_storage(unicast_scan, mockfs):
 
 
 async def test_provides_storage_to_pairing_handler(
-    unicast_scan, session_manager, mockfs
+    unicast_scan, session_manager, monkeypatch
 ):
+    def fake_urandom(n):
+        return b"\x00" * n
+
+    monkeypatch.setattr(os, "urandom", fake_urandom)
+
     loop = asyncio.get_running_loop()
 
     storage = await new_storage(STORAGE_FILENAME, loop)
