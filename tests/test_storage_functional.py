@@ -51,7 +51,7 @@ async def test_scan_inserts_into_storage(unicast_scan, mockfs):
     # Compare content to ensure they are exactly the same.
     storage2 = await new_storage(STORAGE_FILENAME, loop)
     settings2 = await storage2.get_settings(conf)
-    assert not DeepDiff(settings2.dict(), settings1.dict())
+    assert not DeepDiff(settings2.model_dump(), settings1.model_dump())
 
 
 async def test_provides_storage_to_pairing_handler(
