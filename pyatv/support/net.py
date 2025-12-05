@@ -47,6 +47,26 @@ def mcast_socket(address: Optional[str], port: int = 0) -> socket.socket:
         with suppress(OSError):
             membership = socket.inet_aton("224.0.0.251") + socket.inet_aton(address)
             sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, membership)
+    else:
+        # Fallback for sandboxed platforms where ifaddr finds no adapters:
+        # detect default IPv4 via a dummy UDP connect and use it for multicast join.
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as probe:
+                probe.connect(("8.8.8.8", 80))
+                detected = probe.getsockname()[0]
+                sock.setsockopt(
+                    socket.SOL_IP, socket.IP_MULTICAST_IF, socket.inet_aton(detected)
+                )
+                membership = socket.inet_aton("224.0.0.251") + socket.inet_aton(
+                    detected
+                )
+                sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, membership)
+        except OSError:
+            with suppress(OSError):
+                membership = socket.inet_aton("224.0.0.251") + socket.inet_aton(
+                    "0.0.0.0"
+                )
+                sock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, membership)
 
     _LOGGER.debug("Binding on %s:%d", address or "*", port)
     sock.bind((address or "", port))
@@ -73,6 +93,17 @@ def get_private_addresses(include_loopback=True) -> List[IPv4Address]:
                 continue
             if ipaddr.is_private:
                 addresses.append(ipaddr)
+
+    # Fallback when no adapters are reported (e.g. sandboxed platforms).
+    if not addresses:
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as probe:
+                probe.connect(("8.8.8.8", 80))
+                detected = IPv4Address(probe.getsockname()[0])
+                if include_loopback or not detected.is_loopback:
+                    addresses.append(detected)
+        except OSError:
+            pass
 
     return addresses
 
