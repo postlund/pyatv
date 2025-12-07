@@ -47,6 +47,24 @@ class FacadeRemoteControl(Relayer, interface.RemoteControl):
 
     # pylint: disable=invalid-name
     @shield.guard
+    async def send_command(
+        self,
+        command,
+        *,
+        wait_for_response: bool = True,
+        timeout: Optional[float] = None,
+        **kwargs,
+    ) -> None:
+        """Send a protocol-specific command (fire-and-forget or with response)."""
+        return await self.relay("send_command")(
+            command=command,
+            wait_for_response=wait_for_response,
+            timeout=timeout,
+            **kwargs,
+        )
+
+    # pylint: disable=invalid-name
+    @shield.guard
     async def up(self, action: InputAction = InputAction.SingleTap) -> None:
         """Press key up."""
         return await self.relay("up")(action=action)
