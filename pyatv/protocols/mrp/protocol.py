@@ -220,28 +220,47 @@ class MrpProtocol(MessageDispatcher[int, protobuf.ProtocolMessage]):
         )
         self.connection.enable_encryption(output_key, input_key)
 
+    def _ensure_send_possible(self) -> None:
+        if self._state in [ProtocolState.CONNECTED, ProtocolState.READY]:
+            if not self.connection.connected:
+                raise exceptions.ConnectionLostError(
+                    "connection is closed; reconnect required"
+                )
+            return
+
+        if self._state == ProtocolState.STOPPED:
+            raise exceptions.ConnectionLostError(
+                "connection is closed; reconnect required"
+            )
+
+        raise exceptions.InvalidStateError(self._state.name)
+
     async def send(self, message: protobuf.ProtocolMessage) -> None:
         """Send a message and expect no response."""
-        if self._state not in [
-            ProtocolState.CONNECTED,
-            ProtocolState.READY,
-        ]:
-            raise exceptions.InvalidStateError(self._state.name)
+        self._ensure_send_possible()
 
-        self.connection.send(message)
+        try:
+            self.connection.send(message)
+        except exceptions.ConnectionLostError:
+            raise
+        except Exception as ex:
+            raise exceptions.ConnectionLostError(
+                "connection was lost while sending; reconnect required"
+            ) from ex
 
     async def send_and_receive(
         self,
         message: protobuf.ProtocolMessage,
         generate_identifier: bool = True,
-        timeout: float = 5.0,
-    ) -> protobuf.ProtocolMessage:
+        timeout: Optional[float] = 5.0,
+        wait_for_response: bool = True,
+    ) -> Optional[protobuf.ProtocolMessage]:
         """Send a message and wait for a response."""
-        if self._state not in [
-            ProtocolState.CONNECTED,
-            ProtocolState.READY,
-        ]:
-            raise exceptions.InvalidStateError(self._state.name)
+        self._ensure_send_possible()
+
+        if not wait_for_response:
+            await self.send(message)
+            return None
 
         # Some messages will respond with the same identifier as used in the
         # corresponding request. Others will not and one example is the crypto
@@ -256,11 +275,18 @@ class MrpProtocol(MessageDispatcher[int, protobuf.ProtocolMessage]):
         else:
             identifier = "type_" + str(message.type)
 
-        self.connection.send(message)
+        try:
+            self.connection.send(message)
+        except exceptions.ConnectionLostError:
+            raise
+        except Exception as ex:
+            raise exceptions.ConnectionLostError(
+                "connection was lost while sending; reconnect required"
+            ) from ex
         return await self._receive(identifier, timeout)
 
     async def _receive(
-        self, identifier: str, timeout: float
+        self, identifier: str, timeout: Optional[float]
     ) -> protobuf.ProtocolMessage:
         semaphore = asyncio.Semaphore(value=0)
         self._outstanding[identifier] = OutstandingMessage(
@@ -269,15 +295,28 @@ class MrpProtocol(MessageDispatcher[int, protobuf.ProtocolMessage]):
 
         try:
             # The connection instance will dispatch the message
-            async with async_timeout(timeout):
+            if timeout is None:
                 await semaphore.acquire()
+            else:
+                async with async_timeout(timeout):
+                    await semaphore.acquire()
 
+        except asyncio.TimeoutError as ex:
+            del self._outstanding[identifier]
+            raise exceptions.OperationTimeoutError(
+                f"no response received within {timeout} seconds"
+            ) from ex
         except Exception:
             del self._outstanding[identifier]
             raise
 
-        response = self._outstanding[identifier].response
-        del self._outstanding[identifier]
+        outstanding = self._outstanding.pop(identifier, None)
+        if outstanding is None:
+            raise exceptions.ConnectionLostError(
+                "connection closed before response was received; reconnect required"
+            )
+
+        response = outstanding.response
         return response
 
     def message_received(self, message: protobuf.ProtocolMessage, _) -> None:

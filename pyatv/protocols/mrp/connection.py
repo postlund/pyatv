@@ -121,7 +121,18 @@ class MrpConnection(
             log_binary(_LOGGER, self._log_str + ">> Send", Encrypted=serialized)
 
         data = write_variant(len(serialized)) + serialized
-        self._transport.write(data)
+        if self._transport is None:
+            raise exceptions.ConnectionLostError(
+                "connection is closed; reconnect required"
+            )
+
+        try:
+            self._transport.write(data)
+        except (ConnectionResetError, BrokenPipeError, OSError) as ex:
+            self._transport = None
+            raise exceptions.ConnectionLostError(
+                "connection was lost while sending; reconnect required"
+            ) from ex
         log_protobuf(_LOGGER, self._log_str + ">> Send: Protobuf", message)
 
     def send_raw(self, data):
@@ -132,7 +143,18 @@ class MrpConnection(
             log_binary(_LOGGER, self._log_str + ">> Send raw", Encrypted=data)
 
         data = write_variant(len(data)) + data
-        self._transport.write(data)
+        if self._transport is None:
+            raise exceptions.ConnectionLostError(
+                "connection is closed; reconnect required"
+            )
+
+        try:
+            self._transport.write(data)
+        except (ConnectionResetError, BrokenPipeError, OSError) as ex:
+            self._transport = None
+            raise exceptions.ConnectionLostError(
+                "connection was lost while sending; reconnect required"
+            ) from ex
 
     def data_received(self, data):
         """Message was received from device."""

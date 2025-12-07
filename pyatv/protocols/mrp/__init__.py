@@ -72,6 +72,7 @@ from pyatv.support.url import is_url
 _LOGGER = logging.getLogger(__name__)
 
 _DEFAULT_SKIP_TIME = 15
+_DEFAULT_COMMAND_TIMEOUT = 5.0
 
 # Source: https://github.com/Daij-Djan/DDHidLib/blob/master/usb_hid_usages.txt
 _KEY_LOOKUP = {
@@ -338,8 +339,24 @@ class MrpRemoteControl(RemoteControl):
         self.psm = psm
         self.protocol = protocol
 
-    async def _send_command(self, command, **kwargs):
-        resp = await self.protocol.send_and_receive(messages.command(command, **kwargs))
+    async def _send_command(
+        self,
+        command,
+        *,
+        wait_for_response: bool = True,
+        timeout: Optional[float] = None,
+        **kwargs,
+    ):
+        message = messages.command(command, **kwargs)
+        if not wait_for_response:
+            await self.protocol.send(message)
+            return
+
+        resp = await self.protocol.send_and_receive(
+            message,
+            timeout=_DEFAULT_COMMAND_TIMEOUT if timeout is None else timeout,
+            wait_for_response=True,
+        )
         inner = resp.inner()
 
         if inner.sendError == protobuf.SendError.NoError:
@@ -350,6 +367,19 @@ class MrpRemoteControl(RemoteControl):
             f"SendError={protobuf.SendError.Enum.Name(inner.sendError)}, "
             "HandlerReturnStatus="
             f"{protobuf.HandlerReturnStatus.Enum.Name(inner.handlerReturnStatus)}"
+        )
+
+    async def send_command(
+        self,
+        command,
+        *,
+        wait_for_response: bool = True,
+        timeout: Optional[float] = None,
+        **kwargs,
+    ) -> None:
+        """Send an arbitrary command with optional response handling overrides."""
+        await self._send_command(
+            command, wait_for_response=wait_for_response, timeout=timeout, **kwargs
         )
 
     async def up(self, action: InputAction = InputAction.SingleTap) -> None:

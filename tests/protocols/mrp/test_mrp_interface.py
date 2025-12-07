@@ -1,16 +1,25 @@
 """Unit tests for interface implementations in pyatv.protocols.mrp."""
 
+import asyncio
 import datetime
 import math
 from typing import Any, Dict
-from unittest.mock import Mock, PropertyMock
+from unittest.mock import AsyncMock, Mock, PropertyMock
 
 import pytest
 
 from pyatv import exceptions
 from pyatv.core import UpdatedState
 from pyatv.interface import ClientSessionManager, OutputDevice
-from pyatv.protocols.mrp import MrpAudio, MrpMetadata, messages, player_state, protobuf
+from pyatv.protocols.mrp import (
+    MrpAudio,
+    MrpMetadata,
+    MrpRemoteControl,
+    messages,
+    player_state,
+    protobuf,
+)
+from pyatv.protocols.mrp.protobuf import CommandInfo_pb2
 from pyatv.settings import InfoSettings
 
 from tests.utils import faketime
@@ -374,3 +383,14 @@ async def test_metadata_position_calculation(metadata, playing_metadata, player_
         player_state.playback_state = protobuf.PlaybackState.Playing
         playing_metadata["playbackRate"] = 0.0
         assert (await metadata.playing()).position == ELAPSED_TIME
+
+
+async def test_remote_fire_and_forget_command():
+    protocol = AsyncMock()
+    psm = Mock(spec=player_state.PlayerStateManager)
+    remote = MrpRemoteControl(asyncio.get_running_loop(), psm, protocol)
+
+    await remote.send_command(CommandInfo_pb2.Play, wait_for_response=False)
+
+    protocol.send.assert_awaited_once()
+    protocol.send_and_receive.assert_not_awaited()
