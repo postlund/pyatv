@@ -11,9 +11,8 @@ import plistlib
 from random import randrange
 from typing import Any, Dict, Mapping, NamedTuple, Optional, Tuple, Union
 
-import async_timeout
-
 from pyatv.protocols.dmap import tags
+from pyatv.support import async_timeout
 from pyatv.support.http import HttpConnection, HttpResponse, decode_bplist_from_body
 from pyatv.support.metadata import MediaMetadata
 
@@ -314,7 +313,7 @@ class RtspSession:
 
         # Wait for response to the CSeq we expect
         try:
-            async with async_timeout.timeout(4):
+            async with async_timeout(4):
                 await self.requests[cseq][0].wait()
             response = self.requests[cseq][1]
         except asyncio.TimeoutError as ex:
