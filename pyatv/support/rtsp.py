@@ -9,17 +9,12 @@ from hashlib import md5
 import logging
 import plistlib
 from random import randrange
-import sys
 from typing import Any, Dict, Mapping, NamedTuple, Optional, Tuple, Union
 
 from pyatv.protocols.dmap import tags
+from pyatv.support import async_timeout
 from pyatv.support.http import HttpConnection, HttpResponse, decode_bplist_from_body
 from pyatv.support.metadata import MediaMetadata
-
-if sys.version_info >= (3, 11):
-    from asyncio import timeout as async_timeout
-else:
-    from async_timeout import timeout as async_timeout
 
 _LOGGER = logging.getLogger(__name__)
 

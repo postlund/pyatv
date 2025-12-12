@@ -4,7 +4,6 @@ import asyncio
 from collections import namedtuple
 from enum import Enum
 import logging
-import sys
 from typing import Dict, NamedTuple, Optional
 import uuid
 
@@ -17,12 +16,7 @@ from pyatv.protocols.mrp import messages, protobuf
 from pyatv.protocols.mrp.auth import MrpPairVerifyProcedure
 from pyatv.protocols.mrp.connection import AbstractMrpConnection
 from pyatv.settings import InfoSettings
-from pyatv.support import error_handler
-
-if sys.version_info >= (3, 11):
-    from asyncio import timeout as async_timeout
-else:
-    from async_timeout import timeout as async_timeout
+from pyatv.support import async_timeout, error_handler
 
 _LOGGER = logging.getLogger(__name__)
 

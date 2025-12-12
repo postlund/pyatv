@@ -5,6 +5,7 @@ import binascii
 import functools
 import logging
 from os import environ, path
+import sys
 from typing import Any, List, Sequence, Union, get_args, get_origin
 import warnings
 
@@ -13,6 +14,13 @@ from pydantic import BaseModel
 
 import pyatv
 from pyatv import exceptions
+
+if sys.version_info >= (3, 11):
+    # TODO: Remove version guard and import alias
+    # once Python 3.11 is the lowest supported version.
+    from asyncio import timeout as async_timeout  # noqa: F401
+else:
+    from async_timeout import timeout as async_timeout  # noqa: F401
 
 _PROTOBUF_LINE_LENGTH = 150
 _BINARY_LINE_LENGTH = 512

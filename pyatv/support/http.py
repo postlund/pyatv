@@ -8,7 +8,6 @@ import logging
 import pathlib
 import plistlib
 import re
-import sys
 from typing import (
     Any,
     Callable,
@@ -26,13 +25,8 @@ from aiohttp.web import middleware
 from requests.structures import CaseInsensitiveDict
 
 from pyatv import const, exceptions
-from pyatv.support import log_binary
+from pyatv.support import async_timeout, log_binary
 from pyatv.support.net import unused_port
-
-if sys.version_info >= (3, 11):
-    from asyncio import timeout as async_timeout
-else:
-    from async_timeout import timeout as async_timeout
 
 _LOGGER = logging.getLogger(__name__)
 
