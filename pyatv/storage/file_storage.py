@@ -53,7 +53,7 @@ class FileStorage(AbstractStorage):
             _LOGGER.debug("Loading settings from %s", self._filename)
             model_json = await self._loop.run_in_executor(None, self._read_file)
             raw_data = json.loads(model_json)
-            self.storage_model = StorageModel.parse_obj(raw_data)
+            self.storage_model = StorageModel.model_validate(raw_data)
 
             # Update hash based on what we read from file rather than serializing the
             # model. The reasonf for this is that pydantic might (because of
