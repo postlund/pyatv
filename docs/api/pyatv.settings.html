@@ -54,6 +54,7 @@ This module has additional documentation
 <h4><code><a title="pyatv.settings.InfoSettings" href="#pyatv.settings.InfoSettings">InfoSettings</a></code></h4>
 <ul class="two-column">
 <li><code><a title="pyatv.settings.InfoSettings.device_id" href="#pyatv.settings.InfoSettings.device_id">device_id</a></code></li>
+<li><code><a title="pyatv.settings.InfoSettings.fill_missing_rp_id" href="#pyatv.settings.InfoSettings.fill_missing_rp_id">fill_missing_rp_id</a></code></li>
 <li><code><a title="pyatv.settings.InfoSettings.mac" href="#pyatv.settings.InfoSettings.mac">mac</a></code></li>
 <li><code><a title="pyatv.settings.InfoSettings.mac_validator" href="#pyatv.settings.InfoSettings.mac_validator">mac_validator</a></code></li>
 <li><code><a title="pyatv.settings.InfoSettings.model" href="#pyatv.settings.InfoSettings.model">model</a></code></li>
@@ -61,6 +62,7 @@ This module has additional documentation
 <li><code><a title="pyatv.settings.InfoSettings.os_build" href="#pyatv.settings.InfoSettings.os_build">os_build</a></code></li>
 <li><code><a title="pyatv.settings.InfoSettings.os_name" href="#pyatv.settings.InfoSettings.os_name">os_name</a></code></li>
 <li><code><a title="pyatv.settings.InfoSettings.os_version" href="#pyatv.settings.InfoSettings.os_version">os_version</a></code></li>
+<li><code><a title="pyatv.settings.InfoSettings.rp_id" href="#pyatv.settings.InfoSettings.rp_id">rp_id</a></code></li>
 </ul>
 </li>
 <li>
@@ -116,7 +118,7 @@ This module has additional documentation
 </header>
 <section id="section-intro">
 <p>Settings for configuring pyatv.</p>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L1-L168" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L1-L179" class="git-link">Browse git</a></div>
 </section>
 <section>
 </section>
@@ -135,7 +137,7 @@ This module has additional documentation
 <section class="desc"><p>Settings related to AirPlay.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L96-L103" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L107-L114" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>pydantic.v1.main.BaseModel</li>
@@ -145,19 +147,19 @@ This module has additional documentation
 <dl>
 <dt id="pyatv.settings.AirPlaySettings.credentials"><code class="name">var <span class="ident">credentials</span> -> str | None</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.AirPlaySettings.identifier"><code class="name">var <span class="ident">identifier</span> -> str | None</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.AirPlaySettings.mrp_tunnel"><code class="name">var <span class="ident">mrp_tunnel</span> -> <a title="pyatv.settings.MrpTunnel" href="#pyatv.settings.MrpTunnel">MrpTunnel</a></code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.AirPlaySettings.password"><code class="name">var <span class="ident">password</span> -> str | None</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 </dl>
 </dd>
@@ -167,7 +169,7 @@ This module has additional documentation
 </code></dt>
 <dd>
 <section class="desc"><p>AirPlay version to use.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L47-L57" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L49-L59" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.str</li>
@@ -197,7 +199,7 @@ This module has additional documentation
 <section class="desc"><p>Settings related to Companion.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L106-L110" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L117-L121" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>pydantic.v1.main.BaseModel</li>
@@ -207,11 +209,11 @@ This module has additional documentation
 <dl>
 <dt id="pyatv.settings.CompanionSettings.credentials"><code class="name">var <span class="ident">credentials</span> -> str | None</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.CompanionSettings.identifier"><code class="name">var <span class="ident">identifier</span> -> str | None</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 </dl>
 </dd>
@@ -223,7 +225,7 @@ This module has additional documentation
 <section class="desc"><p>Settings related to DMAP.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L113-L117" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L124-L128" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>pydantic.v1.main.BaseModel</li>
@@ -233,11 +235,11 @@ This module has additional documentation
 <dl>
 <dt id="pyatv.settings.DmapSettings.credentials"><code class="name">var <span class="ident">credentials</span> -> str | None</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.DmapSettings.identifier"><code class="name">var <span class="ident">identifier</span> -> str | None</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 </dl>
 </dd>
@@ -249,7 +251,7 @@ This module has additional documentation
 <section class="desc"><p>Information related settings.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L76-L93" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L78-L104" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>pydantic.v1.main.BaseModel</li>
@@ -259,35 +261,47 @@ This module has additional documentation
 <dl>
 <dt id="pyatv.settings.InfoSettings.device_id"><code class="name">var <span class="ident">device_id</span> -> str</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.InfoSettings.mac"><code class="name">var <span class="ident">mac</span> -> str</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.InfoSettings.model"><code class="name">var <span class="ident">model</span> -> str</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.InfoSettings.name"><code class="name">var <span class="ident">name</span> -> str</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.InfoSettings.os_build"><code class="name">var <span class="ident">os_build</span> -> str</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.InfoSettings.os_name"><code class="name">var <span class="ident">os_name</span> -> str</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.InfoSettings.os_version"><code class="name">var <span class="ident">os_version</span> -> str</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
+</dd>
+<dt id="pyatv.settings.InfoSettings.rp_id"><code class="name">var <span class="ident">rp_id</span> -> str | None</code></dt>
+<dd>
+<section class="desc"></section>
 </dd>
 </dl>
 <h3>Static methods</h3>
 <dl>
+<dt id="pyatv.settings.InfoSettings.fill_missing_rp_id">
+<code class="name flex">
+<span>def <span class="ident">fill_missing_rp_id</span></span>(<span>v)</span>
+</code>
+</dt>
+<dd>
+<section class="desc"><p>Generate a new random rp_id if it is missing.</p></section>
+</dd>
 <dt id="pyatv.settings.InfoSettings.mac_validator">
 <code class="name flex">
 <span>def <span class="ident">mac_validator</span></span>(<span>mac: str) -> str</span>
@@ -306,7 +320,7 @@ This module has additional documentation
 <section class="desc"><p>Settings related to MRP.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L120-L124" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L131-L135" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>pydantic.v1.main.BaseModel</li>
@@ -316,11 +330,11 @@ This module has additional documentation
 <dl>
 <dt id="pyatv.settings.MrpSettings.credentials"><code class="name">var <span class="ident">credentials</span> -> str | None</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.MrpSettings.identifier"><code class="name">var <span class="ident">identifier</span> -> str | None</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 </dl>
 </dd>
@@ -330,7 +344,7 @@ This module has additional documentation
 </code></dt>
 <dd>
 <section class="desc"><p>How MRP tunneling over AirPlay is handled.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L60-L70" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L62-L72" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.str</li>
@@ -360,7 +374,7 @@ This module has additional documentation
 <section class="desc"><p>Container for protocol specific settings.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L154-L161" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L165-L172" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>pydantic.v1.main.BaseModel</li>
@@ -370,23 +384,23 @@ This module has additional documentation
 <dl>
 <dt id="pyatv.settings.ProtocolSettings.airplay"><code class="name">var <span class="ident">airplay</span> -> <a title="pyatv.settings.AirPlaySettings" href="#pyatv.settings.AirPlaySettings">AirPlaySettings</a></code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.ProtocolSettings.companion"><code class="name">var <span class="ident">companion</span> -> <a title="pyatv.settings.CompanionSettings" href="#pyatv.settings.CompanionSettings">CompanionSettings</a></code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.ProtocolSettings.dmap"><code class="name">var <span class="ident">dmap</span> -> <a title="pyatv.settings.DmapSettings" href="#pyatv.settings.DmapSettings">DmapSettings</a></code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.ProtocolSettings.mrp"><code class="name">var <span class="ident">mrp</span> -> <a title="pyatv.settings.MrpSettings" href="#pyatv.settings.MrpSettings">MrpSettings</a></code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.ProtocolSettings.raop"><code class="name">var <span class="ident">raop</span> -> <a title="pyatv.settings.RaopSettings" href="#pyatv.settings.RaopSettings">RaopSettings</a></code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 </dl>
 </dd>
@@ -398,7 +412,7 @@ This module has additional documentation
 <section class="desc"><p>Settings related to RAOP.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L127-L151" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L138-L162" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>pydantic.v1.main.BaseModel</li>
@@ -413,15 +427,15 @@ This module has additional documentation
 </dd>
 <dt id="pyatv.settings.RaopSettings.credentials"><code class="name">var <span class="ident">credentials</span> -> str | None</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.RaopSettings.identifier"><code class="name">var <span class="ident">identifier</span> -> str | None</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.RaopSettings.password"><code class="name">var <span class="ident">password</span> -> str | None</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.RaopSettings.protocol_version"><code class="name">var <span class="ident">protocol_version</span> -> <a title="pyatv.settings.AirPlayVersion" href="#pyatv.settings.AirPlayVersion">AirPlayVersion</a></code></dt>
 <dd>
@@ -444,7 +458,7 @@ mode (recommended), or 1 or 2 for AirPlay 1 or 2 respectively.</p></section>
 <section class="desc"><p>Settings container class.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L164-L168" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L175-L179" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>pydantic.v1.main.BaseModel</li>
@@ -454,11 +468,11 @@ mode (recommended), or 1 or 2 for AirPlay 1 or 2 respectively.</p></section>
 <dl>
 <dt id="pyatv.settings.Settings.info"><code class="name">var <span class="ident">info</span> -> <a title="pyatv.settings.InfoSettings" href="#pyatv.settings.InfoSettings">InfoSettings</a></code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.settings.Settings.protocols"><code class="name">var <span class="ident">protocols</span> -> <a title="pyatv.settings.ProtocolSettings" href="#pyatv.settings.ProtocolSettings">ProtocolSettings</a></code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 </dl>
 </dd>

@@ -1,7 +1,8 @@
 """Storage module."""
 
 from hashlib import sha256
-from typing import List, Sequence
+import json
+from typing import Any, Iterator, List, Sequence, Tuple
 
 from pyatv.const import Protocol
 from pyatv.exceptions import DeviceIdMissingError, SettingsError
@@ -19,14 +20,12 @@ __pdoc__ = {
 MODEL_VERSION = 1
 
 
-def _calculate_settings_hash(settings: List[Settings]) -> str:
+def _dict_hash(data: dict) -> str:
     # Calculate a hash of all settings by dumping content to JSON and hashing all
     # output using SHA256 (arbitrarily chosen for now). This is not very efficient
     # (especially when making multiple calls) but should be reliable and good enough.
     hasher = sha256()
-    for setting in settings:
-        setting_json = setting.json(exclude_defaults=True)
-        hasher.update(setting_json.encode("utf-8"))
+    hasher.update(json.dumps(data).encode("utf-8"))
     return hasher.hexdigest()
 
 
@@ -49,17 +48,15 @@ class AbstractStorage(Storage):
     def __init__(self) -> None:
         """Initialize a new AbstractStorage instance."""
         self._settings: List[Settings] = []
-        self._settings_hash: str = _calculate_settings_hash(self._settings)
+        self._hash: str = _dict_hash({})
 
-    @property
-    def changed(self) -> bool:
+    def has_changed(self, data: dict) -> bool:
         """Return if anything has changed in the model since loading.
 
-        This property will return True if a any setting has been changed. It is reset
-        when data is loaded into storage (by calling load) or manually by calling
-        mark_as_solved (typically done by save).
+        This method compares a hash of the saved data with the provided data to deduce
+        if anything has changed.
         """
-        return self._settings_hash != _calculate_settings_hash(self._settings)
+        return self._hash != _dict_hash(data)
 
     @property
     def settings(self) -> Sequence[Settings]:
@@ -78,13 +75,9 @@ class AbstractStorage(Storage):
             raise SettingsError(f"unsupported version: {other.version}")
         self._settings = other.devices
 
-    def mark_as_saved(self) -> None:
-        """Call after saving to indicate settings have been saved.
-
-        The changed property reflects whether something has been changed in the model
-        or not based on calling this method.
-        """
-        self._settings_hash = _calculate_settings_hash(self._settings)
+    def update_hash(self, data: dict) -> None:
+        """Call after saving to indicate settings have been saved."""
+        self._hash = _dict_hash(data)
 
     async def get_settings(self, config: BaseConfig) -> Settings:
         """Return settings for a specific configuration (device).
@@ -169,6 +162,15 @@ class AbstractStorage(Storage):
                     settings.protocols.raop, update=service.settings()
                 )
                 settings.protocols.raop.identifier = service.identifier
+
+    def __iter__(self) -> Iterator[Tuple[str, Any]]:
+        """Iterate over stored devices."""
+        # If settings are empty for a device (e.e. no settings overridden or credentials
+        # saved), then the output will just be an empty dict. To not pollute the output
+        # with those, we do some filtering here.
+        dumped = self.storage_model.dict(exclude_defaults=True)
+        dumped["devices"] = [device for device in dumped["devices"] if device != {}]
+        return iter(dumped.items())
 
     def __repr__(self) -> str:
         """Return representation of MemoryStorage."""
