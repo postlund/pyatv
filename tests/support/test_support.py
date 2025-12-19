@@ -9,6 +9,7 @@ from typing import Optional
 from unittest.mock import MagicMock, patch
 
 from deepdiff import DeepDiff
+from pydantic import BaseModel, Field, ValidationError
 import pytest
 
 from pyatv import exceptions
@@ -23,7 +24,6 @@ from pyatv.support import (
     stringify_model,
     update_model_field,
 )
-from pyatv.support.pydantic_compat import BaseModel, Field, ValidationError
 
 
 class DummyException(Exception):

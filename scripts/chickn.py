@@ -113,7 +113,7 @@ async def run_pip(dependency_files, variables, force_reinstall=False) -> None:
             + ("--force-reinstall " if force_reinstall else "")
             + " ".join(
                 [
-                    name + "==" + version
+                    f'"{name}=={version}"'
                     for name, version in expected_dependencies.items()
                 ]
             )
