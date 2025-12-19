@@ -139,6 +139,8 @@ SUPPORTED_FEATURES = set(
         FeatureName.ChannelUp,
         FeatureName.ChannelDown,
         FeatureName.Screensaver,
+        FeatureName.Guide,
+        FeatureName.ControlCenter,
         # Keyboard interface
         FeatureName.TextFocusState,
         FeatureName.TextGet,
@@ -379,6 +381,14 @@ class CompanionRemoteControl(RemoteControl):
     async def screensaver(self) -> None:
         """Activate screen saver."""
         await self._press_button(HidCommand.Screensaver)
+
+    async def guide(self) -> None:
+        """Show EPG."""
+        await self._press_button(HidCommand.Guide)
+
+    async def control_center(self) -> None:
+        """Open the control center."""
+        await self._press_button(HidCommand.PageDown)
 
     async def _press_button(
         self,
