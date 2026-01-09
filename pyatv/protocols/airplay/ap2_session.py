@@ -19,7 +19,7 @@ from pyatv.interface import DeviceListener
 from pyatv.protocols.airplay.auth import verify_connection
 from pyatv.protocols.airplay.channels import DataStreamChannel, EventChannel
 from pyatv.settings import InfoSettings
-from pyatv.support.http import HttpConnection, decode_bplist_from_body, http_connect
+from pyatv.support.http import HttpConnection, decode_plist_body, http_connect
 from pyatv.support.rtsp import RtspSession
 from pyatv.support.state_producer import StateProducer
 
@@ -110,7 +110,7 @@ class AP2Session:
     async def _setup(self, body: Dict[str, Any]) -> Dict[str, Any]:
         assert self.rtsp
         resp = await self.rtsp.setup(body=body)
-        return decode_bplist_from_body(resp)
+        return decode_plist_body(resp.body)
 
     async def _setup_event_channel(self, address: str) -> None:
         if self.verifier is None:

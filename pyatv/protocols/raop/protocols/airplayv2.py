@@ -3,7 +3,7 @@
 import asyncio
 import logging
 import plistlib
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Dict
 from uuid import uuid4
 
 from pyatv import exceptions
@@ -13,7 +13,7 @@ from pyatv.protocols.airplay.auth import verify_connection
 from pyatv.protocols.airplay.channels import EventChannel
 from pyatv.protocols.raop.protocols import StreamContext, StreamProtocol
 from pyatv.support.chacha20 import Chacha20Cipher, Chacha20Cipher8byteNonce
-from pyatv.support.http import decode_bplist_from_body
+from pyatv.support.http import decode_plist_body
 from pyatv.support.rtsp import RtspSession
 
 _LOGGER = logging.getLogger(__name__)
@@ -24,29 +24,35 @@ EVENTS_READ_INFO = "Events-Read-Encryption-Key"
 
 FEEDBACK_INTERVAL = 2.0  # Seconds
 
+SESSION_ID = str(uuid4()).upper()
+
 HEADERS = {
-    "User-Agent": "AirPlay/550.10",
+    "User-Agent": "AirPlay/870.14.1",
     "Content-Type": "application/x-apple-binary-plist",
     "X-Apple-ProtocolVersion": "1",
-    "X-Apple-Session-ID": str(uuid4()).lower(),
-    "X-Apple-Stream-ID": "1",
+    "X-Apple-Session-ID": SESSION_ID,
+    "X-Apple-StreamID": "1",
+    "CSeq": "1"
 }
 
-
 class AirPlayV2(StreamProtocol):
-    """Stream protocol used for AirPlay v1 support."""
+    """Stream protocol used for AirPlay v2 support."""
 
     def __init__(self, context: StreamContext, rtsp: RtspSession) -> None:
         """Initialize a new AirPlayV2 instance."""
         super().__init__()
         self.context = context
         self.rtsp = rtsp
-        self.event_channel: Optional[asyncio.BaseTransport] = None
+        self.event_transport: Optional[asyncio.BaseTransport] = None
         self._verifier: Optional[PairVerifyProcedure] = None
         self._cipher: Optional[Chacha20Cipher] = None
         self._feedback_task: Optional[asyncio.Task] = None
-
+        self._messageID = 1
+        self._playbackState = None
         self.uuid = str(uuid4())
+
+    def _playbackStateListener(self, info):
+        self._playbackState = info
 
     async def _setup_base(self, timing_server_port: int) -> None:
         self._verifier = await verify_connection(
@@ -56,7 +62,8 @@ class AirPlayV2(StreamProtocol):
         setup_resp = await self.rtsp.setup(
             body={
                 "deviceID": "AA:BB:CC:DD:EE:FF",
-                "sessionUUID": str(uuid4()).upper(),
+                "sessionUUID": SESSION_ID,
+                "sessionCorrelationUUID": str(uuid4()).upper(),
                 "timingPort": timing_server_port,
                 "timingProtocol": "NTP",
                 "isMultiSelectAirPlay": True,
@@ -72,8 +79,7 @@ class AirPlayV2(StreamProtocol):
                 "statsCollectionEnabled": False,
             }
         )
-        resp = decode_bplist_from_body(setup_resp)
-        _LOGGER.debug("Setup response body: %s", resp)
+        resp = decode_plist_body(setup_resp.body)
 
         event_port = resp.get("eventPort", 0)
 
@@ -85,7 +91,7 @@ class AirPlayV2(StreamProtocol):
         transport = None
         while transport is None:
             try:
-                transport, _ = await setup_channel(
+                transport, channel = await setup_channel(
                     EventChannel,
                     self._verifier,
                     self.rtsp.connection.remote_ip,
@@ -94,15 +100,17 @@ class AirPlayV2(StreamProtocol):
                     EVENTS_READ_INFO,
                     EVENTS_WRITE_INFO,
                 )
-            except ConnectionRefusedError:
+            except (ConnectionRefusedError, OSError):
                 retries -= 1
                 if retries == 0:
                     raise
 
-                _LOGGER.debug("Connect failed, retrying")
+                _LOGGER.warning("Connect failed, retrying")
                 await asyncio.sleep(1.0)
 
-        self.event_channel = transport
+        self.event_transport = transport
+        self.event_channel = channel
+        self.event_channel.listener(self._playbackStateListener)
 
     async def setup(self, timing_server_port: int, control_client_port: int) -> None:
         """To setup connection prior to starting to stream."""
@@ -145,7 +153,7 @@ class AirPlayV2(StreamProtocol):
                 ]
             }
         )
-        resp = decode_bplist_from_body(setup_resp)
+        resp = decode_plist_body(setup_resp.body)
         _LOGGER.debug("Setup stream response: %s", resp)
 
         stream = resp["streams"][0]
@@ -160,9 +168,9 @@ class AirPlayV2(StreamProtocol):
         if self._feedback_task:
             self._feedback_task.cancel()
             self._feedback_task = None
-        if self.event_channel:
-            self.event_channel.close()
-            self.event_channel = None
+        if self.event_transport:
+            self.event_transport.close()
+            self.event_transport = None
 
     async def start_feedback(self) -> None:
         """Start to send feedback (if supported and required)."""
@@ -173,12 +181,12 @@ class AirPlayV2(StreamProtocol):
         _LOGGER.debug("Starting feedback task")
         # TODO: Better end condition here to not risk infinite runs?
         while True:
+            await asyncio.sleep(FEEDBACK_INTERVAL)
             try:
                 await self.rtsp.feedback()
             except Exception as ex:
                 # Treat feedback as "best effort" and don't raise any errors
                 _LOGGER.debug("Feedback failed: %s", ex)
-            await asyncio.sleep(FEEDBACK_INTERVAL)
 
     async def send_audio_packet(
         self, transport: asyncio.DatagramTransport, rtp_header: bytes, audio: bytes
@@ -207,67 +215,101 @@ class AirPlayV2(StreamProtocol):
 
         return self.context.rtpseq, packet
 
-    async def play_url(self, timing_server_port: int, url: str, position: float = 0.0):
-        """Play media from a URL."""
-        await self._setup_base(timing_server_port)
-        await self.start_feedback()
-        await self.rtsp.record()
-
+    async def send_command(self, data):
         # Most fields are not needed here, but keeping them for reference
         body = {
-            "Content-Location": url,
-            "Start-Position-Seconds": position,
-            "uuid": self.uuid,
-            "streamType": 1,
-            "mediaType": "file",
-            "mightSupportStorePastisKeyRequests": True,
-            "playbackRestrictions": 0,
-            "secureConnectionMs": 22,
-            "volume": 1.0,
-            "infoMs": 122,
-            "connectMs": 18,
-            "authMs": 0,
-            "bonjourMs": 0,
-            "referenceRestrictions": 3,
-            "SenderMACAddress": "AA:BB:CC:DD:EE:FF",
-            "model": "iPhone14,3",
-            "postAuthMs": 0,
-            "clientBundleID": "dev.pyatv.GPU",
-            "clientProcName": "dev.pyatv.GPU",
-            "osBuildVersion": "20G1116",
-            "rate": 1.0,
+            "params": {
+                "data": plistlib.dumps(data, fmt=plistlib.FMT_BINARY, sort_keys=False)
+            }
         }
 
-        # Actually start the stream
-        resp = await self.rtsp.connection.post(
-            "/play",
+        # Send the command
+        return await self.rtsp.connection.post(
+            "/command",
             headers=HEADERS,
             body=plistlib.dumps(
                 body, fmt=plistlib.FMT_BINARY  # pylint: disable=no-member
             ),
             allow_error=True,
-        )
+        )        
 
-        # Various commands, most of which are probably not needed for pyatv. Doing them
-        # anyways, just to be sure things work. Most important command is "/rate" as
-        # that sets playback rate to 100% (will start paused otherwise).
-        # TODO: Maybe check some return values?
-        await self.rtsp.exchange(
-            "PUT", uri="/setProperty?isInterestedInDateRange", body={"value": True}
-        )
-        await self.rtsp.exchange(
-            "PUT", uri="/setProperty?actionAtItemEnd", body={"value": 0}
-        )
-        await self.rtsp.exchange("POST", uri="/rate?value=1.000000")
-        await self.rtsp.exchange(
-            "PUT",
-            uri="/setProperty?forwardEndTime",
-            body={"value": {"flags": 0, "value": 0, "epoch": 0, "timescale": 0}},
-        )
-        await self.rtsp.exchange(
-            "PUT",
-            uri="/setProperty?reverseEndTime",
-            body={"value": {"flags": 0, "value": 0, "epoch": 0, "timescale": 0}},
-        )
+    async def setup_url_stream(self) -> dict: 
+        """Setup a new stream used for video over http."""
+        if self._verifier is None:
+            raise exceptions.InvalidStateError("base stream not set up")
 
+        setup_resp = await self.rtsp.setup(
+            body={
+                    "streams": [
+                        {
+                            'clientUUID': '2E0A9FBA-182D-4E04-8A5D-EC018BD8C408',
+                            'clientTypeUUID': 'A6B27562-B43A-4F2D-B75F-82391E250194',
+                            'channelID': '36:CB:3F:E1:93:B0-RCS-1',
+                            'controlType': 1,
+                            'type': 130
+                        }
+                    ]
+            })
+        
+        resp = decode_plist_body(setup_resp.body)
+        HEADERS["X-Apple-StreamID"] = resp["streams"][0]["streamID"]
         return resp
+
+    async def play_url(self, timing_server_port: int, url: str, position: float = 0.0) -> int :
+        """Play media from a URL."""        
+        if not self._verifier:
+            await self._setup_base(timing_server_port)
+            await self.start_feedback()
+            
+        await self.rtsp.info()
+        await self.rtsp.record()
+        resp = await self.setup_url_stream()
+
+        item = {
+            "uuid": "30BFEC7B-E49B-47E9-8839-E009D7F9CD7F"
+        }
+
+        resp = await self.send_command({
+            "type": "insertPlayQueueItem",
+            "item": {
+                "uuid": item["uuid"],
+                "mediaType": "file",
+                "Content-Location": url,
+            }
+        })
+
+        await self.send_command({
+            "type": "setProperty",
+            "value": True,
+            "property": "isInterestedInDateRange",
+            "item": item
+        })
+
+        await self.send_command({
+            "type": "setProperty",
+            "value": 1,
+            "property": "actionAtItemEnd"
+        })
+
+        await self.send_command({
+            "type": "setRate",
+            "rate": 1.0,
+        })
+
+        return self._playbackState
+
+    async def playbackInfo(self) -> Dict:
+        id = self._messageID
+        self._messageID += 1
+        await self.send_command({'type': 'playbackInfo', 'kind': 'request', 'messageID': id})
+        response = await self.event_channel.responseFor(id)
+        return response
+    
+    def playbackState(self) -> Dict:
+        if self._playbackState:
+            if 'params' in self._playbackState:
+                return self._playbackState['params']['playbackState']
+            else:
+                return self._playbackState['name']
+        else:
+            return None

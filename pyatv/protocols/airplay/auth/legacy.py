@@ -12,7 +12,7 @@ from pyatv.auth.hap_pairing import (
     PairVerifyProcedure,
 )
 from pyatv.protocols.airplay.srp import LegacySRPAuthHandler
-from pyatv.support.http import HttpConnection, HttpResponse, decode_bplist_from_body
+from pyatv.support.http import HttpConnection, HttpResponse, decode_plist_body
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -53,7 +53,7 @@ class AirPlayLegacyPairSetupProcedure(PairSetupProcedure):
         )
         self.srp.step1(client_id, pin_code)
         resp = await self._send_plist(method="pin", user=client_id)
-        body = decode_bplist_from_body(resp)
+        body = decode_plist_body(resp.body)
         if not isinstance(body, dict):
             raise exceptions.ProtocolError(f"exoected dict, got {type(body).__name__}")
 

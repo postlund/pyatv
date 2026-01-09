@@ -13,17 +13,16 @@ from pyatv.auth.hap_pairing import (
 from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.exceptions import InvalidResponseError
 from pyatv.support import log_binary
-from pyatv.support.http import HttpConnection, HttpResponse
+from pyatv.support.http import HttpConnection, HttpResponse, HttpRequest
 
 _LOGGER = logging.getLogger(__name__)
 
 _AIRPLAY_HEADERS = {
-    "User-Agent": "AirPlay/320.20",
+    "User-Agent": "AirPlay/870.14.1",
     "Connection": "keep-alive",
     "X-Apple-HKP": 3,
-    "Content-Type": "application/octet-stream",
+    "Content-Type": "application/octet-stream"
 }
-
 
 def _get_pairing_data(resp: HttpResponse):
     if not isinstance(resp.body, bytes):
@@ -107,45 +106,82 @@ class AirPlayHapPairVerifyProcedure(PairVerifyProcedure):
         self.http = http
         self.srp = auth_handler
         self.credentials = credentials
+        self.pairing_data = None
+        self._sequence = 0
 
     async def verify_credentials(self) -> bool:
-        """Verify if device is allowed to use AirPlau."""
+        """Verify if device is allowed to use AirPlay."""
+        await self.verify_credentials_seq1()
+        await self.verify_credentials_seq2()
 
+        return True
+    
+    def sequence(self) -> int: 
+        return self._sequence
+
+    async def verify_credentials_seq1(self, request:HttpRequest=None):
         _, public_key = self.srp.initialize()
 
-        resp = await self._send(
-            {
-                hap_tlv8.TlvValue.SeqNo: b"\x01",
-                hap_tlv8.TlvValue.PublicKey: public_key,
-            }
-        )
+        # copy data from template request
+        data = hap_tlv8.read_tlv(
+            request.body
+            if isinstance(request.body, bytes)
+            else request.body.encode("utf-8")
+        ) if request else {}
 
-        pairing_data = _get_pairing_data(resp)
-        session_pub_key = pairing_data[hap_tlv8.TlvValue.PublicKey]
-        encrypted = pairing_data[hap_tlv8.TlvValue.EncryptedData]
+        # override critical values
+        data[hap_tlv8.TlvValue.SeqNo] = b"\x01"
+#        data[hap_tlv8.TlvValue.Method] = b"\x07"
+        data[hap_tlv8.TlvValue.PublicKey] = public_key
+
+        response = await self._send(data, copy(request.headers if request else _AIRPLAY_HEADERS))
+
+        self.pairing_data = _get_pairing_data(response)
+    
+    async def verify_credentials_seq2(self, request:HttpRequest=None):
+        session_pub_key = self.pairing_data[hap_tlv8.TlvValue.PublicKey]
+        encrypted = self.pairing_data[hap_tlv8.TlvValue.EncryptedData]
         log_binary(_LOGGER, "Device", Public=self.credentials.ltpk, Encrypted=encrypted)
 
         encrypted_data = self.srp.verify1(self.credentials, session_pub_key, encrypted)
-        await self._send(
-            {
-                hap_tlv8.TlvValue.SeqNo: b"\x03",
-                hap_tlv8.TlvValue.EncryptedData: encrypted_data,
-            }
-        )
 
-        # TODO: check status code
+        # copy data from template request
+        data = hap_tlv8.read_tlv(
+            request.body
+            if isinstance(request.body, bytes)
+            else request.body.encode("utf-8")
+        ) if request else {}
+
+        data[hap_tlv8.TlvValue.SeqNo] = b"\x03"
+        data[hap_tlv8.TlvValue.EncryptedData] = encrypted_data
+
+        response = await self._send(data, copy(request.headers if request else _AIRPLAY_HEADERS))
+
+        if response.code != 200:
+            raise (f"HAP Verification Sequence 2 failed with %s", response.code)
 
         return True
 
-    async def _send(self, data: Dict[Any, Any]) -> HttpResponse:
-        headers = copy(_AIRPLAY_HEADERS)
+    async def _send(self, data: Dict[Any, Any], headers=copy(_AIRPLAY_HEADERS)) -> HttpResponse:
+#        data[hap_tlv8.TlvValue.Method] = b"\x07"
+        body = hap_tlv8.write_tlv(data)
         headers["Content-Type"] = "application/octet-stream"
-        return await self.http.post(
-            "/pair-verify", body=hap_tlv8.write_tlv(data), headers=headers
+        headers["Content-Length"] = len(body)
+
+        self._sequence = data[hap_tlv8.TlvValue.SeqNo][0]
+
+        resp = await self.http.post(
+            "/pair-verify", body=body, headers=headers
         )
+
+        if (resp.code == 200):
+            self._sequence = hap_tlv8.read_tlv(resp.body)[hap_tlv8.TlvValue.SeqNo][0]
+
+        return resp
 
     def encryption_keys(
         self, salt: str, output_info: str, input_info: str
     ) -> Tuple[bytes, bytes]:
         """Return derived encryption keys."""
+
         return self.srp.verify2(salt, output_info, input_info)

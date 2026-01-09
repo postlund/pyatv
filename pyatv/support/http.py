@@ -20,6 +20,8 @@ from typing import (
     cast,
 )
 
+import biplist
+
 from aiohttp import ClientSession, web
 from aiohttp.web import middleware
 from requests.structures import CaseInsensitiveDict
@@ -218,15 +220,16 @@ def parse_request(request: bytes) -> Tuple[Optional[HttpRequest], bytes]:
     )
 
 
-def decode_bplist_from_body(response: HttpResponse) -> Dict[str, Any]:
-    """Decode a binary property list in a response."""
-    if not isinstance(response.body, (bytes, str)):
-        raise exceptions.ProtocolError(
-            f"expected bytes or str but got {type(response.body).__name__}"
-        )
-
-    body = response.body
-    return plistlib.loads(body if isinstance(body, bytes) else body.encode("utf-8"))
+def decode_plist_body(body: Union[str, bytes, Dict[Any, Any]]) -> Any:
+    """Decode a binary plist payload."""
+    try:
+        if isinstance(body, Dict):
+            return body
+        return biplist.readPlistFromString(body)
+#        return plistlib.loads(body if isinstance(body, bytes) else body.encode("utf-8"))
+#    except plistlib.InvalidFileException:
+    except (biplist.InvalidPlistException, biplist.NotBinaryPlistException):
+        return None
 
 
 class ClientSessionManager:
@@ -456,6 +459,19 @@ class HttpConnection(asyncio.Protocol):
 
         self.transport.write(self.send_processor(output))
 
+        # print(f"> {method} {uri} {protocol} {content_type}")
+        # for h in headers:
+        #     print(f"    {h}: {headers[h]}")
+
+        # if body:
+        #     plist = decode_plist_body(body)
+        #     if plist:
+        #         print(f"\n    body: {plist}")
+        #     else:
+        #         print(f"\n    body: {body}")
+
+        # print(" ")
+
         pending_request = HttpConnection.PendingRequest(event=asyncio.Event())
         self._requests.appendleft(pending_request)
         try:
@@ -478,6 +494,20 @@ class HttpConnection(asyncio.Protocol):
                 self._requests.remove(pending_request)
 
         _LOGGER.debug("Got %s response: %s:", response.protocol, response)
+
+        # print(f"< {response.code} {method} {uri} {content_type}")
+        # for h in response.headers:
+        #     print(f"    {h}: {response.headers[h]}")
+
+        # if response.body:
+        #     plist = decode_plist_body(response.body)
+        #     if plist:
+        #         print(f"\n    body: {plist}")
+        #     else:
+        #         print(f"\n    body: {response.body}")
+
+        # print(" ")
+
 
         if response.code == 403:
             raise exceptions.AuthenticationError("not authenticated")

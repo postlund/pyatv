@@ -1572,8 +1572,29 @@ async def _start_airplay_proxy(loop, args, zconf):
     _LOGGER.debug("Binding to local address %s", args.local_ip)
 
     service_type = "_airplay._tcp.local"
-    resp = await mdns.unicast(loop, args.remote_ip, [service_type])
-    service = next((s for s in resp.services if s.type == service_type), None)
+    service = None
+    error = None
+    try:
+        resp = await mdns.unicast(loop, args.remote_ip, [service_type])
+        service = next((s for s in resp.services if s.type == service_type), None)
+
+    except TimeoutError as e1:
+        # some non-Apple AirPlay decives don't support unicast mdns
+        # so try multicast, instead
+        _LOGGER.warning('Unicast connection failed, attempting Multicast...')
+        try: 
+            for response in (await mdns.multicast(loop, [service_type])):
+                for x in response.services:
+                    if str(x.address) == args.remote_ip:
+                        service = x
+                        break
+        except Exception as e2:
+            error = e2
+        error = e1
+
+    if not service:
+        _LOGGER.warning('Connection failed')
+        return None
 
     if not args.remote_port:
         args.remote_port = service.port
@@ -1657,7 +1678,7 @@ async def appstart(loop):
 
     # To get logging from pyatv
     logging.basicConfig(
-        level=logging.DEBUG,
+        level=_LOGGER.DEBUG,
         stream=sys.stdout,
         datefmt="%Y-%m-%d %H:%M:%S",
         format="%(asctime)s %(levelname)s [%(name)s]: %(message)s",
