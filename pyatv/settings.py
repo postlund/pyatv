@@ -5,7 +5,7 @@ import os
 import re
 from typing import Optional
 
-from pyatv.support.pydantic_compat import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 __pdoc__ = {
     "InfoSettings.model_config": False,
@@ -95,7 +95,7 @@ class InfoSettings(BaseModel, extra="ignore"):  # type: ignore[call-arg]
             raise ValueError(f"{mac} is not a valid MAC address")
         return mac
 
-    @field_validator("rp_id", always=True)
+    @field_validator("rp_id")
     @classmethod
     def fill_missing_rp_id(cls, v):
         """Generate a new random rp_id if it is missing."""
