@@ -454,6 +454,16 @@ class RemoteControl:
         """Activate screen saver.."""
         raise exceptions.NotSupportedError()
 
+    @feature(66, "Guide", "Show EPG.")
+    async def guide(self) -> None:
+        """Show EPG."""
+        raise exceptions.NotSupportedError()
+
+    @feature(68, "ControlCenter", "Control Center.")
+    async def control_center(self) -> None:
+        """Open the control center."""
+        raise exceptions.NotSupportedError()
+
 
 # TODO: Should be made into a dataclass when support for 3.6 is dropped
 class Playing(ABC):
