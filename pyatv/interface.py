@@ -880,7 +880,7 @@ class Stream:  # pylint: disable=too-few-public-methods
         /,
         metadata: Optional[MediaMetadata] = None,
         override_missing_metadata: bool = False,
-        **kwargs
+        **kwargs,
     ) -> None:
         """Stream local or remote file to device.
 
@@ -1087,7 +1087,7 @@ class Features:
     def in_state(
         self,
         states: Union[List[FeatureState], FeatureState],
-        *feature_names: FeatureName
+        *feature_names: FeatureName,
     ) -> bool:
         """Return if features are in a specific state.
 

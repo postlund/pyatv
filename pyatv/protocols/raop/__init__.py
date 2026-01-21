@@ -337,7 +337,7 @@ class RaopStream(Stream):
         /,
         metadata: Optional[MediaMetadata] = None,
         override_missing_metadata: bool = False,
-        **kwargs
+        **kwargs,
     ) -> None:
         """Stream local or remote file to device.
 

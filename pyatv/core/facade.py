@@ -371,7 +371,7 @@ class FacadeStream(Relayer, interface.Stream):  # pylint: disable=too-few-public
         /,
         metadata: Optional[interface.MediaMetadata] = None,
         override_missing_metadata: bool = False,
-        **kwargs
+        **kwargs,
     ) -> None:
         """Stream local file to device.
 
