@@ -1,13 +1,13 @@
-aiohttp==3.13.2
+aiohttp==3.13.3
 async-timeout==5.0.1;python_version<'3.11'
 cryptography==46.0.3
 chacha20poly1305-reuseable==0.13.2
 ifaddr==0.2.0
 ifaddr==0.2.0
 miniaudio==1.61
-protobuf==6.33.0
+protobuf==6.33.2
 pydantic==2.12.5
-requests==2.32.4
+requests==2.32.5
 srptools==1.0.1
 tabulate==0.9.0
 tinytag==2.1.2
