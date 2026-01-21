@@ -51,7 +51,7 @@ This module has additional documentation
 </header>
 <section id="section-intro">
 <p>Storage module.</p>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/storage/__init__.py#L1-L177" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/storage/__init__.py#L1-L179" class="git-link">Browse git</a></div>
 </section>
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
@@ -81,7 +81,7 @@ This module has additional documentation
 <p>New storage modules should generally inherit from this class and implement save and
 load according to the underlying storage mechanism.</p>
 <p>Initialize a new AbstractStorage instance.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/storage/__init__.py#L41-L177" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/storage/__init__.py#L43-L179" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="pyatv.interface.Storage" href="../../interface#pyatv.interface.Storage">Storage</a></li>
@@ -97,7 +97,7 @@ load according to the underlying storage mechanism.</p>
 <dt id="pyatv.storage.AbstractStorage.storage_model"><code class="name">var <span class="ident">storage_model</span> -> <a title="pyatv.storage.StorageModel" href="#pyatv.storage.StorageModel">StorageModel</a></code></dt>
 <dd>
 <section class="desc"><p>Return storage model representation.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/storage/__init__.py#L66-L69" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/storage/__init__.py#L68-L71" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 <h3>Methods</h3>
@@ -116,7 +116,7 @@ automatically and returned. If the configuration does not contain any valid
 identitiers, DeviceIdMissingError will be raised.</p>
 <p>If settings exists for a configuration but mismatch, they will be automatically
 updated in the storage. Set ignore_update to False to not update storage.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/storage/__init__.py#L82-L115" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/storage/__init__.py#L84-L117" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.storage.AbstractStorage.has_changed">
 <code class="name flex">
@@ -127,7 +127,7 @@ updated in the storage. Set ignore_update to False to not update storage.</p></s
 <section class="desc"><p>Return if anything has changed in the model since loading.</p>
 <p>This method compares a hash of the saved data with the provided data to deduce
 if anything has changed.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/storage/__init__.py#L53-L59" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/storage/__init__.py#L55-L61" class="git-link">Browse git</a></div>
 </dd>
 <dt id="pyatv.storage.AbstractStorage.update_hash">
 <code class="name flex">
@@ -136,7 +136,7 @@ if anything has changed.</p></section>
 </dt>
 <dd>
 <section class="desc"><p>Call after saving to indicate settings have been saved.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/storage/__init__.py#L78-L80" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/storage/__init__.py#L80-L82" class="git-link">Browse git</a></div>
 </dd>
 </dl>
 <h3>Inherited members</h3>
@@ -159,22 +159,23 @@ if anything has changed.</p></section>
 <dd>
 <section class="desc"><p>Storage model of data that is saved or restored to underlying storage.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
-<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></section>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/storage/__init__.py#L34-L38" class="git-link">Browse git</a></div>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/storage/__init__.py#L36-L40" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>pydantic.v1.main.BaseModel</li>
-<li>pydantic.v1.utils.Representation</li>
+<li>pydantic.main.BaseModel</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="pyatv.storage.StorageModel.devices"><code class="name">var <span class="ident">devices</span> -> List[<a title="pyatv.settings.Settings" href="../../settings#pyatv.settings.Settings">Settings</a>]</code></dt>
+<dt id="pyatv.storage.StorageModel.devices"><code class="name">var <span class="ident">devices</span> -> List[<a title="pyatv.settings.Settings" href="../../settings#pyatv.settings.Settings">Settings</a>] = PydanticUndefined</code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>The type of the None singleton.</p></section>
 </dd>
-<dt id="pyatv.storage.StorageModel.version"><code class="name">var <span class="ident">version</span> -> int</code></dt>
+<dt id="pyatv.storage.StorageModel.version"><code class="name">var <span class="ident">version</span> -> int = PydanticUndefined</code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>The type of the None singleton.</p></section>
 </dd>
 </dl>
 </dd>
