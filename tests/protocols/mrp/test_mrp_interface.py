@@ -164,21 +164,35 @@ async def test_audio_set_volume_no_output_device(protocol_mock, audio):
 @pytest.mark.parametrize(
     "is_leader,is_proxy,grouped_devices,expected_devices",
     [
-        (True, False, [], [OutputDevice(DEVICE_NAME, DEVICE_UID)]),
+        (True, False, [], [OutputDevice(name=DEVICE_NAME, identifier=DEVICE_UID)]),
         (
             True,
             False,
-            [OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ")],
             [
-                OutputDevice(DEVICE_NAME, DEVICE_UID),
-                OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ"),
+                OutputDevice(
+                    name="HomePod", identifier="FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ"
+                )
+            ],
+            [
+                OutputDevice(name=DEVICE_NAME, identifier=DEVICE_UID),
+                OutputDevice(
+                    name="HomePod", identifier="FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ"
+                ),
             ],
         ),
         (
             True,
             True,
-            [OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ")],
-            [OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ")],
+            [
+                OutputDevice(
+                    name="HomePod", identifier="FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ"
+                )
+            ],
+            [
+                OutputDevice(
+                    name="HomePod", identifier="FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ"
+                )
+            ],
         ),
         (False, False, [], []),
     ],
@@ -193,21 +207,35 @@ async def test_audio_update_output_devices(
 @pytest.mark.parametrize(
     "is_leader,is_proxy,grouped_devices,expected_devices",
     [
-        (True, False, [], [OutputDevice(DEVICE_NAME, DEVICE_UID)]),
+        (True, False, [], [OutputDevice(name=DEVICE_NAME, identifier=DEVICE_UID)]),
         (
             True,
             False,
-            [OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ")],
             [
-                OutputDevice(DEVICE_NAME, DEVICE_UID),
-                OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ"),
+                OutputDevice(
+                    name="HomePod", identifier="FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ"
+                )
+            ],
+            [
+                OutputDevice(name=DEVICE_NAME, identifier=DEVICE_UID),
+                OutputDevice(
+                    name="HomePod", identifier="FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ"
+                ),
             ],
         ),
         (
             True,
             True,
-            [OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ")],
-            [OutputDevice("HomePod", "FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ")],
+            [
+                OutputDevice(
+                    name="HomePod", identifier="FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ"
+                )
+            ],
+            [
+                OutputDevice(
+                    name="HomePod", identifier="FFFFFFFF-GGGG-HHHH-IIII-JJJJJJJJJJJJ"
+                )
+            ],
         ),
         (False, False, [], []),
     ],

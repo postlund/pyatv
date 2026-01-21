@@ -19,7 +19,13 @@ from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union, cast
 
 from pyatv import const, exceptions, interface
 from pyatv.const import FeatureName, FeatureState, InputAction, Protocol, TouchAction
-from pyatv.core import CoreStateDispatcher, SetupData, StateMessage, UpdatedState
+from pyatv.core import (
+    CoreStateDispatcher,
+    OutputDeviceState,
+    SetupData,
+    StateMessage,
+    UpdatedState,
+)
 from pyatv.core.relayer import Relayer
 from pyatv.interface import OutputDevice
 from pyatv.settings import Settings
@@ -428,6 +434,9 @@ class FacadeAudio(Relayer, interface.Audio):
         core_dispatcher.listen_to(
             UpdatedState.OutputDevices, self._output_devices_changed
         )
+        core_dispatcher.listen_to(
+            UpdatedState.OutputDeviceVolume, self._output_device_volume_changed
+        )
 
     def _volume_changed(self, message: StateMessage) -> None:
         """State of something changed."""
@@ -453,6 +462,26 @@ class FacadeAudio(Relayer, interface.Audio):
         if new_devices != old_devices:
             self.listener.outputdevices_update(old_devices, new_devices)
 
+    def _output_device_volume_changed(self, message: StateMessage) -> None:
+        """State of output device volume changed."""
+        device_state = cast(OutputDeviceState, message.value)
+        output_device = next(
+            (
+                device
+                for device in self._output_devices
+                if device.identifier == device_state.identifier
+            ),
+            None,
+        )
+        if output_device is None:
+            output_device = OutputDevice(device_state.identifier)
+        old_volume = output_device.volume
+        output_device.volume = device_state.volume
+        if device_state.volume != old_volume:
+            self.listener.volume_device_update(
+                output_device, old_volume, device_state.volume
+            )
+
     @shield.guard
     async def volume_up(self) -> None:
         """Press key volume up."""
@@ -473,10 +502,12 @@ class FacadeAudio(Relayer, interface.Audio):
         raise exceptions.ProtocolError(f"volume {volume} is out of range")
 
     @shield.guard
-    async def set_volume(self, level: float) -> None:
+    async def set_volume(
+        self, level: float, output_device: Optional[OutputDevice] = None
+    ) -> None:
         """Change current volume level."""
         if 0.0 <= level <= 100.0:
-            await self.relay("set_volume")(level)
+            await self.relay("set_volume")(level, output_device)
         else:
             raise exceptions.ProtocolError(f"volume {level} is out of range")
 
