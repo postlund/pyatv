@@ -5,7 +5,7 @@ chacha20poly1305-reuseable==0.13.2
 ifaddr==0.2.0
 ifaddr==0.2.0
 miniaudio==1.61
-protobuf==6.33.2
+protobuf==6.33.4
 pydantic==2.12.5
 requests==2.32.5
 srptools==1.0.1
