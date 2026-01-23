@@ -14,6 +14,9 @@ from pyatv import exceptions
 
 _LOGGER = logging.getLogger(__name__)
 
+# Private RFC1918 target used only to select a default route.
+_DEFAULT_ROUTE_PROBE = ("10.255.255.1", 1)
+
 
 def unused_port() -> int:
     """Return a port that is unused on the current host."""
@@ -52,7 +55,7 @@ def mcast_socket(address: Optional[str], port: int = 0) -> socket.socket:
         # detect default IPv4 via a dummy UDP connect and use it for multicast join.
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as probe:
-                probe.connect(("8.8.8.8", 80))
+                probe.connect(_DEFAULT_ROUTE_PROBE)
                 detected = probe.getsockname()[0]
                 sock.setsockopt(
                     socket.SOL_IP, socket.IP_MULTICAST_IF, socket.inet_aton(detected)
@@ -98,7 +101,7 @@ def get_private_addresses(include_loopback=True) -> List[IPv4Address]:
     if not addresses:
         try:
             with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as probe:
-                probe.connect(("8.8.8.8", 80))
+                probe.connect(_DEFAULT_ROUTE_PROBE)
                 detected = IPv4Address(probe.getsockname()[0])
                 if include_loopback or not detected.is_loopback:
                     addresses.append(detected)
