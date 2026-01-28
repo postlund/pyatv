@@ -1,6 +1,6 @@
 aiohttp==3.13.3
 async-timeout==5.0.1;python_version<'3.11'
-cryptography==46.0.3
+cryptography==46.0.4
 chacha20poly1305-reuseable==0.13.2
 ifaddr==0.2.0
 ifaddr==0.2.0
