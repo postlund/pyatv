@@ -9,8 +9,6 @@ import sys
 import pyatv
 from pyatv.interface import Playing, PushListener
 
-LOOP = asyncio.get_event_loop()
-
 
 class PushUpdatePrinter(PushListener):
     """Print push updates to console."""
@@ -24,12 +22,10 @@ class PushUpdatePrinter(PushListener):
         print("Error:", exception)
 
 
-async def stream_with_push_updates(
-    address: str, filename: str, loop: asyncio.AbstractEventLoop
-):
+async def stream_with_push_updates(address: str, filename: str):
     """Find a device and print what is playing."""
     print("* Discovering device on network...")
-    atvs = await pyatv.scan(loop, hosts=[address], timeout=5)
+    atvs = await pyatv.scan(hosts=[address], timeout=5)
 
     if not atvs:
         print("* Device found", file=sys.stderr)
@@ -38,7 +34,7 @@ async def stream_with_push_updates(
     conf = atvs[0]
 
     print("* Connecting to", conf.address)
-    atv = await pyatv.connect(conf, loop)
+    atv = await pyatv.connect(conf)
 
     listener = PushUpdatePrinter()
     atv.push_updater.listener = listener
@@ -53,4 +49,4 @@ async def stream_with_push_updates(
 
 
 if __name__ == "__main__":
-    LOOP.run_until_complete(stream_with_push_updates(sys.argv[1], sys.argv[2], LOOP))
+    asyncio.run(stream_with_push_updates(sys.argv[1], sys.argv[2]))

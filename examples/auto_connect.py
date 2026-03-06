@@ -13,4 +13,4 @@ async def print_what_is_playing(atv):
     print(playing)
 
 
-asyncio.get_event_loop().run_until_complete(helpers.auto_connect(print_what_is_playing))
+asyncio.run(helpers.auto_connect(print_what_is_playing))

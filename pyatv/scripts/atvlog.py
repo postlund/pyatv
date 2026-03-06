@@ -230,7 +230,7 @@ async def serve_page(page: str, port: int) -> None:
         return web.Response(text=page, content_type="text/html")
 
     server = web.Server(handler)
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     await loop.create_server(server, "0.0.0.0", port)
 
     print("Press ENTER to quit")
@@ -315,8 +315,7 @@ async def appstart():
 
 def main():
     """Application start here."""
-    loop = asyncio.get_event_loop()
-    return loop.run_until_complete(appstart())
+    return asyncio.run(appstart())
 
 
 if __name__ == "__main__":

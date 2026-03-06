@@ -173,7 +173,7 @@ class StreamReaderWrapper(miniaudio.StreamableSource):
         """Initialize a new ReaderWrapper instance."""
         self.reader: asyncio.streams.StreamReader = reader
         self.buffer: SemiSeekableBuffer = buffer
-        self.loop = asyncio.get_event_loop()
+        self.loop = asyncio.get_running_loop()
 
     def read(self, num_bytes: int = -1) -> Union[bytes, memoryview]:
         """Read and return data from buffer."""
@@ -291,7 +291,7 @@ class BufferedIOBaseSource(AudioSource):
         sample_size: int,
     ) -> None:
         """Initialize a new MiniaudioWrapper instance."""
-        self.loop = asyncio.get_event_loop()
+        self.loop = asyncio.get_running_loop()
         self.reader: miniaudio.WavFileReadStream = reader
         self.source: miniaudio.StreamableSource = source
         self.metadata = metadata
@@ -315,7 +315,7 @@ class BufferedIOBaseSource(AudioSource):
         sample_size: int,
     ) -> "BufferedIOBaseSource":
         """Return a new AudioSource instance playing from the provided buffer."""
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
 
         buffer = SemiSeekableBuffer(
             BUFFER_SIZE, seekable_headroom=HEADROOM_SIZE, protected_headroom=True
@@ -565,7 +565,7 @@ class InternetSource(AudioSource):
         self.source = source
         self.stream_generator = stream_generator
         self.metadata = metadata
-        self.loop = asyncio.get_event_loop()
+        self.loop = asyncio.get_running_loop()
         self._sample_rate = sample_rate
         self._channels = channels
         self._sample_size = sample_size
@@ -584,7 +584,7 @@ class InternetSource(AudioSource):
             seekable_headroom=HEADROOM_SIZE,
             protected_headroom=True,
         )
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         source = await loop.run_in_executor(None, PatchedIceCastClient, buffer, url)
 
         # Read metadata prior to starting to stream to ensure we are at the
@@ -666,7 +666,7 @@ class FileSource(AudioSource):
         cls, filename: str, sample_rate: int, channels: int, sample_size: int
     ) -> "FileSource":
         """Return a new AudioSource instance playing from the provided file."""
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         src = await loop.run_in_executor(
             None,
             partial(

@@ -15,8 +15,6 @@ import sys
 import pyatv
 from pyatv.const import Protocol
 
-LOOP = asyncio.get_event_loop()
-
 # This can be stored in a file for instance
 DEVICES = [
     {
@@ -32,10 +30,10 @@ DEVICES = [
 ]
 
 
-async def print_what_is_playing(device, loop):
+async def print_what_is_playing(device):
     """Find a device and print what is playing."""
     print(f"Discovering {device['name']} on network...")
-    confs = await pyatv.scan(loop, identifier=device["identifiers"])
+    confs = await pyatv.scan(identifier=device["identifiers"])
 
     if not confs:
         print("Device could not be found", file=sys.stderr)
@@ -46,7 +44,7 @@ async def print_what_is_playing(device, loop):
         conf.set_credentials(protocol, credentials)
 
     print(f"Connecting to {conf.address}")
-    atv = await pyatv.connect(conf, loop)
+    atv = await pyatv.connect(conf)
 
     try:
         playing = await atv.metadata.playing()
@@ -57,4 +55,4 @@ async def print_what_is_playing(device, loop):
 
 
 if __name__ == "__main__":
-    LOOP.run_until_complete(print_what_is_playing(DEVICES[int(sys.argv[1])], LOOP))
+    asyncio.run(print_what_is_playing(DEVICES[int(sys.argv[1])]))

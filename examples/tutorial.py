@@ -108,7 +108,7 @@ async def state(request):
 @routes.get("/scan")
 async def scan(request):
     """Handle request to scan for devices."""
-    results = await pyatv.scan(loop=asyncio.get_event_loop())
+    results = await pyatv.scan(loop=asyncio.get_running_loop())
     output = "\n\n".join(str(result) for result in results)
     return web.Response(text=output)
 
@@ -116,19 +116,18 @@ async def scan(request):
 @routes.get("/connect/{id}")
 async def connect(request):
     """Handle request to connect to a device."""
-    loop = asyncio.get_event_loop()
     device_id = request.match_info["id"]
     if device_id in request.app["atv"]:
         return web.Response(text=f"Already connected to {device_id}")
 
-    results = await pyatv.scan(identifier=device_id, loop=loop)
+    results = await pyatv.scan(identifier=device_id)
     if not results:
         return web.Response(text="Device not found", status=500)
 
     add_credentials(results[0], request.query)
 
     try:
-        atv = await pyatv.connect(results[0], loop=loop)
+        atv = await pyatv.connect(results[0])
     except Exception as ex:
         return web.Response(text=f"Failed to connect to device: {ex}", status=500)
 

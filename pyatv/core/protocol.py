@@ -110,7 +110,7 @@ class MessageDispatcher(Generic[DispatchType, DispatchMessage]):
                 _LOGGER.exception("error during dispatch")
 
         tasks = []
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         listeners = self.__listeners.get(dispatch_type, [])
         for func in [func for filter_func, func in listeners if filter_func(message)]:
             _LOGGER.debug(

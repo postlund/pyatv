@@ -25,7 +25,7 @@ HEADERS = {
 async def timing_server(rtsp: RtspSession):
     """Context manager setting up a timing server."""
     local_addr = (rtsp.connection.local_ip, 0)
-    (_, server) = await asyncio.get_event_loop().create_datagram_endpoint(
+    (_, server) = await asyncio.get_running_loop().create_datagram_endpoint(
         TimingServer, local_addr=local_addr
     )
     yield server

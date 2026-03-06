@@ -208,7 +208,7 @@ class CompanionPower(Power):
         """Initialize a new instance of CompanionPower."""
         super().__init__()
         self.api: CompanionAPI = api
-        self.loop = asyncio.get_event_loop()
+        self.loop = asyncio.get_running_loop()
         self._power_state: PowerState = PowerState.Unknown
 
     @property

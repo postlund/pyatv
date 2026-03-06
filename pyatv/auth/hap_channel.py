@@ -88,7 +88,7 @@ async def setup_channel(
     """Set up a new HAP channel and enable encryption."""
     out_key, in_key = verifier.encryption_keys(salt, output_info, input_info)
 
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     transport, protocol = await loop.create_connection(
         lambda: factory(out_key, in_key),
         address,

@@ -649,7 +649,7 @@ class StaticFileWebServer:
 
 async def http_connect(address: str, port: int) -> HttpConnection:
     """Open connection to a remote host."""
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     _, connection = await loop.create_connection(HttpConnection, address, port)
     return cast(HttpConnection, connection)
 
@@ -660,7 +660,7 @@ async def http_server(
     port: int = 0,
 ) -> Tuple[asyncio.AbstractServer, int]:
     """Set up a new basic HTTP server."""
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     server = await loop.create_server(server_factory, address, port)
     if server.sockets is None:
         raise RuntimeError("failed to set up http server")

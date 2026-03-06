@@ -177,15 +177,16 @@ class DevicePrinter(DeviceListener):
         self.abort_sem.release()
 
 
-async def wait_for_input(loop, abort_sem):
+async def wait_for_input(abort_sem):
     """Wait for user input (enter) or abort signal."""
-    reader = asyncio.StreamReader(loop=loop)
+    reader = asyncio.StreamReader()
     reader_protocol = asyncio.StreamReaderProtocol(reader)
+    loop = asyncio.get_running_loop()
     await loop.connect_read_pipe(lambda: reader_protocol, sys.stdin)
     reader_readline = asyncio.create_task(reader.readline())
     abort_sem_acquire = asyncio.create_task(abort_sem.acquire())
     await asyncio.wait(
-        [reader_readline, abort_sem_acquire], return_when=asyncio.FIRST_COMPLETED
+        {reader_readline, abort_sem_acquire}, return_when=asyncio.FIRST_COMPLETED
     )
 
 
@@ -226,9 +227,9 @@ def output_playing(playing: Playing, app: Optional[App]):
     return output(True, values=values)
 
 
-async def _scan_devices(loop, storage: Storage, hosts):
+async def _scan_devices(storage: Storage, hosts):
     atvs = []
-    for atv in await scan(loop, hosts=hosts, storage=storage):
+    for atv in await scan(asyncio.get_running_loop(), hosts=hosts, storage=storage):
         services = []
         for service in atv.services:
             services.append(
@@ -253,13 +254,13 @@ async def _scan_devices(loop, storage: Storage, hosts):
     return output(True, values={"devices": atvs})
 
 
-async def _autodiscover_device(args, storage: Storage, loop: asyncio.AbstractEventLoop):
+async def _autodiscover_device(args, storage: Storage):
     options = {"identifier": args.id, "protocol": args.protocol}
 
     if args.scan_hosts:
         options["hosts"] = args.scan_hosts
 
-    atvs = await scan(loop, storage=storage, **options)
+    atvs = await scan(asyncio.get_running_loop(), storage=storage, **options)
 
     if not atvs:
         return None
@@ -278,24 +279,22 @@ async def _autodiscover_device(args, storage: Storage, loop: asyncio.AbstractEve
     return apple_tv
 
 
-async def _handle_command(
-    args, abort_sem, storage: Storage, loop: asyncio.AbstractEventLoop
-):
+async def _handle_command(args, abort_sem, storage: Storage):
     if args.command == "scan":
-        return await _scan_devices(loop, storage, args.scan_hosts)
+        return await _scan_devices(storage, args.scan_hosts)
 
-    config = await _autodiscover_device(args, storage, loop)
+    config = await _autodiscover_device(args, storage)
     if not config:
         return output(False, "device_not_found")
 
-    atv = await connect(config, loop, storage=storage)
+    atv = await connect(config, asyncio.get_running_loop(), storage=storage)
     try:
-        return await _run_command(atv, args, abort_sem, loop)
+        return await _run_command(atv, args, abort_sem)
     finally:
         atv.close()
 
 
-async def _run_command(atv, args, abort_sem, loop):
+async def _run_command(atv, args, abort_sem):
     if args.command == "playing":
         return output_playing(
             await atv.metadata.playing(),
@@ -326,7 +325,7 @@ async def _run_command(atv, args, abort_sem, loop):
             flush=True,
         )
         audio_listener.outputdevices_update([], atv.audio.output_devices)
-        await wait_for_input(loop, abort_sem)
+        await wait_for_input(abort_sem)
         return output(True, values={"push_updates": "finished"})
 
     if args.command in retrieve_commands(RemoteControl):
@@ -336,7 +335,7 @@ async def _run_command(atv, args, abort_sem, loop):
     return output(False, "unsupported_command")
 
 
-async def appstart(loop):
+async def appstart():
     """Start the asyncio event loop and runs the application."""
     parser = create_common_parser()
     parser.add_argument("command", help="command to run")
@@ -401,6 +400,7 @@ async def appstart(loop):
         print(args.output(output(False, **kwargs)))
         abort_sem.release()
 
+    loop = asyncio.get_running_loop()
     loop.set_exception_handler(_handle_exception)
 
     _LOGGER.debug("Started atvscript")
@@ -410,7 +410,7 @@ async def appstart(loop):
 
     try:
         print(
-            args.output(await _handle_command(args, abort_sem, storage, loop)),
+            args.output(await _handle_command(args, abort_sem, storage)),
             flush=True,
         )
     except Exception as ex:
@@ -421,9 +421,8 @@ async def appstart(loop):
 
 def main():
     """Application start here."""
-    loop = asyncio.get_event_loop()
     try:
-        return loop.run_until_complete(appstart(loop))
+        return asyncio.run(appstart())
     except KeyboardInterrupt:
         return 0
 
