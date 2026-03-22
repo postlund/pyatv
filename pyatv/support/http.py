@@ -459,18 +459,18 @@ class HttpConnection(asyncio.Protocol):
 
         self.transport.write(self.send_processor(output))
 
-        # print(f"> {method} {uri} {protocol} {content_type}")
-        # for h in headers:
-        #     print(f"    {h}: {headers[h]}")
+        print(f"> {method} {uri} {protocol} {content_type}")
+        for h in headers:
+            print(f"    {h}: {headers[h]}")
 
-        # if body:
-        #     plist = decode_plist_body(body)
-        #     if plist:
-        #         print(f"\n    body: {plist}")
-        #     else:
-        #         print(f"\n    body: {body}")
+        if body:
+            plist = decode_plist_body(body)
+            if plist:
+                print(f"\n    body: {plist}")
+            else:
+                print(f"\n    body: {body}")
 
-        # print(" ")
+        print(" ")
 
         pending_request = HttpConnection.PendingRequest(event=asyncio.Event())
         self._requests.appendleft(pending_request)
@@ -495,18 +495,18 @@ class HttpConnection(asyncio.Protocol):
 
         _LOGGER.debug("Got %s response: %s:", response.protocol, response)
 
-        # print(f"< {response.code} {method} {uri} {content_type}")
-        # for h in response.headers:
-        #     print(f"    {h}: {response.headers[h]}")
+        print(f"< {response.code} {method} {uri} {content_type}")
+        for h in response.headers:
+            print(f"    {h}: {response.headers[h]}")
 
-        # if response.body:
-        #     plist = decode_plist_body(response.body)
-        #     if plist:
-        #         print(f"\n    body: {plist}")
-        #     else:
-        #         print(f"\n    body: {response.body}")
+        if response.body:
+            plist = decode_plist_body(response.body)
+            if plist:
+                print(f"\n    body: {plist}")
+            else:
+                print(f"\n    body: {response.body}")
 
-        # print(" ")
+        print(" ")
 
 
         if response.code == 403:
