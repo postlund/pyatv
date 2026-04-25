@@ -6,7 +6,7 @@ This module only deals with AirPlay 2 related channels right now.
 from abc import ABC
 import logging
 from random import randrange
-from typing import Any, List, NamedTuple, Optional, Tuple
+from typing import Any, List, NamedTuple, Optional, Tuple, Dict
 
 from pyatv.auth.hap_channel import AbstractHAPChannel
 from pyatv.protocols.airplay.utils import decode_plist_body, encode_plist_body
@@ -21,6 +21,7 @@ from pyatv.support.http import (
 )
 from pyatv.support.packet import defpacket
 from pyatv.support.variant import read_variant, write_variant
+import asyncio
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -60,6 +61,23 @@ class BaseEventChannel(AbstractHAPChannel, ABC):
 class EventChannel(BaseEventChannel):
     """Connection used to handle the event channel."""
 
+    def __init__(self, output_key, input_key):
+        super().__init__(output_key, input_key)
+        self._requests = {}
+        self._responses = {}
+        self._listener = None
+
+    async def responseFor(self, messageId: int) -> Dict:
+        event = asyncio.Event()
+        self._requests[str(messageId)] = event
+        await event.wait()
+        response = self._responses[str(messageId)]
+        del self._responses[str(messageId)]
+        return response
+    
+    def listener(self, listener):
+        self._listener = listener
+        
     def handle_received(self) -> None:
         """Handle received data that was put in buffer."""
         self.buffer: bytes
@@ -71,6 +89,19 @@ class EventChannel(BaseEventChannel):
                     break
 
                 _LOGGER.debug("Got message on event channel: %s", request)
+
+                plist = decode_plist_body(request.body)
+                if plist and 'params' in plist and 'data' in plist['params']:
+                    plist = decode_plist_body(plist['params']['data'])
+                    if plist and 'kind' in plist:
+                        if plist['kind'] == "response":
+                            ID = str(plist["messageID"])
+                            if ID in self._requests:
+                                self._responses[ID] = plist
+                                self._requests[ID].set()
+                    elif plist["type"] == "playbackState":
+                        # Update state
+                        self._listener(plist)
 
                 # Send a positive response to satisfy the other end of the channel
                 headers = {

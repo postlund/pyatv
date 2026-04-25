@@ -98,6 +98,9 @@ class StreamProtocol(ABC):
     async def play_url(self, timing_server_port: int, url: str, position: float = 0.0):
         """Play media from a URL."""
 
+    @abstractmethod
+    async def playbackState(self) -> str:
+        """Play media from a URL."""
 
 class TimingServer(asyncio.Protocol):
     """Basic timing server responding to timing requests."""

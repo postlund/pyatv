@@ -1205,7 +1205,7 @@ AirPlay uses two services, one for audio and one for video. They are described h
 | osvers | 14.5 | Operating system version
 | pi | UUID4 | Group ID
 | vv | 2 | ?
-| srcvers | 540.31.41 | AirPlay version
+| srcvers | 870.14.1 | AirPlay version
 | psi | UUID4 | Public AirPlay Pairing Identifier
 | gid | UUID4 | Group UUID
 | pk  | UUID4 | Public key
@@ -1234,7 +1234,7 @@ Sender asks receiver what methods it supports:
 ```raw
 OPTIONS * RTSP/1.0
 CSeq: 0
-nUser-Agent: AirPlay/540.31
+nUser-Agent: AirPlay/870.14
 DACP-ID: A851074254310A45
 Active-Remote: 4019753970
 Client-Instance: A851074254310A45
@@ -1246,7 +1246,7 @@ RTSP/1.0 200 OK
 Date: Tue, 11 May 2021 17:35:10 GMT
 Content-Length: 0
 Public: ANNOUNCE, SETUP, RECORD, PAUSE, FLUSH, TEARDOWN, OPTIONS, GET_PARAMETER, SET_PARAMETER, POST, GET, PUT
-Server: AirTunes/540.31.41
+Server: AirTunes/870.14.1
 CSeq: 0
 ```
 
@@ -1258,7 +1258,7 @@ Sender tells the receiver about properties for an upcoming stream.
 ```raw
 ANNOUNCE rtsp://10.0.10.254/4018537194 RTSP/1.0
 CSeq: 0
-User-Agent: AirPlay/540.31
+User-Agent: AirPlay/870.14
 DACP-ID: 9D881F7AED72DB4A
 Active-Remote: 3630929274
 Client-Instance: 9D881F7AED72DB4A
@@ -1287,7 +1287,7 @@ Some observations (might not be true):
 RTSP/1.0 200 OK
 Date: Tue, 11 May 2021 17:25:54 GMT
 Content-Length: 0
-Server: AirTunes/540.31.41
+Server: AirTunes/870.14.1
 CSeq: 0
 ```
 
@@ -1305,7 +1305,7 @@ Sender requests initialization of a (Airplay v1) session (but does not start it)
 ```raw
 SETUP rtsp://10.0.10.254/1085946124 RTSP/1.0
 CSeq: 2
-User-Agent: AirPlay/540.31
+User-Agent: AirPlay/870.14
 DACP-ID: A851074254310A45
 Active-Remote: 4019753970
 Client-Instance: A851074254310A45
@@ -1320,7 +1320,7 @@ Content-Length: 0
 Transport: RTP/AVP/UDP;unicast;mode=record;server_port=55801;control_port=50367;timing_port=0
 Session: 1
 Audio-Jack-Status: connected
-Server: AirTunes/540.31.41
+Server: AirTunes/870.14.1
 CSeq: 2
 ```
 
@@ -1347,7 +1347,7 @@ randomized.
 ```raw
 RECORD rtsp://10.0.10.254/1085946124 RTSP/1.0
 CSeq: 6
-User-Agent: AirPlay/540.31
+User-Agent: AirPlay/870.14
 DACP-ID: A851074254310A45
 Active-Remote: 4019753970
 Client-Instance: A851074254310A45
@@ -1362,7 +1362,7 @@ RTSP/1.0 200 OK
 Date: Tue, 11 May 2021 07:35:11 GMT
 Content-Length: 0
 Audio-Latency: 3035
-Server: AirTunes/540.31.41
+Server: AirTunes/870.14.1
 CSeq: 6
 ```
 
@@ -1374,7 +1374,7 @@ Requests to flush the receivers buffer and pause/stop what is playing.
 ```raw
 FLUSH rtsp://10.0.10.254/1085946124 RTSP/1.0
 CSeq: 7
-User-Agent: AirPlay/540.31
+User-Agent: AirPlay/870.14
 DACP-ID: A851074254310A45
 Active-Remote: 4019753970
 Client-Instance: A851074254310A45
@@ -1385,7 +1385,7 @@ Client-Instance: A851074254310A45
 RTSP/1.0 200 OK
 Date: Tue, 11 May 2021 17:35:11 GMT
 Content-Length: 0
-Server: AirTunes/540.31.41
+Server: AirTunes/870.14.1
 CSeq: 7
 ```
 
@@ -1397,7 +1397,7 @@ End the active session.
 ```raw
 TEARDOWN rtsp://10.0.10.254/1085946124 RTSP/1.0
 CSeq: 8
-User-Agent: AirPlay/540.31
+User-Agent: AirPlay/870.14
 DACP-ID: A851074254310A45
 Active-Remote: 4019753970
 Client-Instance: A851074254310A45
@@ -1408,7 +1408,7 @@ Client-Instance: A851074254310A45
 RTSP/1.0 200 OK
 Date: Tue, 11 May 2021 17:35:19 GMT
 Content-Length: 0
-Server: AirTunes/540.31.41
+Server: AirTunes/870.14.1
 CSeq: 8
 ```
 
@@ -1420,7 +1420,7 @@ Change a parameter, e.g. metadata or progress, on the receiver.
 ```raw
 SET_PARAMETER rtsp://10.0.10.254/1085946124 RTSP/1.0
 CSeq: 3
-User-Agent: AirPlay/540.31
+User-Agent: AirPlay/870.14
 DACP-ID: A851074254310A45
 Active-Remote: 4019753970
 Client-Instance: A851074254310A45
@@ -1435,7 +1435,7 @@ volume: -20
 RTSP/1.0 200 OK
 Date: Tue, 11 May 2021 17:35:11 GMT
 Content-Length: 0
-Server: AirTunes/540.31.41
+Server: AirTunes/870.14.1
 CSeq: 3
 ```
 
@@ -1463,7 +1463,7 @@ from owntone [here](https://github.com/owntone/owntone-server/blob/c1db4d914f5cd
 ```raw
 POST /auth-setup RTSP/1.0
 CSeq: 0
-User-Agent: AirPlay/540.31
+User-Agent: AirPlay/870.14
 DACP-ID: BFAA2A9155BD093C
 Active-Remote: 347218209
 Client-Instance: BFAA2A9155BD093C

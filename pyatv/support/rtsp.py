@@ -13,7 +13,7 @@ from typing import Any, Dict, Mapping, NamedTuple, Optional, Tuple, Union
 
 from pyatv.protocols.dmap import tags
 from pyatv.support import async_timeout
-from pyatv.support.http import HttpConnection, HttpResponse, decode_bplist_from_body
+from pyatv.support.http import HttpConnection, HttpResponse, decode_plist_body
 from pyatv.support.metadata import MediaMetadata
 
 _LOGGER = logging.getLogger(__name__)
@@ -107,7 +107,7 @@ class RtspSession:
             _LOGGER.debug("Device does not support /info")
             return {}
 
-        return decode_bplist_from_body(device_info)
+        return decode_plist_body(device_info.body)
 
     async def auth_setup(self) -> HttpResponse:
         """Send auth-setup message."""
