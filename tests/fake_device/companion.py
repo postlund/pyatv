@@ -484,6 +484,9 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
         else:
             self.send_error(message, "Invalid SID")
 
+    def handle_tvrcsessionstart(self, message):
+        self.send_response(message, message.get("_c", {}))
+
     def handle__systeminfo(self, message):
         self.send_response(message, {})
 
