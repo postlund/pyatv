@@ -485,6 +485,8 @@ class PatchedIceCastClient(miniaudio.StreamableSource):
 
         # TODO: Should not be based on polling
         while len(self._buffer) < num_bytes and not self._stop_stream:
+            if not self._buffer.fits(1):
+                break
             if time.monotonic() - start_time > DEFAULT_TIMEOUT:
                 raise OperationTimeoutError("timed out reading from stream")
 
