@@ -82,7 +82,7 @@ class InfoSettings(BaseModel, extra="ignore"):  # type: ignore[call-arg]
     mac: str = DEFUALT_MAC
     model: str = DEFAULT_MODEL
     device_id: str = DEFAULT_DEVICE_ID
-    rp_id: Optional[str] = None
+    rp_id: str = Field(default_factory=lambda: os.urandom(6).hex())
     os_name: str = DEFAULT_OS_NAME
     os_build: str = DEFAULT_OS_BUILD
     os_version: str = DEFAULT_OS_VERSION
@@ -95,7 +95,7 @@ class InfoSettings(BaseModel, extra="ignore"):  # type: ignore[call-arg]
             raise ValueError(f"{mac} is not a valid MAC address")
         return mac
 
-    @field_validator("rp_id")
+    @field_validator("rp_id", mode="before")
     @classmethod
     def fill_missing_rp_id(cls, v):
         """Generate a new random rp_id if it is missing."""
