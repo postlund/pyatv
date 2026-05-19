@@ -197,7 +197,9 @@ class CompanionAPI(
                 "_bf": 0,
                 "_cf": 512,
                 "_clFl": 128,
-                "_i": info.rp_id,
+                # A null "_i" stops the device from pushing TVSystemStatus
+                # (power state) events; fall back to a stable identifier.
+                "_i": info.rp_id or info.device_id.replace(":", "").lower(),
                 "_idsID": creds.client_id,
                 # Not really device id here, but better then anything...
                 "_pubID": info.device_id,
