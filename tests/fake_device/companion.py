@@ -97,6 +97,8 @@ class FakeCompanionState:
         self.powered_on: bool = True
         self.sid: int = 0
         self.service_type: Optional[str] = None
+        self.system_info: Optional[dict] = None
+        self.tv_rc_protocol_version: Optional[str] = None
         self.latest_button: Optional[str] = None
         self.media_control_flags: int = MediaControlFlags.Volume
         self.interests: Set[str] = set()
@@ -485,7 +487,12 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
             self.send_error(message, "Invalid SID")
 
     def handle__systeminfo(self, message):
+        self.state.system_info = message["_c"]
         self.send_response(message, {})
+
+    def handle_tvrcsessionstart(self, message):
+        self.state.tv_rc_protocol_version = message["_c"].get("ProtocolVersionKey")
+        self.send_response(message, message.get("_c", {}))
 
     def handle__interest(self, message):
         content = message["_c"]

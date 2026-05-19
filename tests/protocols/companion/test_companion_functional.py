@@ -188,6 +188,15 @@ async def test_session_start_and_stop(companion_client, companion_state):
     assert companion_state.sid == 0
 
 
+async def test_tv_rc_session_start(companion_client, companion_state):
+    assert companion_state.tv_rc_protocol_version == "1.2"
+
+
+async def test_system_info_includes_identifier(companion_client, companion_state):
+    assert companion_state.system_info is not None
+    assert companion_state.system_info.get("_i")
+
+
 @pytest.mark.parametrize(
     "button",
     [
