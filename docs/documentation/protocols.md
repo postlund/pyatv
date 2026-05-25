@@ -950,6 +950,24 @@ Once a command has been called, it will be cached making it possible to call it 
 sending `_sessionStart` again. This is probably why `_launchApp` keeps working after
 requesting the list from Shortcuts (as it will set up a new session).
 
+A client should also register a *TV Remote Client* session by sending
+`TVRCSessionStart` after `_sessionStart`. Some Apple TVs will not answer commands
+such as `FetchAttentionState` until this session has been registered:
+
+```javascript
+{
+    '_i': 'TVRCSessionStart',
+    '_x': 123,
+    '_t': 2,
+    '_c': {
+        'ProtocolVersionKey': '1.2'
+    }
+}
+```
+
+The response echoes the negotiated `ProtocolVersionKey`. Older devices that do not
+implement this message return an error, so it is safe to always send it.
+
 #### Events
 
 It is possible to subscribe to events using `_interest`:
@@ -966,8 +984,10 @@ It is possible to subscribe to events using `_interest`:
 }
 ```
 
-No explicit response is sent to the request, other than an event update. So far `_iMC`
-(Media Control) is the only known event type. An event update might look like this:
+No explicit response is sent to the request, other than an event update. Known event
+types include `_iMC` (Media Control) and `SystemStatus`/`TVSystemStatus` (power state).
+The Apple TV only pushes `SystemStatus`/`TVSystemStatus` events to a client that sent a
+non-null `_i` in its `_systemInfo`. An event update might look like this:
 
 ```javascript
 {
