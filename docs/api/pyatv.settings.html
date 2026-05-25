@@ -136,30 +136,31 @@ This module has additional documentation
 <dd>
 <section class="desc"><p>Settings related to AirPlay.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
-<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></section>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></section>
 <div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L107-L114" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>pydantic.v1.main.BaseModel</li>
-<li>pydantic.v1.utils.Representation</li>
+<li>pydantic.main.BaseModel</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="pyatv.settings.AirPlaySettings.credentials"><code class="name">var <span class="ident">credentials</span> -> str | None</code></dt>
+<dt id="pyatv.settings.AirPlaySettings.credentials"><code class="name">var <span class="ident">credentials</span> -> str | None = None</code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>The type of the None singleton.</p></section>
 </dd>
-<dt id="pyatv.settings.AirPlaySettings.identifier"><code class="name">var <span class="ident">identifier</span> -> str | None</code></dt>
+<dt id="pyatv.settings.AirPlaySettings.identifier"><code class="name">var <span class="ident">identifier</span> -> str | None = None</code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>The type of the None singleton.</p></section>
 </dd>
-<dt id="pyatv.settings.AirPlaySettings.mrp_tunnel"><code class="name">var <span class="ident">mrp_tunnel</span> -> <a title="pyatv.settings.MrpTunnel" href="#pyatv.settings.MrpTunnel">MrpTunnel</a></code></dt>
+<dt id="pyatv.settings.AirPlaySettings.mrp_tunnel"><code class="name">var <span class="ident">mrp_tunnel</span> -> <a title="pyatv.settings.MrpTunnel" href="#pyatv.settings.MrpTunnel">MrpTunnel</a> = MrpTunnel.Auto</code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>The type of the None singleton.</p></section>
 </dd>
-<dt id="pyatv.settings.AirPlaySettings.password"><code class="name">var <span class="ident">password</span> -> str | None</code></dt>
+<dt id="pyatv.settings.AirPlaySettings.password"><code class="name">var <span class="ident">password</span> -> str | None = None</code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>The type of the None singleton.</p></section>
 </dd>
 </dl>
 </dd>
@@ -198,22 +199,23 @@ This module has additional documentation
 <dd>
 <section class="desc"><p>Settings related to Companion.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
-<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></section>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></section>
 <div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L117-L121" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>pydantic.v1.main.BaseModel</li>
-<li>pydantic.v1.utils.Representation</li>
+<li>pydantic.main.BaseModel</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="pyatv.settings.CompanionSettings.credentials"><code class="name">var <span class="ident">credentials</span> -> str | None</code></dt>
+<dt id="pyatv.settings.CompanionSettings.credentials"><code class="name">var <span class="ident">credentials</span> -> str | None = None</code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>The type of the None singleton.</p></section>
 </dd>
-<dt id="pyatv.settings.CompanionSettings.identifier"><code class="name">var <span class="ident">identifier</span> -> str | None</code></dt>
+<dt id="pyatv.settings.CompanionSettings.identifier"><code class="name">var <span class="ident">identifier</span> -> str | None = None</code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>The type of the None singleton.</p></section>
 </dd>
 </dl>
 </dd>
@@ -224,22 +226,23 @@ This module has additional documentation
 <dd>
 <section class="desc"><p>Settings related to DMAP.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
-<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></section>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></section>
 <div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L124-L128" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>pydantic.v1.main.BaseModel</li>
-<li>pydantic.v1.utils.Representation</li>
+<li>pydantic.main.BaseModel</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="pyatv.settings.DmapSettings.credentials"><code class="name">var <span class="ident">credentials</span> -> str | None</code></dt>
+<dt id="pyatv.settings.DmapSettings.credentials"><code class="name">var <span class="ident">credentials</span> -> str | None = None</code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>The type of the None singleton.</p></section>
 </dd>
-<dt id="pyatv.settings.DmapSettings.identifier"><code class="name">var <span class="ident">identifier</span> -> str | None</code></dt>
+<dt id="pyatv.settings.DmapSettings.identifier"><code class="name">var <span class="ident">identifier</span> -> str | None = None</code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>The type of the None singleton.</p></section>
 </dd>
 </dl>
 </dd>
@@ -250,46 +253,47 @@ This module has additional documentation
 <dd>
 <section class="desc"><p>Information related settings.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
-<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></section>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></section>
 <div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L78-L104" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>pydantic.v1.main.BaseModel</li>
-<li>pydantic.v1.utils.Representation</li>
+<li>pydantic.main.BaseModel</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="pyatv.settings.InfoSettings.device_id"><code class="name">var <span class="ident">device_id</span> -> str</code></dt>
+<dt id="pyatv.settings.InfoSettings.device_id"><code class="name">var <span class="ident">device_id</span> -> str = FF:70:79:61:74:76</code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>The type of the None singleton.</p></section>
 </dd>
-<dt id="pyatv.settings.InfoSettings.mac"><code class="name">var <span class="ident">mac</span> -> str</code></dt>
+<dt id="pyatv.settings.InfoSettings.mac"><code class="name">var <span class="ident">mac</span> -> str = 02:70:79:61:74:76</code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>The type of the None singleton.</p></section>
 </dd>
-<dt id="pyatv.settings.InfoSettings.model"><code class="name">var <span class="ident">model</span> -> str</code></dt>
+<dt id="pyatv.settings.InfoSettings.model"><code class="name">var <span class="ident">model</span> -> str = iPhone10,6</code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>The type of the None singleton.</p></section>
 </dd>
-<dt id="pyatv.settings.InfoSettings.name"><code class="name">var <span class="ident">name</span> -> str</code></dt>
+<dt id="pyatv.settings.InfoSettings.name"><code class="name">var <span class="ident">name</span> -> str = pyatv</code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>The type of the None singleton.</p></section>
 </dd>
-<dt id="pyatv.settings.InfoSettings.os_build"><code class="name">var <span class="ident">os_build</span> -> str</code></dt>
+<dt id="pyatv.settings.InfoSettings.os_build"><code class="name">var <span class="ident">os_build</span> -> str = 18G82</code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>The type of the None singleton.</p></section>
 </dd>
-<dt id="pyatv.settings.InfoSettings.os_name"><code class="name">var <span class="ident">os_name</span> -> str</code></dt>
+<dt id="pyatv.settings.InfoSettings.os_name"><code class="name">var <span class="ident">os_name</span> -> str = iPhone OS</code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>The type of the None singleton.</p></section>
 </dd>
-<dt id="pyatv.settings.InfoSettings.os_version"><code class="name">var <span class="ident">os_version</span> -> str</code></dt>
+<dt id="pyatv.settings.InfoSettings.os_version"><code class="name">var <span class="ident">os_version</span> -> str = 14.7.1</code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>The type of the None singleton.</p></section>
 </dd>
-<dt id="pyatv.settings.InfoSettings.rp_id"><code class="name">var <span class="ident">rp_id</span> -> str | None</code></dt>
+<dt id="pyatv.settings.InfoSettings.rp_id"><code class="name">var <span class="ident">rp_id</span> -> str | None = None</code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>The type of the None singleton.</p></section>
 </dd>
 </dl>
 <h3>Static methods</h3>
@@ -319,22 +323,23 @@ This module has additional documentation
 <dd>
 <section class="desc"><p>Settings related to MRP.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
-<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></section>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></section>
 <div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L131-L135" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>pydantic.v1.main.BaseModel</li>
-<li>pydantic.v1.utils.Representation</li>
+<li>pydantic.main.BaseModel</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="pyatv.settings.MrpSettings.credentials"><code class="name">var <span class="ident">credentials</span> -> str | None</code></dt>
+<dt id="pyatv.settings.MrpSettings.credentials"><code class="name">var <span class="ident">credentials</span> -> str | None = None</code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>The type of the None singleton.</p></section>
 </dd>
-<dt id="pyatv.settings.MrpSettings.identifier"><code class="name">var <span class="ident">identifier</span> -> str | None</code></dt>
+<dt id="pyatv.settings.MrpSettings.identifier"><code class="name">var <span class="ident">identifier</span> -> str | None = None</code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>The type of the None singleton.</p></section>
 </dd>
 </dl>
 </dd>
@@ -373,34 +378,35 @@ This module has additional documentation
 <dd>
 <section class="desc"><p>Container for protocol specific settings.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
-<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></section>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></section>
 <div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L165-L172" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>pydantic.v1.main.BaseModel</li>
-<li>pydantic.v1.utils.Representation</li>
+<li>pydantic.main.BaseModel</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
 <dt id="pyatv.settings.ProtocolSettings.airplay"><code class="name">var <span class="ident">airplay</span> -> <a title="pyatv.settings.AirPlaySettings" href="#pyatv.settings.AirPlaySettings">AirPlaySettings</a></code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>The type of the None singleton.</p></section>
 </dd>
 <dt id="pyatv.settings.ProtocolSettings.companion"><code class="name">var <span class="ident">companion</span> -> <a title="pyatv.settings.CompanionSettings" href="#pyatv.settings.CompanionSettings">CompanionSettings</a></code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>The type of the None singleton.</p></section>
 </dd>
 <dt id="pyatv.settings.ProtocolSettings.dmap"><code class="name">var <span class="ident">dmap</span> -> <a title="pyatv.settings.DmapSettings" href="#pyatv.settings.DmapSettings">DmapSettings</a></code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>The type of the None singleton.</p></section>
 </dd>
 <dt id="pyatv.settings.ProtocolSettings.mrp"><code class="name">var <span class="ident">mrp</span> -> <a title="pyatv.settings.MrpSettings" href="#pyatv.settings.MrpSettings">MrpSettings</a></code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>The type of the None singleton.</p></section>
 </dd>
 <dt id="pyatv.settings.ProtocolSettings.raop"><code class="name">var <span class="ident">raop</span> -> <a title="pyatv.settings.RaopSettings" href="#pyatv.settings.RaopSettings">RaopSettings</a></code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>The type of the None singleton.</p></section>
 </dd>
 </dl>
 </dd>
@@ -411,39 +417,40 @@ This module has additional documentation
 <dd>
 <section class="desc"><p>Settings related to RAOP.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
-<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></section>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></section>
 <div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L138-L162" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>pydantic.v1.main.BaseModel</li>
-<li>pydantic.v1.utils.Representation</li>
+<li>pydantic.main.BaseModel</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
-<dt id="pyatv.settings.RaopSettings.control_port"><code class="name">var <span class="ident">control_port</span> -> int</code></dt>
+<dt id="pyatv.settings.RaopSettings.control_port"><code class="name">var <span class="ident">control_port</span> -> int = 0</code></dt>
 <dd>
 <section class="desc"><p>Server side (UDP) port used by control server.</p>
 <p>Set to 0 to use random free port.</p></section>
 </dd>
-<dt id="pyatv.settings.RaopSettings.credentials"><code class="name">var <span class="ident">credentials</span> -> str | None</code></dt>
+<dt id="pyatv.settings.RaopSettings.credentials"><code class="name">var <span class="ident">credentials</span> -> str | None = None</code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>The type of the None singleton.</p></section>
 </dd>
-<dt id="pyatv.settings.RaopSettings.identifier"><code class="name">var <span class="ident">identifier</span> -> str | None</code></dt>
+<dt id="pyatv.settings.RaopSettings.identifier"><code class="name">var <span class="ident">identifier</span> -> str | None = None</code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>The type of the None singleton.</p></section>
 </dd>
-<dt id="pyatv.settings.RaopSettings.password"><code class="name">var <span class="ident">password</span> -> str | None</code></dt>
+<dt id="pyatv.settings.RaopSettings.password"><code class="name">var <span class="ident">password</span> -> str | None = None</code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>The type of the None singleton.</p></section>
 </dd>
-<dt id="pyatv.settings.RaopSettings.protocol_version"><code class="name">var <span class="ident">protocol_version</span> -> <a title="pyatv.settings.AirPlayVersion" href="#pyatv.settings.AirPlayVersion">AirPlayVersion</a></code></dt>
+<dt id="pyatv.settings.RaopSettings.protocol_version"><code class="name">var <span class="ident">protocol_version</span> -> <a title="pyatv.settings.AirPlayVersion" href="#pyatv.settings.AirPlayVersion">AirPlayVersion</a> = AirPlayVersion.Auto</code></dt>
 <dd>
 <section class="desc"><p>Protocol version used.</p>
 <p>In reality this corresponds to the AirPlay version used. Set to 0 for automatic
 mode (recommended), or 1 or 2 for AirPlay 1 or 2 respectively.</p></section>
 </dd>
-<dt id="pyatv.settings.RaopSettings.timing_port"><code class="name">var <span class="ident">timing_port</span> -> int</code></dt>
+<dt id="pyatv.settings.RaopSettings.timing_port"><code class="name">var <span class="ident">timing_port</span> -> int = 0</code></dt>
 <dd>
 <section class="desc"><p>Server side (UDP) port used by timing server.</p>
 <p>Set to 0 to use random free port.</p></section>
@@ -457,22 +464,23 @@ mode (recommended), or 1 or 2 for AirPlay 1 or 2 respectively.</p></section>
 <dd>
 <section class="desc"><p>Settings container class.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
-<p>Raises ValidationError if the input data cannot be parsed to form a valid model.</p></section>
+<p>Raises [<code>ValidationError</code>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><code>self</code> is explicitly positional-only to allow <code>self</code> as a field name.</p></section>
 <div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/settings.py#L175-L179" class="git-link">Browse git</a></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
-<li>pydantic.v1.main.BaseModel</li>
-<li>pydantic.v1.utils.Representation</li>
+<li>pydantic.main.BaseModel</li>
 </ul>
 <h3>Class variables</h3>
 <dl>
 <dt id="pyatv.settings.Settings.info"><code class="name">var <span class="ident">info</span> -> <a title="pyatv.settings.InfoSettings" href="#pyatv.settings.InfoSettings">InfoSettings</a></code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>The type of the None singleton.</p></section>
 </dd>
 <dt id="pyatv.settings.Settings.protocols"><code class="name">var <span class="ident">protocols</span> -> <a title="pyatv.settings.ProtocolSettings" href="#pyatv.settings.ProtocolSettings">ProtocolSettings</a></code></dt>
 <dd>
-<section class="desc"></section>
+<section class="desc"><p>The type of the None singleton.</p></section>
 </dd>
 </dl>
 </dd>

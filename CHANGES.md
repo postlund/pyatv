@@ -1,5 +1,68 @@
 # CHANGES
 
+## 0.17.0 Velma (2026-01-21)
+
+Happy new year! This release brings support for Guide and Control Center
+buttons (@henrikwidlund), per-device volume control (@albaintor), and modernized
+packaging (@cdce8p). There is also official upport for Python 3.14. As a final
+housekeeping item, support for pydantic v1 has been dropped—make sure to have
+pydantic 2.x installed.
+
+**Changes:**
+
+*Other:*
+
+```
+0b643bec Add support for Guide and Control Center (#2699)
+1ce4dbc9 Modernize packaging (#2734)
+dfed887f Added ability to set volume per (connected) device (#2673)
+a722f9c3 fix link for `c4-pyatv-remote`
+67508775 Add Python 3.14 (#2800)
+410d415c Use asyncio.timeout for Python 3.11+ (#2735)
+504ddf4c Update stringify_model for Python 3.14
+2a6d8ead Drop support for pydantic v1
+```
+
+**All changes:**
+
+```
+d64a63f4 build(deps): Bump types-protobuf in /requirements
+0b643bec Add support for Guide and Control Center (#2699)
+1ce4dbc9 Modernize packaging (#2734)
+dfed887f Added ability to set volume per (connected) device (#2673)
+e418960e build(deps): Bump pylint from 3.3.7 to 4.0.4 in /requirements
+9dd16dc7 build(deps): Bump types-requests in /requirements
+a722f9c3 fix link for `c4-pyatv-remote`
+faf313ff build(deps): Bump mypy-protobuf from 3.6.0 to 3.7.0 in /requirements
+5432ae37 build(deps): Bump python from 3.15.0a2-alpine to 3.15.0a5-alpine (#2811)
+667c6a7f build(deps): Bump aiohttp from 3.13.2 to 3.13.3 in /requirements
+2514da5f build(deps): Bump protobuf from 6.33.0 to 6.33.2 in /requirements
+6b9a6324 build(deps): Bump requests from 2.32.4 to 2.32.5 in /requirements
+487b1136 build(deps): Bump pytest from 8.4.1 to 9.0.2 in /requirements (#2797)
+67508775 Add Python 3.14 (#2800)
+410d415c Use asyncio.timeout for Python 3.11+ (#2735)
+504ddf4c Update stringify_model for Python 3.14
+2a6d8ead Drop support for pydantic v1
+299f2c03 build(deps): Bump mypy from 1.18.2 to 1.19.0 in /requirements
+d205d5b7 build(deps): Bump python from 3.14.1-alpine to 3.15.0a2-alpine
+ef434437 build(deps): Bump pydantic from 2.11.7 to 2.12.5 in /requirements
+9c1f65f4 build(deps): Bump pyfakefs from 5.10.1 to 5.10.2 in /requirements
+965fe67a build(deps): Bump zeroconf from 0.147.0 to 0.148.0 in /requirements
+40e84e91 build(deps): Bump python from 3.14.0-alpine to 3.14.1-alpine
+fda09e0a build(deps): Bump black from 25.1.0 to 25.11.0 in /requirements
+ffcf348b build(deps): Bump tinytag from 2.1.1 to 2.1.2 in /requirements
+c6a9b363 build(deps): Bump types-protobuf in /requirements
+98fd8145 build(deps): Bump pytest-cov from 6.2.1 to 7.0.0 in /requirements
+d06069ac build(deps): Bump protobuf from 6.31.1 to 6.33.0 in /requirements
+1aec1c07 build(deps): Bump aiohttp from 3.12.13 to 3.13.2 in /requirements
+03a5b901 build(deps): Bump pyfakefs from 5.9.1 to 5.10.1 in /requirements
+82cee18f build(deps): Bump cryptography from 45.0.5 to 46.0.3 in /requirements
+abe575d0 build(deps): Bump python from 3.13.5-alpine to 3.14.0-alpine
+3ad82779 build(deps): Bump mypy from 1.16.1 to 1.18.2 in /requirements
+9afe19e2 build(deps): Bump types-protobuf in /requirements
+dcbb4d57 build(deps): Bump deepdiff from 8.5.0 to 8.6.1 in /requirements
+```
+
 ## 0.16.1 Uter (2025-07-12)
 
 Hey-ho, minor release (finally) that should fix:
