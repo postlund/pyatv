@@ -224,10 +224,8 @@ class CompanionAPI(
 
     async def _tv_rc_session_start(self) -> None:
         _LOGGER.debug("TV RC session start")
-        # TODO additional field '_inUseProc': 'tvremoted' is expected but not handled
-        #  by send_command, ignored
-        #  {'_i': 'TVRCSessionStart', '_x': 2789401675, '_btHP': False,
-        #  '_inUseProc': 'tvremoted', '_c': {'ProtocolVersionKey': '1.2'}, '_t': 2}
+        # TODO additional field '_inUseProc': 'tvremoted' is expected but not handled by send_command, ignored
+        #  {'_i': 'TVRCSessionStart', '_x': 2789401675, '_btHP': False, '_inUseProc': 'tvremoted', '_c': {'ProtocolVersionKey': '1.2'}, '_t': 2}
         resp = await self._send_command(
             "TVRCSessionStart", {"ProtocolVersionKey": "1.2"}
         )
