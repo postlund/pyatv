@@ -377,7 +377,7 @@ class StreamClient:
         source: AudioSource,
         metadata: MediaMetadata = EMPTY_METADATA,
         /,
-        volume: Optional[float] = None
+        volume: Optional[float] = None,
     ):
         """Send an audio stream to the device."""
         if self.control_client is None or self.timing_server is None:

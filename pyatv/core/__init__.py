@@ -1,6 +1,7 @@
 """Core module of pyatv."""
 
 import asyncio
+from dataclasses import dataclass
 from enum import Enum
 from typing import (
     Any,
@@ -45,6 +46,9 @@ class UpdatedState(Enum):
 
     OutputDevices = 4
     """AirPlay output devices were updated."""
+
+    OutputDeviceVolume = 5
+    """Output device volume was updated."""
 
 
 # pylint: enable=invalid-name
@@ -261,3 +265,21 @@ async def create_core(
             service.protocol, core_dispatcher or CoreStateDispatcher()
         ),
     )
+
+
+@dataclass
+class OutputDeviceState:
+    """State information of an output device."""
+
+    identifier: str
+    volume: float = 0.0
+
+    def __str__(self) -> str:
+        """Convert app info to readable string."""
+        return f"Device: {self.identifier} ({self.volume})"
+
+    def __eq__(self, other) -> bool:
+        """Return self==other."""
+        if isinstance(other, OutputDeviceState):
+            return self.identifier == other.identifier and self.volume == other.volume
+        return False

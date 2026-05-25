@@ -33,6 +33,7 @@ from pyatv.interface import (
     FeatureInfo,
     Features,
     Keyboard,
+    OutputDevice,
     PairingHandler,
     Power,
     RemoteControl,
@@ -139,6 +140,8 @@ SUPPORTED_FEATURES = set(
         FeatureName.ChannelUp,
         FeatureName.ChannelDown,
         FeatureName.Screensaver,
+        FeatureName.Guide,
+        FeatureName.ControlCenter,
         # Keyboard interface
         FeatureName.TextFocusState,
         FeatureName.TextGet,
@@ -380,6 +383,14 @@ class CompanionRemoteControl(RemoteControl):
         """Activate screen saver."""
         await self._press_button(HidCommand.Screensaver)
 
+    async def guide(self) -> None:
+        """Show EPG."""
+        await self._press_button(HidCommand.Guide)
+
+    async def control_center(self) -> None:
+        """Open the control center."""
+        await self._press_button(HidCommand.PageDown)
+
     async def _press_button(
         self,
         command: HidCommand,
@@ -439,7 +450,9 @@ class CompanionAudio(Audio):
         """
         return self._volume
 
-    async def set_volume(self, level: float) -> None:
+    async def set_volume(
+        self, level: float, output_device: Optional[OutputDevice] = None
+    ) -> None:
         """Change current volume level.
 
         Range is in percent, i.e. [0.0-100.0].

@@ -50,8 +50,8 @@ jobs:
             python scripts/version.py sha1
           fi
 
-          python -m pip install --upgrade setuptools pip wheel
-          python setup.py sdist bdist_wheel
+          python -m pip install --upgrade build
+          python -m build
           echo "version=$(python scripts/version.py get)" >> $GITHUB_OUTPUT
 
       - name: Log in to the Container registry

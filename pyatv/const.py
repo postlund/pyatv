@@ -450,6 +450,12 @@ class FeatureName(Enum):
     Click = 65
     """Touch click command."""
 
+    Guide = 66
+    """Show EPG."""
+
+    ControlCenter = 68
+    """Open the Control Center."""
+
 
 class TouchAction(Enum):
     """Touch action constants."""

@@ -55,7 +55,7 @@ class SemiSeekableBuffer:
         buffer_size: int = BUFFER_SIZE,
         /,
         seekable_headroom: int = HEADROOM_SIZE,
-        protected_headroom: bool = False
+        protected_headroom: bool = False,
     ) -> None:
         """Initialize a new SemiSeekableBuffer instance."""
         # Headroom cannot be smaller than actual buffer

@@ -86,7 +86,7 @@ Here are a few projects known to use pyatv:
 * [iSponsorBlockTV](https://github.com/dmunozv04/iSponsorBlockTV) - Skip sponsor segments in YouTube videos playing on an Apple TV
 * [homebridge-homepod-radio](https://github.com/petro-kushchak/homebridge-homepod-radio) - Homebridge accessory for streaming radio to Homepod mini
 * [node-red-contrib-apple-tv-x](https://github.com/twocolors/node-red-contrib-apple-tv-x) - Apple TV control from inside Node-RED
-* [c4-pyatv-remote](https://github.com/13mralex/c4-pyatv-remote>) - Control4 remote control integration
+* [c4-pyatv-remote](https://github.com/13mralex/c4-pyatv-remote) - Control4 remote control integration
 * [atv-desktop-remote](https://github.com/bsharper/atv-desktop-remote) - Desktop remote control for Apple TV
 
 If you are maintaining a project using pyatv, feel free to add it to the list (open a PR

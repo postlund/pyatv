@@ -29,6 +29,7 @@ from pyatv.core import (
     AbstractPushUpdater,
     Core,
     MutableService,
+    OutputDeviceState,
     ProtocolStateDispatcher,
     SetupData,
     UpdatedState,
@@ -835,31 +836,51 @@ class MrpAudio(Audio):
             _LOGGER.debug("Volume changed to %0.1f", self.volume)
 
             self.state_dispatcher.dispatch(UpdatedState.Volume, self._volume)
+        else:
+            volume = round(inner.volume * 100.0, 1)
+            _LOGGER.debug(
+                "Volume changed to %0.1f for output device %s",
+                volume,
+                inner.outputDeviceUID,
+            )
+            self.state_dispatcher.dispatch(
+                UpdatedState.OutputDeviceVolume,
+                OutputDeviceState(inner.outputDeviceUID, volume),
+            )
 
-            # There are no responses to the volume_up/down commands sent to the device.
-            # So when calling volume_up/down here, they will wait for the volume to
-            # change to know when done. Here, a single asyncio.Event is used which
-            # works as long as no more than one task is calling either function at the
-            # same time. If two or more call those functions, all of them will return
-            # at once (when first volume update occurs) instead of one by one. This is
-            # generally fine, but can be improved if there's a need for it.
-            self._volume_event.set()
-            self._volume_event.clear()
+        # There are no responses to the volume_up/down commands sent to the device.
+        # So when calling volume_up/down here, they will wait for the volume to
+        # change to know when done. Here, a single asyncio.Event is used which
+        # works as long as no more than one task is calling either function at the
+        # same time. If two or more call those functions, all of them will return
+        # at once (when first volume update occurs) instead of one by one. This is
+        # generally fine, but can be improved if there's a need for it.
+        self._volume_event.set()
+        self._volume_event.clear()
 
     @property
     def volume(self) -> float:
         """Return current volume level."""
         return self._volume
 
-    async def set_volume(self, level: float) -> None:
+    async def set_volume(
+        self, level: float, output_device: Optional[OutputDevice] = None
+    ) -> None:
         """Change current volume level."""
-        if self.device_uid is None:
-            raise exceptions.ProtocolError("no output device")
-
-        await self.protocol.send(messages.set_volume(self.device_uid, level / 100.0))
-
-        if self.is_volume_absolute and self._volume != level:
-            await asyncio.wait_for(self._volume_event.wait(), timeout=5.0)
+        if output_device is None:
+            if self.device_uid is None:
+                raise exceptions.ProtocolError("no output device")
+            await self.protocol.send(
+                messages.set_volume(self.device_uid, level / 100.0)
+            )
+            if self.is_volume_absolute and self._volume != level:
+                await asyncio.wait_for(self._volume_event.wait(), timeout=5.0)
+        else:
+            await self.protocol.send(
+                messages.set_volume(output_device.identifier, level / 100.0)
+            )
+            if output_device.volume != level:
+                await asyncio.wait_for(self._volume_event.wait(), timeout=5.0)
 
     async def volume_up(self) -> None:
         """Increase volume by one step."""
@@ -891,9 +912,11 @@ class MrpAudio(Audio):
         inner = cast(protobuf.DeviceInfoMessage, message.inner())
         devices = []
         if inner.isGroupLeader and not inner.isProxyGroupPlayer:
-            devices.append(OutputDevice(inner.name, inner.uniqueIdentifier))
+            devices.append(
+                OutputDevice(name=inner.name, identifier=inner.uniqueIdentifier)
+            )
         for device in list(inner.groupedDevices):
-            devices.append(OutputDevice(device.name, device.deviceUID))
+            devices.append(OutputDevice(name=device.name, identifier=device.deviceUID))
         self._output_devices = devices
         self._output_devices_event.set()
         self._output_devices_event.clear()

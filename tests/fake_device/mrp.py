@@ -725,7 +725,7 @@ class FakeMrpUseCases:
         position,
         player=PLAYER_IDENTIFIER,
         app_name=APP_NAME,
-        **kwargs
+        **kwargs,
     ):
         """Call to change what is currently plaing to video."""
         fields = {
@@ -788,7 +788,7 @@ class FakeMrpUseCases:
         position,
         season_number,
         episode_number,
-        **kwargs
+        **kwargs,
     ):
         """Call to change what is currently playing to TV."""
         fields = {

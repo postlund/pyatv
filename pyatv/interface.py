@@ -454,6 +454,16 @@ class RemoteControl:
         """Activate screen saver.."""
         raise exceptions.NotSupportedError()
 
+    @feature(66, "Guide", "Show EPG.")
+    async def guide(self) -> None:
+        """Show EPG."""
+        raise exceptions.NotSupportedError()
+
+    @feature(68, "ControlCenter", "Control Center.")
+    async def control_center(self) -> None:
+        """Open the control center."""
+        raise exceptions.NotSupportedError()
+
 
 # TODO: Should be made into a dataclass when support for 3.6 is dropped
 class Playing(ABC):
@@ -880,7 +890,7 @@ class Stream:  # pylint: disable=too-few-public-methods
         /,
         metadata: Optional[MediaMetadata] = None,
         override_missing_metadata: bool = False,
-        **kwargs
+        **kwargs,
     ) -> None:
         """Stream local or remote file to device.
 
@@ -1087,7 +1097,7 @@ class Features:
     def in_state(
         self,
         states: Union[List[FeatureState], FeatureState],
-        *feature_names: FeatureName
+        *feature_names: FeatureName,
     ) -> bool:
         """Return if features are in a specific state.
 
@@ -1103,23 +1113,13 @@ class Features:
         return True
 
 
+@dataclass
 class OutputDevice:
     """Information about an output device."""
 
-    def __init__(self, name: Optional[str], identifier: str) -> None:
-        """Initialize a new OutputDevice instance."""
-        self._name = name
-        self._identifier = identifier
-
-    @property
-    def name(self) -> Optional[str]:
-        """User friendly name of output device."""
-        return self._name
-
-    @property
-    def identifier(self) -> str:
-        """Return a unique id for the output device."""
-        return self._identifier
+    identifier: str
+    name: Optional[str] = None
+    volume: float = 0.0
 
     def __str__(self) -> str:
         """Convert app info to readable string."""
@@ -1128,7 +1128,11 @@ class OutputDevice:
     def __eq__(self, other) -> bool:
         """Return self==other."""
         if isinstance(other, OutputDevice):
-            return self.name == other.name and self.identifier == other.identifier
+            return (
+                self.name == other.name
+                and self.identifier == other.identifier
+                and self.volume == other.volume
+            )
         return False
 
 
@@ -1138,6 +1142,13 @@ class AudioListener(ABC):
     @abstractmethod
     def volume_update(self, old_level: float, new_level: float) -> None:
         """Device volume was updated."""
+        raise NotImplementedError()
+
+    @abstractmethod
+    def volume_device_update(
+        self, output_device: OutputDevice, old_level: float, new_level: float
+    ) -> None:
+        """Output device volume was updated."""
         raise NotImplementedError()
 
     @abstractmethod
@@ -1167,7 +1178,9 @@ class Audio(ABC, StateProducer):
         raise exceptions.NotSupportedError()
 
     @feature(46, "SetVolume", "Set volume level.")
-    async def set_volume(self, level: float) -> None:
+    async def set_volume(
+        self, level: float, output_device: Optional[OutputDevice] = None
+    ) -> None:
         """Change current volume level.
 
         Range is in percent, i.e. [0.0-100.0].

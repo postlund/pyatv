@@ -32,7 +32,7 @@ def dict_subtract(
     dict_a: typing.Dict[typing.Any, typing.Any],
     dict_b: typing.Mapping[typing.Any, typing.Any],
     /,
-    remove_if_same_value: bool = False
+    remove_if_same_value: bool = False,
 ) -> typing.Dict[typing.Any, typing.Any]:
     """Subtract items from a dict (based on key) recursively.
 
@@ -70,7 +70,7 @@ class CaseInsensitiveDict(  # pylint: disable=too-many-ancestors
         mapping_or_iterable: typing.Union[
             typing.Mapping[str, T], typing.Iterable[typing.Tuple[str, T]], None
         ] = None,
-        **kwargs
+        **kwargs,
     ):
         """Create a `CaseInensitiveDict`. It takes the same arguments as `dict`."""
         self._data = {}
