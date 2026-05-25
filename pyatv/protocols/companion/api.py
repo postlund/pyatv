@@ -153,7 +153,6 @@ class CompanionAPI(
         await self.system_info()
         await self._touch_start()
         await self._session_start()
-        await self._tv_rc_session_start()
         await self._text_input_start()
 
         await self.subscribe_event("_iMC")
@@ -221,19 +220,6 @@ class CompanionAPI(
         remote_sid = cast(Mapping[str, Any], resp["_c"])["_sid"]
         self.sid = (remote_sid << 32) | local_sid
         _LOGGER.debug("Started session with SID 0x%X", self.sid)
-
-    async def _tv_rc_session_start(self) -> None:
-        _LOGGER.debug("TV RC session start")
-        # TODO additional field '_inUseProc': 'tvremoted' is expected but not handled by send_command, ignored
-        #  {'_i': 'TVRCSessionStart', '_x': 2789401675, '_btHP': False, '_inUseProc': 'tvremoted', '_c': {'ProtocolVersionKey': '1.2'}, '_t': 2}
-        resp = await self._send_command(
-            "TVRCSessionStart", {"ProtocolVersionKey": "1.2"}
-        )
-        content = resp.get("_c")
-        if content is None:
-            raise exceptions.ProtocolError("missing content")
-
-        _LOGGER.debug("Started TV RC session with %s", content)
 
     async def _session_stop(self) -> None:
         await self._send_command(
