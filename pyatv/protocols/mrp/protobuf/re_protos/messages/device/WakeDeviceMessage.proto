@@ -1,0 +1,11 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+
+extend ProtocolMessage {
+  optional WakeDeviceMessage wakeDeviceMessage = 45;
+}
+
+message WakeDeviceMessage {
+
+}

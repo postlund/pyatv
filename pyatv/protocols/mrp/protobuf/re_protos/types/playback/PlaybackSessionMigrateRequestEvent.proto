@@ -1,0 +1,19 @@
+syntax = "proto2";
+
+import "foundation/Dictionary.proto";
+import "foundation/Error.proto";
+import "foundation/Common.proto";
+
+message PlaybackSessionMigrateRequestEvent {
+  optional string name = 1;
+  optional double startTimestamp = 2;
+  optional double endTimestamp = 3;
+  optional int64 errorCode = 5;
+  optional string errorDescription = 6;
+  optional Error error = 7;
+  optional PlaybackSessionMigrateRequestEventRole.Enum role = 8;
+  optional Dictionary input = 9;
+  optional Dictionary output = 10;
+  repeated PlaybackSessionMigrateRequestEvent events = 11;
+  optional uint32 identifier = 100;
+}

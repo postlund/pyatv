@@ -1,0 +1,138 @@
+syntax = "proto2";
+
+import "foundation/Common.proto";
+import "foundation/Dictionary.proto";
+import "types/media/CommandOptions.proto";
+
+enum Command {
+  Unknown = 0;
+  Play = 1;
+  Pause = 2;
+  TogglePlayPause = 3;
+  Stop = 4;
+  NextTrack = 5;
+  PreviousTrack = 6;
+  AdvanceShuffleMode = 7;
+  AdvanceRepeatMode = 8;
+  BeginFastForward = 9;
+  EndFastForward = 10;
+  BeginRewind = 11;
+  EndRewind = 12;
+  Rewind15Seconds = 13;
+  FastForward15Seconds = 14;
+  Rewind30Seconds = 15;
+  FastForward30Seconds = 16;
+  SkipForward = 18;
+  SkipBackward = 19;
+  ChangePlaybackRate = 20;
+  RateTrack = 21;
+  LikeTrack = 22;
+  DislikeTrack = 23;
+  BookmarkTrack = 24;
+  SeekToPlaybackPosition = 45;
+  ChangeRepeatMode = 46;
+  ChangeShuffleMode = 47;
+  EnableLanguageOption = 53;
+  DisableLanguageOption = 54;
+  NextChapter = 25;
+  PreviousChapter = 26;
+  NextAlbum = 27;
+  PreviousAlbum = 28;
+  NextPlaylist = 29;
+  PreviousPlaylist = 30;
+  BanTrack = 31;
+  AddTrackToWishList = 32;
+  RemoveTrackFromWishList = 33;
+  NextInContext = 34;
+  PreviousInContext = 35;
+  ResetPlaybackTimeout = 41;
+  SetPlaybackQueue = 48;
+  AddNowPlayingItemToLibrary = 49;
+  CreateRadioStation = 50;
+  AddItemToLibrary = 51;
+  InsertIntoPlaybackQueue = 52;
+  ReorderPlaybackQueue = 55;
+  RemoveFromPlaybackQueue = 56;
+  PlayItemInPlaybackQueue = 57;
+  PrepareForSetQueue = 58;
+  SetPlaybackSession = 59;
+  PreloadedPlaybackSession = 60;
+  SetPriorityForPlaybackSession = 61;
+  DiscardPlaybackSession = 62;
+  Reshuffle = 63;
+  ChangeQueueEndAction = 135;
+}
+
+message QueueEndAction {
+  enum Enum {
+    ClearAction = 0;
+    None = 1;
+    Reset = 2;
+    AutoPlay = 3;
+  }
+}
+
+message DisableReason {
+  enum Enum {
+    Unknown = 0;
+    AdPlayback = 1;
+    SkipLimitReached = 2;
+    InvalidAdRanges = 3;
+  }
+}
+
+message PreloadedPlaybackSessionInfo {
+  optional string playbackSessionIdentifier = 1;
+  optional string playbackSessionRevision = 2;
+  optional int32 playbackSessionPriority = 3;
+}
+
+message CommandInfo {
+  optional Command command = 1;                  // varint enum
+  optional bool enabled = 2;                     // varint bool
+  optional bool active = 3;                      // varint bool
+  repeated double preferredIntervals = 4 [packed = true];  // fixed64; reader supports packed/unpacked
+  optional string localizedTitle = 5;
+  optional string localizedShortTitle = 9;
+  optional float minimumRating = 6;              // fixed32 float
+  optional float maximumRating = 7;              // fixed32 float
+  repeated float supportedRates = 8 [packed = true];       // fixed32; packed/unpacked supported
+  repeated float extendedSupportedRates = 47 [packed = true];
+  optional RepeatMode.Enum repeatMode = 10;      // varint enum
+  optional ShuffleMode.Enum shuffleMode = 11;    // varint enum
+  optional int32 presentationStyle = 12;         // varint int32/enum-ish
+  optional int32 transitionStyle = 48;           // varint int32/enum-ish
+  optional int32 skipInterval = 13; // field 13 is read as varint int32 (not float/double in this build).
+  optional int32 numAvailableSkips = 14;
+  optional int32 skipFrequency = 15;
+  optional bool canScrub = 16;
+  repeated int32 supportedPlaybackQueueTypes = 17 [packed = true];  // varint; packed/unpacked supported
+  repeated string supportedCustomQueueIdentifiers = 18;
+  repeated int32 supportedInsertionPositions = 19 [packed = true];  // varint; packed/unpacked supported
+//  optional bool supportsSharedQueue = 20;
+  optional int32 upNextItemCount = 21;
+  optional float preferredPlaybackRate = 22;     // fixed32 float
+  repeated string supportedPlaybackSessionTypes = 23; //  reads these as strings (PBReaderReadString), not int32 enums.
+  repeated string currentPlaybackSessionTypes = 24; //  reads these as strings (PBReaderReadString), not int32 enums.
+  optional string playbackSessionIdentifier = 25;
+  optional QueueEndAction.Enum currentQueueEndAction = 26;
+  repeated QueueEndAction.Enum supportedQueueEndActions = 27 [packed = true];
+  optional DisableReason.Enum disabledReason = 28;
+  repeated PreloadedPlaybackSessionInfo supportedPlaybackSessionIdentifiers = 29;
+  optional CommandOptions proactiveCommandOptions = 30;
+  optional bool vocalsControlActive = 31;
+  optional float vocalsControlLevel = 32;
+  optional float vocalsControlMaxLevel = 33;
+  optional float vocalsControlMinLevel = 34;
+  optional bool vocalsControlContinuous = 35;
+  optional double sleepTimerTime = 36;           // fixed64 double
+  optional int32 sleepTimerStopMode = 38;
+  optional double sleepTimerFireDate = 39;       // fixed64 double
+  optional Dictionary dialogOptions = 41;
+  optional string lastSectionContentItemID = 42;
+  optional bool supportsReferencePosition = 43;
+  optional Dictionary playbackSessionRequirements = 44;
+
+  // Fields this reader explicitly skips (reserved to avoid accidental reuse):
+  reserved 20, 37, 40, 45, 46;
+}

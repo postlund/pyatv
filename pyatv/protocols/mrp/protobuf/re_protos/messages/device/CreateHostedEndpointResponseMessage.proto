@@ -1,0 +1,12 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+
+extend ProtocolMessage {
+  optional CreateHostedEndpointResponseMessage createHostedEndpointResponseMessage = 96;
+}
+
+// Response after creating a hosted endpoint
+message CreateHostedEndpointResponseMessage {
+  optional string groupUID = 1;
+}

@@ -1,0 +1,15 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+import "types/playback/PlayerPath.proto";
+import "types/playback/PlaybackQueueParticipant.proto";
+
+extend ProtocolMessage {
+  optional PlayerClientParticipantsUpdateMessage playerClientParticipantsUpdateMessage = 103;
+}
+
+// Update participants in a playback queue for a specific player
+message PlayerClientParticipantsUpdateMessage {
+  optional PlayerPath playerPath = 1;
+  repeated PlaybackQueueParticipant participants = 2;
+}

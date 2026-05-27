@@ -1,0 +1,18 @@
+syntax = "proto2";
+
+import "foundation/Common.proto";
+
+message SystemPlaybackGenericTracklistQueue {
+
+  optional string firstTrackIdentifier = 1;
+
+  // Encoded list of track identifiers (NOT repeated).
+  // Likely serialized or delimited externally.
+  optional string trackIdentifiers = 2;
+
+  optional bytes collectionIdentifierSet = 3;
+
+  optional ShuffleMode.Enum shuffleMode = 4;
+
+  optional RepeatMode.Enum repeatMode = 5;
+}

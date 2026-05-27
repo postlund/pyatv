@@ -1,0 +1,14 @@
+syntax = "proto2";
+
+
+message GroupSessionToken {
+  required bytes invitationData = 1;
+  required int32 routeType = 2;
+
+  optional string displayName = 3;
+  optional string sessionIdentifier = 4;
+  optional string sharedSecret = 5;
+  optional string equivalentMediaIdentifier = 6;
+
+  optional uint32 version = 7;
+}

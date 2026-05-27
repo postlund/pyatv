@@ -1,0 +1,79 @@
+syntax = "proto2";
+
+/*
+ * Dictionary
+ *
+ * A dictionary implemented as a repeated list of key/value pairs.
+ * Keys are strings.
+ * Values are dynamically typed via MRValueProtobuf.
+ */
+message Dictionary {
+
+  // Repeated key/value entries
+  repeated KeyValuePair pair = 1;
+}
+
+/*
+ * KeyValuePair
+ *
+ * Represents a single dictionary entry.
+ * - key is REQUIRED (writer crashes if missing)
+ * - value is REQUIRED (writer crashes if missing)
+ */
+message KeyValuePair {
+
+  // Dictionary key
+  required string key = 1;
+
+  // Dictionary value (variant type)
+  required Value value = 2;
+}
+
+/*
+ * Value
+ *
+ * Dynamically typed value container.
+ *
+ * This is NOT a proto3 oneof.
+ * Presence is tracked via a private _has bitfield.
+ *
+ * Supported types:
+ *  - string
+ *  - int64
+ *  - float
+ *  - double
+ *  - bytes
+ *  - bool
+ *  - date (string-encoded)
+ *  - array (repeated MRValueProtobuf)
+ *  - dictionary (MRDictionaryProtobuf)
+ */
+message Value {
+
+  // String value
+  optional string stringValue = 1;
+
+  // Integer value
+  optional int64 int64Value = 2;
+
+  // Float value
+  optional float floatValue = 3;
+
+  // Double value
+  optional double doubleValue = 4;
+
+  // Raw data value
+  optional bytes dataValue = 5;
+
+  // Boolean value
+  optional bool boolValue = 6;
+
+  // Date value (string-encoded, likely ISO-8601)
+  optional string dateValue = 7;
+
+  // Array of values
+  repeated Value arrayValues = 8;
+
+  // Nested dictionary
+  optional Dictionary dictionaryValue = 9;
+}

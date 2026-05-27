@@ -1,0 +1,27 @@
+syntax = "proto2";
+
+import "types/device/AVOutputDeviceDescriptor.proto";
+
+message MRAVEndpointDescriptor {
+  optional string name = 1;
+  optional string uniqueIdentifier = 2;
+  repeated AVOutputDeviceDescriptor outputDevices = 3;
+  optional AVOutputDeviceDescriptor designatedGroupLeader = 4;
+  optional bool isLocalEndpoint = 5;
+  optional string instanceIdentifier = 6;
+  optional bool isProxyGroupPlayer = 7;
+
+  enum ConnectionType {
+    Unknown = 0;
+    Local = 1;
+    Direct = 2;
+    Relay = 3;
+    AirPlaySender = 4;
+    RemoteHosted = 5;
+    LocalHosted = 6;
+  }
+  optional ConnectionType connectionType = 8;
+
+  optional bool canModifyGroupMembership = 9;
+  repeated AVOutputDeviceDescriptor personalOutputDevices = 10;
+}

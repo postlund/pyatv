@@ -1,0 +1,12 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+import "types/playback/PlayerPath.proto";
+
+extend ProtocolMessage {
+  optional SetNowPlayingPlayerMessage setNowPlayingPlayerMessage = 51;
+}
+
+message SetNowPlayingPlayerMessage {
+  optional PlayerPath playerPath = 1;
+}

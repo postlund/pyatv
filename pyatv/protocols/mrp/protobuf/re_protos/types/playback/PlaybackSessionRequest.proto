@@ -1,0 +1,11 @@
+syntax = "proto2";
+import "foundation/Dictionary.proto";
+import "types/playback/PlayerPath.proto";
+message PlaybackSessionRequest {
+  optional string requestID = 1;
+  optional string identifier = 2;
+  optional string type = 5;
+  optional PlayerPath destinationPlayerPath = 6;
+  optional Dictionary destinationCommandInfo = 7;
+  optional bool isPreflight = 8;
+}

@@ -1,0 +1,14 @@
+// GroupSessionInfo.proto
+syntax = "proto2";
+
+import "foundation/Common.proto";
+
+message GroupSessionInfo {
+  required string identifier = 1;
+  // NOTE: In the provided writeTo, fields 3 and 4 are only written if hostDisplayName is non-null.
+  optional string hostDisplayName = 2;
+  optional GroupSessionRouteType.Enum  routeType = 3;
+  optional bool hosted = 4;
+  optional string equivalentMediaIdentifier = 5;
+  optional bool placeholder = 6;
+}

@@ -1,0 +1,8 @@
+syntax = "proto2";
+
+import "types/audio/AudioFormatSettingsMessage.proto";
+
+message VoiceInputDeviceDescriptor {
+  repeated AudioFormatSettings supported_formats = 1;
+  optional AudioFormatSettings default_format = 2;
+}

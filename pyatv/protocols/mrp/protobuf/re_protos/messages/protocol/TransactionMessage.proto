@@ -1,0 +1,15 @@
+syntax = "proto2";
+
+import "types/transaction/TransactionPackets.proto";
+import "protocol/ProtocolMessage.proto";
+import "types/playback/PlayerPath.proto";
+
+extend ProtocolMessage {
+  optional TransactionMessage transactionMessage = 38;
+}
+
+message TransactionMessage {
+    optional uint64 name = 1;
+    optional TransactionPackets packets = 2;
+    optional PlayerPath playerPath = 3;
+}

@@ -1,0 +1,14 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+
+extend ProtocolMessage {
+  optional CreateHostedEndpointRequestMessage createHostedEndpointRequestMessage = 95;
+}
+
+// Request to create a hosted endpoint with specified output devices
+message CreateHostedEndpointRequestMessage {
+  repeated string outputDeviceUIDs = 1;
+}
+//    CreatedHostedEndpointRequestMessage.ts
+//    CreateHostedEndpointRequestMessage.ts

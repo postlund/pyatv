@@ -1,0 +1,9 @@
+syntax = "proto2";
+
+message GameControllerDigitizer {
+  optional double x = 1;
+  optional double y = 2;
+
+  optional bool touchDown = 3;
+  optional uint64 timestamp = 4;
+}

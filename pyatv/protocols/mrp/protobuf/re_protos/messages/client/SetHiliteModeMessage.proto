@@ -1,0 +1,11 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+
+extend ProtocolMessage {
+  optional SetHiliteModeMessage setHiliteModeMessage = 44;
+}
+
+message SetHiliteModeMessage {
+  optional bool hiliteMode = 1;
+}

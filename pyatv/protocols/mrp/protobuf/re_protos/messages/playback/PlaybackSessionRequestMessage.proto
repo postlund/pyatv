@@ -1,0 +1,13 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+import "types/playback/PlayerPath.proto";
+import "types/playback/PlaybackSessionRequest.proto";
+extend ProtocolMessage {
+  optional PlaybackSessionRequestMessage playbackSessionRequestMessage = 73;
+}
+
+message PlaybackSessionRequestMessage {
+   optional PlaybackSessionRequest request = 1;
+  optional PlayerPath playerPath = 2;
+}

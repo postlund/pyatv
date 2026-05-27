@@ -1,0 +1,11 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+
+extend ProtocolMessage {
+  optional RegisterGameControllerResponseMessage registerGameControllerResponseMessage = 25;
+}
+
+message RegisterGameControllerResponseMessage {
+  optional uint64 controllerID = 1;
+}

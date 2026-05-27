@@ -1,0 +1,14 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+import "types/connection/ApplicationConnectionContext.proto";
+import "types/connection/ApplicationConnectionRequestInfo.proto";
+
+extend ProtocolMessage {
+  optional CreateApplicationConnectionMessage createApplicationConnectionMessage = 105;
+}
+
+message CreateApplicationConnectionMessage {
+  optional ApplicationConnectionContext context = 1;
+  optional ApplicationConnectionRequestInfo requestInfo = 2;
+}

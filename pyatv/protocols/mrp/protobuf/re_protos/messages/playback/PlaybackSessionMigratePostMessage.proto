@@ -1,0 +1,21 @@
+
+
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+import "types/playback/PlaybackSessionMigrateRequest.proto";
+import "foundation/Dictionary.proto";
+import "foundation/Error.proto";
+import "types/playback/PlayerPath.proto";
+
+extend ProtocolMessage {
+  optional PlaybackSessionMigratePostMessage playbackSessionMigratePostMessage = 110;
+}
+
+message PlaybackSessionMigratePostMessage {
+  optional PlaybackSessionMigrateRequest request = 1;
+  optional PlayerPath playerPath = 2;
+  optional string setPlaybackSessionCommandId = 3;
+  optional Dictionary metrics = 4;
+  optional Error error = 5;
+}

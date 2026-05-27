@@ -1,0 +1,13 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+import "types/session/RequestDetails.proto";
+extend ProtocolMessage {
+  optional SetVolumeMessage setVolumeMessage = 55;
+}
+
+message SetVolumeMessage {
+  optional float volume = 1;
+  optional string outputDeviceUID = 2;
+   optional RequestDetails details = 3;
+}

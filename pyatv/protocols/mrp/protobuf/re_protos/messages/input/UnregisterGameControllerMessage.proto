@@ -1,0 +1,11 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+
+extend ProtocolMessage {
+  optional UnregisterGameControllerMessage unregisterGameControllerMessage = 26;
+}
+
+message UnregisterGameControllerMessage {
+  optional uint64 controllerID = 1;
+}

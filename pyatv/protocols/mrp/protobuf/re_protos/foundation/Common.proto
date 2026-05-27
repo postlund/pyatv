@@ -1,0 +1,264 @@
+syntax = "proto2";
+
+message RepeatMode {
+  enum Enum {
+    Unknown = 0;
+    Off = 1;
+    One = 2;
+    All = 3;
+  }
+}
+
+message ShuffleMode {
+  enum Enum {
+    Unknown = 0;
+    Off = 1;
+    Albums = 2;
+    Songs = 3;
+  }
+}
+
+message DeviceClass {
+  enum Enum {
+    Invalid       = 0;
+    iPhone        = 1;
+    iPod          = 2;
+    iPad          = 3;
+    AppleTV       = 4;
+    iFPGA         = 5;
+    Watch         = 6;
+    Accessory     = 7;
+    Bridge        = 8;
+    Mac           = 9;
+    Android       = 10;
+    Web           = 11;
+    AppleDisplay  = 12;
+    RealityDevice = 13;
+  }
+}
+
+message DeviceType {
+  enum Enum {
+    Unknown = 0;
+    AirPlay = 1;
+    Bluetooth = 2;
+    CarPlay = 3;
+    BuiltIn = 4;
+    Wired = 5;
+  }
+}
+
+message DeviceSubType {
+  enum Enum {
+    Default = 0;
+    Speaker = 1;
+    Headphones = 2;
+    Headset = 3;
+    Receiver = 4;
+    LineOut = 5;
+    USB = 6;
+    DisplayPort = 7;
+    HDMI = 8;
+    LowEnergy = 9;
+    SPDIF = 10;
+    TV = 11;
+    HomePod = 12;
+    AppleTV = 13;
+    Vehicle = 14;
+    Cluster = 15;
+    SetTopBox = 16;
+    TVStick = 17;
+    Mac = 18;
+    iOS = 19;
+    Watch = 20;
+    Vision = 21;
+  }
+}
+
+message PlaybackState {
+  enum Enum {
+    Unknown = 0;
+    Playing = 1;
+    Paused = 2;
+    Stopped = 3;
+    Interrupted = 4;
+    Seeking = 5;
+  }
+}
+
+
+message AudioTier {
+  enum Enum {
+    LowBandwidthStereo = 1;
+    HighQualityStereo = 2;
+    Lossless = 3;
+    HighResolutionLossless = 4;
+    Spatial = 5;
+  }
+}
+
+message SongTraits {
+  enum Enum {
+    None = 0;
+    AppleDigitalMaster = 1;
+    Lossless = 2;
+    HighResolutionLossless = 4;
+    Spatial = 8;
+    Atmos = 16;
+    Surround = 32;
+  }
+}
+
+message AlbumTraits {
+  enum Enum {
+    None = 0;
+    AppleDigitalMaster = 1;
+    Lossless = 2;
+    HighResolutionLossless = 4;
+    Spatial = 8;
+    Atmos = 16;
+    Surround = 32;
+  }
+}
+
+message PlaylistTraits {
+  enum Enum {
+    None = 0;
+    Spatial = 8;
+    Atmos = 16;
+    Surround = 32;
+  }
+}
+
+message ActiveFormatJustification {
+  enum Enum {
+    Unknown = 0;
+    Unavailable = 1;
+    UserPreference = 100;
+    UserDownload = 101;
+    RouteIncompatible = 500;
+    RouteUnknownCompatibility = 501;
+    BandwidthInsufficient = 1000;
+  }
+}
+
+message FormatTier {
+  enum Enum {
+    LowBandwidthStereo = 1;
+    HighQualityStereo = 2;
+    Lossless = 4;
+    HighResolutionLossless = 8;
+    Spatial = 16;
+  }
+}
+
+message AudioRouteType {
+  enum Enum {
+    Unknown = 0;
+    DevicesSpeaker = 1;
+    LineOut = 2;
+    Headphones = 3;
+    BluetoothHeadphones = 4;
+    BluetoothSpeaker = 5;
+    USBAudio = 6;
+    CarAudio = 7;
+    HDMI = 8;
+    AirPlay = 9;
+  }
+}
+message GroupSessionRouteType {
+
+  enum  Enum{
+    Unknown = 0;
+    CarKit = 1;
+    CarPlay = 2;
+    Speaker = 5;
+    HomePod = 8;
+    HomePodMini = 9;
+    AppleTV = 11;
+  }
+}
+message EndpointOptions {
+enum Enum {
+  None = 0;
+  UpdateActiveEndpoint = 1;
+  FallbackToAddOutputDevices = 2;
+  AllowMigrateToGroup = 4;
+  AllowMigrateFromGroup = 8;
+}
+    }
+
+
+message PlayerOptions {
+   enum Enum {
+  None = 0;
+  RestoreDestinationPlaybackState = 1;
+  PlayDestination = 2;
+  PauseSource = 4;
+  RestorePlaybackPosition = 8;
+  RestorePlaybackRate = 16;
+}
+}
+message RecipeType {
+  enum Enum {
+    NotPossible = 0;
+    Legacy = 1;
+    OneShot = 2;
+  }
+}
+
+message PlaybackSessionMigrateRequestEventRole {
+  enum Enum {
+    Unknown = 0;
+    Receptionist = 1;
+    Source = 2;
+    Destination = 3;
+    InApp = 4;
+    Hijacked = 5;
+    Group = 6;
+  }
+}
+
+message ClusterType {
+  enum Enum {
+    None = 0;
+    StereoPair = 1;
+    HomeTheater = 2;
+    GenericAudio = 3;
+  }
+}
+
+message VirtualTouchPhase {
+  enum Enum {
+    Unknown = 0;
+    Began = 1;
+    Moved = 2;
+    Stationary = 3;
+    Ended = 4;
+    Cancelled = 5;
+  }
+}
+
+message ReplaceIntent {
+  enum Enum {
+    NonDestructive = 1;
+    ClearUpNext = 2;
+    KeepUpNext = 3;
+    LeaveSharedSession = 4;
+  }
+}
+message PlaybackQueueType {
+  enum Enum {
+    Unknown = 1;
+    Generic = 2;
+    Custom = 3;
+    Empty = 4;
+  }
+}
+
+message ChangeType {
+  enum Enum {
+    Immediate = 0;
+    Deferrable = 1;
+  }
+}

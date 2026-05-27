@@ -1,0 +1,13 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+
+extend ProtocolMessage {
+  optional SetConversationDetectionEnabledMessage setConversationDetectionEnabledMessage = 102;
+}
+
+// Enable or disable conversation detection on an output device
+message SetConversationDetectionEnabledMessage {
+  optional bool enabled = 1;
+  optional string outputDeviceUID = 2;
+}

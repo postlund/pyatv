@@ -1,0 +1,13 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+
+extend ProtocolMessage {
+  optional VolumeMutedDidChangeMessage volumeMutedDidChangeMessage = 101;
+}
+
+// Notification that mute state changed on an output device
+message VolumeMutedDidChangeMessage {
+  optional bool isMuted = 1;
+  optional string outputDeviceUID = 2;
+}

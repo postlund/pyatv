@@ -1,0 +1,7 @@
+syntax = "proto2";
+import "types/playback/PlayerPath.proto";
+message ApplicationConnectionContext {
+  optional string identifier = 1;
+  optional string service_name = 2;
+  optional PlayerPath destination_player_path = 3;
+}

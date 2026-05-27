@@ -1,0 +1,9 @@
+syntax = "proto2";
+
+message PlaybackSession {
+  optional bytes playbackSessionData = 1;
+  optional string identifier = 2;
+  optional string type = 3;
+  optional string revision = 4;
+  optional bytes metadata = 5;
+}

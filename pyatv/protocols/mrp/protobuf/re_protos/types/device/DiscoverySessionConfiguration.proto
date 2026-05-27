@@ -1,0 +1,13 @@
+syntax = "proto2";
+
+message DiscoverySessionConfiguration {
+  // Bitmask of discovery features  Audio=1, Screen=2, Video=4, RemoteControl=8, Companion=256
+  optional int32 features = 1;
+  optional string routing_context_uid = 2;
+  optional bool enable_throttling = 3;
+  optional bool always_allow_updates = 4;
+  optional bool populates_external_device = 5;
+  optional string output_device_uid = 6;
+  optional uint32 target_session_id = 7;
+  optional bool cached_discovery_enabled = 8;
+}

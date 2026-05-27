@@ -1,0 +1,20 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+import "types/device/DiscoverySessionConfiguration.proto";
+extend ProtocolMessage {
+  optional SetDiscoveryModeMessage setDiscoveryModeMessage = 82;
+}
+
+message SetDiscoveryModeMessage {
+  enum Mode {
+    Disabled = 0;
+    Presence = 1;
+    InfraOnly = 2;
+    Detailed = 3;
+  }
+  optional Mode mode = 1;
+  // Bitmask of Features enum values (Audio=1, Screen=2, Video=4, RemoteControl=8, Companion=256)
+  optional int32 features = 2;
+  optional DiscoverySessionConfiguration configuration = 3;
+}

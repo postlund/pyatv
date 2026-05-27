@@ -1,0 +1,12 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+
+extend ProtocolMessage {
+  optional SetListeningModeMessage setListeningModeMessage = 92;
+}
+
+message SetListeningModeMessage {
+  optional string listeningMode = 1;
+  optional string outputDeviceUID = 2;
+}

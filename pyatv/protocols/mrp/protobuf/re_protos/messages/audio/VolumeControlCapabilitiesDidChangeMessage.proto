@@ -1,0 +1,15 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+import "messages/audio/VolumeControlAvailabilityMessage.proto";
+
+extend ProtocolMessage {
+  optional VolumeControlCapabilitiesDidChangeMessage volumeControlCapabilitiesDidChangeMessage = 68;
+}
+
+// NOTE(RE): matches MrVolumeControlCapabilitiesDidChangeMessage.proto - no differences found
+message VolumeControlCapabilitiesDidChangeMessage {
+  optional VolumeControlAvailabilityMessage capabilities = 1;
+  optional string endpointUID = 3;
+  optional string outputDeviceUID = 4;
+}

@@ -1,0 +1,13 @@
+syntax = "proto2";
+import "types/session/RequestDetails.proto";
+import "protocol/ProtocolMessage.proto";
+
+
+
+extend ProtocolMessage {
+  optional RequestGroupSessionMessage requestGroupSessionMessage = 104;
+}
+
+message RequestGroupSessionMessage {
+  optional RequestDetails details = 1;
+}

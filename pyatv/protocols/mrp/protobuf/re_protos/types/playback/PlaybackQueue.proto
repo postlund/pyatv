@@ -1,0 +1,21 @@
+syntax = "proto2";
+
+import "types/media/ContentItem.proto";
+import "types/playback/PlaybackQueueContext.proto";
+import "types/playback/PlayerPath.proto";
+import "foundation/Dictionary.proto";
+import "types/playback/PlaybackQueueParticipant.proto";
+
+message PlaybackQueue {
+  optional int32 location = 1;
+  repeated ContentItem contentItems = 2;
+  optional PlaybackQueueContext context = 3;
+  optional string requestId = 4;
+  optional PlayerPath resolvedPlayerPath = 5;
+  optional bool sendingPlaybackQueueTransaction = 6;
+  optional string queueIdentifier = 7;
+   repeated PlaybackQueueParticipant participants = 8;
+   repeated string homeUserIdentifiers = 9;
+   optional Dictionary properties = 10;
+   optional Dictionary auxiliaryNowPlayingInfo = 11;
+}

@@ -1,0 +1,6 @@
+syntax = "proto2";
+
+message DataArtwork {
+  optional string type = 1;
+  optional bytes image_data = 2;
+}

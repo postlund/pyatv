@@ -1,0 +1,14 @@
+syntax = "proto2";
+
+
+message UserIdentity {
+
+  enum Type {
+    Basic = 0;
+    Resolvable = 1;
+  }
+
+  optional string identifier = 1;
+  optional string displayName = 2;
+  optional Type type = 3;
+}

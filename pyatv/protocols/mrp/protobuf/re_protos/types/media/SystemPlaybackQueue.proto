@@ -1,0 +1,19 @@
+syntax = "proto2";
+
+
+
+import "types/media/SystemPlaybackCustomDataQueue.proto";
+import "types/media/SystemPlaybackGenericTrackListQueue.proto";
+import "foundation/Common.proto";
+
+
+message SystemPlaybackQueue {
+  optional PlaybackQueueType.Enum type = 1;
+  optional ReplaceIntent.Enum replaceIntent = 2;
+  optional bool isRequestingImmediatePlayback = 3;
+  optional string featureName = 4;
+  optional SystemPlaybackCustomDataQueue customData = 6;
+  optional SystemPlaybackGenericTracklistQueue tracklist = 7;
+  optional bytes userInfo = 8;
+  optional bytes metrics = 9;
+}

@@ -1,0 +1,7 @@
+syntax = "proto2";
+
+message TranscriptAlignment {
+  optional double start_time = 1;
+  optional double end_time = 2;
+  optional string text = 3;
+}

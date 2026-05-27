@@ -1,0 +1,15 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+import "types/device/MRAVEndpointDescriptor.proto";
+import "types/device/DiscoverySessionConfiguration.proto";
+
+extend ProtocolMessage {
+  optional DiscoveryUpdateEndpointsMessage discoveryUpdateEndpointsMessage = 90;
+}
+
+// From: MRDiscoveryUpdateEndpointsProtobufMessage
+message DiscoveryUpdateEndpointsMessage {
+  repeated MRAVEndpointDescriptor endpoints = 1;
+  optional DiscoverySessionConfiguration configuration = 2;
+}

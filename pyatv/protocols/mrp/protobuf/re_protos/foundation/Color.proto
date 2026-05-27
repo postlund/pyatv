@@ -1,0 +1,9 @@
+syntax = "proto2";
+
+
+message Color {
+  optional float red = 1;
+  optional float green = 2;
+  optional float blue = 3;
+  optional float alpha = 4;
+}

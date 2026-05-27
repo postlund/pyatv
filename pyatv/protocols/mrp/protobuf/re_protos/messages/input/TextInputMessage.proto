@@ -1,0 +1,23 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+
+extend ProtocolMessage {
+  optional TextInputMessage textInputMessage = 30;
+}
+
+message ActionType {
+  enum Enum {
+    Unknown = 0;
+    Insert = 1;
+    Set = 2;
+    Delete = 3;
+    ClearAction = 4;
+  }
+}
+
+message TextInputMessage {
+  optional double timestamp = 1;
+  optional string text = 2;
+  optional ActionType.Enum actionType = 3; // NOTE(RE): type is int32 in RE proto
+}

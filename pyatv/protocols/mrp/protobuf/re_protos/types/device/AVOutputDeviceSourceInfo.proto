@@ -1,0 +1,6 @@
+syntax = "proto2";
+
+message AVOutputDeviceSourceInfo {
+  optional string routingContextUID = 1;
+  optional bool multipleBuiltInDevices = 2;
+}

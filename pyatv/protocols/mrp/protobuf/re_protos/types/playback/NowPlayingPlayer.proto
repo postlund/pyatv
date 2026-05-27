@@ -1,0 +1,16 @@
+syntax = "proto2";
+
+message NowPlayingPlayer {
+  enum AudioSessionType {
+    Default = 0;
+    LongForm = 1;
+    Independent = 2;
+  }
+  optional string identifier = 1;
+  optional string displayName = 2;
+  optional bool isDefaultPlayer = 3; // NOTE(RE): field 3 (isDefaultPlayer) is absent in decompiled code
+  optional AudioSessionType audioSessionType = 4;
+  repeated int64 mxSessionIDs = 5;
+  optional uint32 audioSessionID = 6;
+  optional string iconURL = 7;
+}

@@ -1,0 +1,15 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+import "types/session/RequestDetails.proto";
+
+extend ProtocolMessage {
+  optional SetVolumeMutedMessage setVolumeMutedMessage = 100;
+}
+
+// Set muted state of an output device
+message SetVolumeMutedMessage {
+  optional bool isMuted = 1;
+  optional string outputDeviceUID = 2;
+  optional RequestDetails details = 3;
+}

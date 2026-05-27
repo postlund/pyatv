@@ -1,0 +1,8 @@
+syntax = "proto2";
+
+import "types/session/UserIdentity.proto";
+
+message PlaybackQueueParticipant {
+  optional string identifier = 1;
+  optional UserIdentity identity = 2;
+}

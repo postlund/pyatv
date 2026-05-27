@@ -1,0 +1,6 @@
+syntax = "proto2";
+
+message RemoteArtwork {
+  optional string url = 1;
+  optional string type = 2;
+}

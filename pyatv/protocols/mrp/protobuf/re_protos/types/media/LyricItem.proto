@@ -1,0 +1,11 @@
+syntax = "proto2";
+
+
+import "types/media/LyricsToken.proto";
+
+
+message LyricsItem {
+  optional string lyrics = 1;
+  optional bool userProvided = 2;
+  optional LyricsToken token = 3;
+}

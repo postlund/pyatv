@@ -1,0 +1,16 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+import "types/media/CommandInfo.proto";
+import "types/media/CommandOptions.proto";
+import "types/playback/PlayerPath.proto";
+
+extend ProtocolMessage {
+  optional SendCommandMessage sendCommandMessage = 6;
+}
+
+message SendCommandMessage {
+  optional Command command = 1;
+  optional CommandOptions options = 2;
+  optional PlayerPath playerPath = 3;
+}
