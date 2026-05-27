@@ -463,7 +463,7 @@ class PatchedIceCastClient(miniaudio.StreamableSource):
     def __init__(self, buffer: SemiSeekableBuffer, url: str) -> None:
         """Initialize a new PatchedIceCastClient instance."""
         self.url = url
-        self.error_message: Optional[str] = None
+        self.error: Optional[BaseException] = None
         self._stop_stream: bool = False
         self._buffer: SemiSeekableBuffer = buffer
         self._buffer_lock = threading.Lock()
@@ -509,8 +509,8 @@ class PatchedIceCastClient(miniaudio.StreamableSource):
         try:
             self._download_stream()
         except Exception as ex:
-            self.error_message = str(ex)
-            _LOGGER.debug("Error during streaming: %s", self.error_message)
+            self.error = ex
+            _LOGGER.warning("Error during streaming from %s: %s", self.url, ex)
         self._stop_stream = True
 
     def _download_stream(self) -> None:  # pylint: disable=too-many-branches
@@ -607,8 +607,14 @@ class InternetSource(AudioSource):
                 ),
             )
         except miniaudio.DecodeError as ex:
-            if source.error_message is not None:
-                raise ProtocolError(source.error_message) from ex
+            # Make sure the download thread has finished so any HTTP/network error
+            # it raised is captured in source.error before we inspect it. Otherwise
+            # we'd race the thread and re-raise the (less informative) DecodeError.
+            await loop.run_in_executor(None, source.close)
+            if source.error is not None:
+                raise ProtocolError(
+                    f"Failed to stream from {url}: {source.error}"
+                ) from source.error
             raise
 
         return cls(
