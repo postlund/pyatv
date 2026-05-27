@@ -20,7 +20,7 @@ def _open_file(file: io.BufferedIOBase) -> TinyTag:
 
 async def get_metadata(file: Union[str, io.BufferedIOBase]) -> MediaMetadata:
     """Extract metadata from a file and return it."""
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
 
     # TODO: TinyTag will always start by seeking to the end of a
     # file, which isn't possible for streaming buffers. So this

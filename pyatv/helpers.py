@@ -47,7 +47,7 @@ async def auto_connect(
             if not_found is not None:
                 await not_found()
 
-    loop = loop or asyncio.get_event_loop()
+    loop = loop or asyncio.get_running_loop()
     await _handle(loop)
 
 
@@ -95,7 +95,7 @@ async def is_streamable(filename: str) -> bool:
     file is missing or lack of permissions.
     """
     try:
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         await loop.run_in_executor(None, miniaudio.get_file_info, filename)
     except Exception:
         return False

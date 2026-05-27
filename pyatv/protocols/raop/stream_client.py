@@ -232,7 +232,7 @@ class StreamClient:
         settings: Settings,
     ):
         """Initialize a new StreamClient instance."""
-        self.loop = asyncio.get_event_loop()
+        self.loop = asyncio.get_running_loop()
         self.rtsp: RtspSession = rtsp
         self.context: StreamContext = context
         self.settings: Settings = settings

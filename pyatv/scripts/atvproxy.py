@@ -1403,7 +1403,7 @@ async def publish_mrp_service(zconf: Zeroconf, address: str, port: int, name: st
     }
 
     return await mdns.publish(
-        asyncio.get_event_loop(),
+        asyncio.get_running_loop(),
         mdns.Service(
             "_mediaremotetv._tcp.local", name, IPv4Address(address), port, properties
         ),
@@ -1426,7 +1426,7 @@ async def publish_companion_service(
     }
 
     return await mdns.publish(
-        asyncio.get_event_loop(),
+        asyncio.get_running_loop(),
         mdns.Service(
             "_companion-link._tcp.local",
             DEVICE_NAME,
@@ -1449,7 +1449,7 @@ async def publish_airplay_service(
     )
 
     return await mdns.publish(
-        asyncio.get_event_loop(),
+        asyncio.get_running_loop(),
         mdns.Service(
             "_airplay._tcp.local",
             DEVICE_NAME,
@@ -1461,16 +1461,15 @@ async def publish_airplay_service(
     )
 
 
-async def _start_mrp_proxy(loop, args, zconf: Zeroconf):
+async def _start_mrp_proxy(args, zconf: Zeroconf):
+    loop = asyncio.get_running_loop()
+
     def proxy_factory():
         try:
             proxy = MrpAppleTVProxy(
                 loop, args.remote_ip, args.remote_port, args.credentials
             )
-            asyncio.ensure_future(
-                proxy.start(),
-                loop=loop,
-            )
+            asyncio.ensure_future(proxy.start())
         except Exception:
             _LOGGER.exception("failed to start proxy")
             raise
@@ -1505,16 +1504,15 @@ async def _start_mrp_proxy(loop, args, zconf: Zeroconf):
     return unpublisher
 
 
-async def _start_companion_proxy(loop, args, zconf):
+async def _start_companion_proxy(args, zconf):
+    loop = asyncio.get_running_loop()
+
     def proxy_factory():
         try:
             proxy = CompanionAppleTVProxy(
                 loop, args.remote_ip, args.remote_port, args.credentials
             )
-            asyncio.ensure_future(
-                proxy.start(),
-                loop=loop,
-            )
+            asyncio.ensure_future(proxy.start())
         except Exception:
             _LOGGER.exception("failed to start proxy")
             raise
@@ -1547,7 +1545,9 @@ async def _start_companion_proxy(loop, args, zconf):
     return unpublisher
 
 
-async def _start_airplay_proxy(loop, args, zconf):
+async def _start_airplay_proxy(args, zconf):
+    loop = asyncio.get_running_loop()
+
     def proxy_factory():
         try:
             proxy = AirPlayAppleTVProxy(
@@ -1557,10 +1557,7 @@ async def _start_airplay_proxy(loop, args, zconf):
                 service.properties,
                 args.credentials,
             )
-            asyncio.ensure_future(
-                proxy.start(),
-                loop=loop,
-            )
+            asyncio.ensure_future(proxy.start())
         except Exception:
             _LOGGER.exception("failed to start proxy")
             raise
@@ -1592,7 +1589,8 @@ async def _start_airplay_proxy(loop, args, zconf):
     return unpublisher
 
 
-async def _start_relay(loop, args, zconf):
+async def _start_relay(args, zconf):
+    loop = asyncio.get_running_loop()
     _, protocol = await loop.create_connection(
         lambda: RemoteConnection(loop), args.remote_ip, args.remote_port
     )
@@ -1604,7 +1602,7 @@ async def _start_relay(loop, args, zconf):
     props = dict({(prop.split("=")[0], prop.split("=")[1]) for prop in args.properties})
 
     unpublisher = await mdns.publish(
-        asyncio.get_event_loop(),
+        asyncio.get_running_loop(),
         mdns.Service(
             args.service_type, args.name, IPv4Address(args.local_ip), port, props
         ),
@@ -1618,7 +1616,7 @@ async def _start_relay(loop, args, zconf):
     return unpublisher
 
 
-async def appstart(loop):
+async def appstart():
     """Start the asyncio event loop and runs the application."""
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(title="sub-commands", dest="command")
@@ -1667,13 +1665,13 @@ async def appstart(loop):
 
     zconf = Zeroconf()
     if args.command == "mrp":
-        unpublisher = await _start_mrp_proxy(loop, args, zconf)
+        unpublisher = await _start_mrp_proxy(args, zconf)
     elif args.command == "companion":
-        unpublisher = await _start_companion_proxy(loop, args, zconf)
+        unpublisher = await _start_companion_proxy(args, zconf)
     elif args.command == "airplay":
-        unpublisher = await _start_airplay_proxy(loop, args, zconf)
+        unpublisher = await _start_airplay_proxy(args, zconf)
     elif args.command == "relay":
-        unpublisher = await _start_relay(loop, args, zconf)
+        unpublisher = await _start_relay(args, zconf)
     else:
         unpublisher = None
 
@@ -1685,8 +1683,7 @@ async def appstart(loop):
 
 def main():
     """Application start here."""
-    loop = asyncio.get_event_loop()
-    return loop.run_until_complete(appstart(loop))
+    return asyncio.run(appstart())
 
 
 if __name__ == "__main__":

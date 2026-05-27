@@ -6,19 +6,17 @@ import sys
 from pyatv import pair, scan
 from pyatv.const import Protocol
 
-LOOP = asyncio.get_event_loop()
-
 
 # Method that is dispatched by the asyncio event loop
-async def pair_with_device(loop):
+async def pair_with_device():
     """Make it possible to pair with device."""
-    atvs = await scan(loop, timeout=5, protocol=Protocol.AirPlay)
+    atvs = await scan(timeout=5, protocol=Protocol.AirPlay)
 
     if not atvs:
         print("No device found", file=sys.stderr)
         return
 
-    pairing = await pair(atvs[0], Protocol.MRP, loop)
+    pairing = await pair(atvs[0], Protocol.MRP)
     await pairing.begin()
 
     pin = int(input("Enter PIN: "))
@@ -37,4 +35,4 @@ async def pair_with_device(loop):
 
 if __name__ == "__main__":
     # Setup event loop and connect
-    LOOP.run_until_complete(pair_with_device(LOOP))
+    asyncio.run(pair_with_device())

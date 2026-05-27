@@ -56,7 +56,7 @@ async def knock(address: IPv4Address, ports: List[int], timeout: float) -> None:
                 asyncio.create_task(_async_knock(address, port, knock_runtime))
             )
         )
-    _, pending = await asyncio.wait(tasks, return_when=FIRST_EXCEPTION)
+    _, pending = await asyncio.wait(set(tasks), return_when=FIRST_EXCEPTION)
     if pending:
         for task in pending:
             task.cancel()
@@ -68,7 +68,7 @@ async def knock(address: IPv4Address, ports: List[int], timeout: float) -> None:
 async def knocker(
     address: IPv4Address,
     ports: List[int],
-    loop: asyncio.AbstractEventLoop,
+    loop: asyncio.AbstractEventLoop = None,
     timeout: int = 4,
 ) -> asyncio.Future:
     """Continuously knock on a set of ports.

@@ -111,7 +111,7 @@ def scriptenv(fake_atv, udns, mockfs):
                             mock_knock.side_effect = _no_action
 
                             module = import_module(f"pyatv.scripts.{script}")
-                            exit_code = await module.appstart(loop)
+                            exit_code = await module.appstart()
                             stdout = out.getvalue()
                             stderr = err.getvalue()
                             return stdout, stderr, exit_code

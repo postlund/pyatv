@@ -181,7 +181,7 @@ class AbstractPushUpdater(PushUpdater):
     def __init__(self, state_dispatcher: ProtocolStateDispatcher):
         """Initialize a new AbstractPushUpdater."""
         super().__init__()
-        self.loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()
+        self.loop: asyncio.AbstractEventLoop = asyncio.get_running_loop()
         self.state_dispatcher = state_dispatcher
         self._previous_state: Optional[Playing] = None
 

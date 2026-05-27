@@ -10,11 +10,9 @@ NAME = "My Apple TV"
 ADDRESS = "10.0.10.22"
 HSGID = "00000000-1111-2222-3333-444444444444"
 
-LOOP = asyncio.get_event_loop()
-
 
 # Method that is dispatched by the asyncio event loop
-async def print_what_is_playing(loop):
+async def print_what_is_playing():
     """Connect to device and print what is playing."""
     config = conf.AppleTV(ADDRESS, NAME)
     config.add_service(
@@ -22,7 +20,7 @@ async def print_what_is_playing(loop):
     )
 
     print(f"Connecting to {config.address}")
-    atv = await connect(config, loop)
+    atv = await connect(config)
 
     try:
         print(await atv.metadata.playing())
@@ -33,4 +31,4 @@ async def print_what_is_playing(loop):
 
 if __name__ == "__main__":
     # Setup event loop and connect
-    LOOP.run_until_complete(print_what_is_playing(LOOP))
+    asyncio.run(print_what_is_playing())

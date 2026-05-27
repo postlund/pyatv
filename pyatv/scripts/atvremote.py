@@ -48,14 +48,15 @@ def _print_commands(title, api):
     print(f"{title} commands:\n{commands}\n")
 
 
-async def _read_input(loop: asyncio.AbstractEventLoop, prompt: str):
+async def _read_input(prompt: str):
     sys.stdout.write(prompt)
     sys.stdout.flush()
+    loop = asyncio.get_running_loop()
     user_input = await loop.run_in_executor(None, sys.stdin.readline)
     return user_input.strip()
 
 
-async def _scan_for_device(args, timeout, storage: Storage, loop, protocol=None):
+async def _scan_for_device(args, timeout, storage: Storage, protocol=None):
     options = {"timeout": timeout, "protocol": protocol}
 
     if not args.name:
@@ -63,7 +64,7 @@ async def _scan_for_device(args, timeout, storage: Storage, loop, protocol=None)
     if args.scan_hosts:
         options["hosts"] = args.scan_hosts
 
-    atvs = await scan(loop, storage=storage, **options)
+    atvs = await scan(asyncio.get_running_loop(), storage=storage, **options)
 
     if args.name:
         devices = [atv for atv in atvs if atv.name == args.name]
@@ -85,11 +86,10 @@ async def _scan_for_device(args, timeout, storage: Storage, loop, protocol=None)
 class GlobalCommands:
     """Commands not bound to a specific device."""
 
-    def __init__(self, args, storage: Storage, loop):
+    def __init__(self, args, storage: Storage):
         """Initialize a new instance of GlobalCommands."""
         self.args = args
         self.storage = storage
-        self.loop = loop
 
     async def commands(self):
         """Print a list with available commands."""
@@ -148,7 +148,7 @@ class GlobalCommands:
     async def scan(self):
         """Scan for Apple TVs on the network."""
         atvs = await scan(
-            self.loop,
+            asyncio.get_running_loop(),
             hosts=self.args.scan_hosts,
             timeout=self.args.scan_timeout,
             protocol=self.args.scan_protocols,
@@ -169,7 +169,7 @@ class GlobalCommands:
             conf = _manual_device(self.args)
         else:
             conf = await _scan_for_device(
-                self.args, self.args.scan_timeout, self.storage, self.loop
+                self.args, self.args.scan_timeout, self.storage
             )
         if not conf:
             return 2
@@ -192,8 +192,9 @@ class GlobalCommands:
                 }
             )
 
+        loop = asyncio.get_running_loop()
         pairing = await pair(
-            conf, self.args.protocol, self.loop, storage=self.storage, **options
+            conf, self.args.protocol, loop, storage=self.storage, **options
         )
 
         try:
@@ -211,7 +212,7 @@ class GlobalCommands:
 
         # Ask for PIN if present or just wait for pairing to end
         if pairing.device_provides_pin:
-            pin = await _read_input(self.loop, "Enter PIN on screen: ")
+            pin = await _read_input("Enter PIN on screen: ")
             pairing.pin(pin)
         else:
             pairing.pin(self.args.pin_code)
@@ -228,7 +229,8 @@ class GlobalCommands:
                     " (press ENTER to stop)"
                 )
 
-            await self.loop.run_in_executor(None, sys.stdin.readline)
+            loop = asyncio.get_running_loop()
+            await loop.run_in_executor(None, sys.stdin.readline)
 
         await pairing.finish()
 
@@ -243,7 +245,7 @@ class GlobalCommands:
         """Wizard to set up a device."""
         print("Looking for devices...")
         atvs = await scan(
-            self.loop,
+            asyncio.get_running_loop(),
             hosts=self.args.scan_hosts,
             timeout=self.args.scan_timeout,
             storage=self.storage,
@@ -265,7 +267,7 @@ class GlobalCommands:
         index = 0
         while True:
             user_input = await _read_input(
-                self.loop, "Enter index of device to set up (q to quit): "
+                "Enter index of device to set up (q to quit): "
             )
             if user_input == "q":
                 return 0
@@ -289,7 +291,7 @@ class GlobalCommands:
         print("Pairing finished, trying to connect and get some metadata...")
 
         try:
-            atv = await connect(conf, self.loop, storage=self.storage)
+            atv = await connect(conf, asyncio.get_running_loop(), storage=self.storage)
         except Exception:
             _LOGGER.exception("Connect failed")
             print("Something failed when connecting, error is printed above.")
@@ -319,7 +321,8 @@ Press ENTER to continue
 """
             print(message)
             service.credentials = None
-            await self.loop.run_in_executor(None, sys.stdin.readline)
+            loop = asyncio.get_running_loop()
+            await loop.run_in_executor(None, sys.stdin.readline)
             return
         if service.pairing == PairingRequirement.NotNeeded:
             print(f"Ignoring {service.protocol.name} since pairing is not needed")
@@ -337,13 +340,14 @@ Press ENTER to continue
 
         print("Starting to pair", service.protocol)
 
-        pairing = await pair(conf, service.protocol, self.loop, storage=self.storage)
+        loop = asyncio.get_running_loop()
+        pairing = await pair(conf, service.protocol, loop, storage=self.storage)
 
         await pairing.begin()
 
         # Ask for PIN if present or just wait for pairing to end
         if pairing.device_provides_pin:
-            pin = await _read_input(self.loop, "Enter PIN on screen: ")
+            pin = await _read_input("Enter PIN on screen: ")
             pairing.pin(pin)
         else:
             pairing.pin(1234)
@@ -354,7 +358,7 @@ Press ENTER to continue
                 " (press ENTER when you are done)"
             )
 
-            await self.loop.run_in_executor(None, sys.stdin.readline)
+            await loop.run_in_executor(None, sys.stdin.readline)
 
         await pairing.finish()
 
@@ -363,7 +367,7 @@ Press ENTER to continue
             print(f"Successfully paired {service.protocol}, moving on...")
         else:
             print("Pairing did not succeed. Press ENTER to continue.")
-            await self.loop.run_in_executor(None, sys.stdin.readline)
+            await loop.run_in_executor(None, sys.stdin.readline)
 
     async def _wizard_password(self, service: BaseService) -> None:
         # Nothing to do if password is not required
@@ -372,7 +376,7 @@ Press ENTER to continue
             return
 
         service.password = await _read_input(
-            self.loop, f"Please enter password for {service.protocol}: "
+            f"Please enter password for {service.protocol}: "
         )
 
 
@@ -382,10 +386,9 @@ class DeviceCommands:
     These commands are not part of the API but are provided by atvremote.
     """
 
-    def __init__(self, atv, loop, storage: Storage, args):
+    def __init__(self, atv, storage: Storage, args):
         """Initialize a new instance of DeviceCommands."""
         self.atv = atv
-        self.loop = loop
         self.storage = storage
         self.args = args
 
@@ -395,7 +398,7 @@ class DeviceCommands:
         print("Type help for help and exit to quit")
 
         while True:
-            command = await _read_input(self.loop, "pyatv> ")
+            command = await _read_input("pyatv> ")
             if command.lower() == "exit":
                 break
 
@@ -404,7 +407,7 @@ class DeviceCommands:
                 continue
 
             await _handle_device_command(
-                self.args, command, self.atv, self.storage, self.loop
+                self.args, command, self.atv, self.storage
             )
 
     async def artwork_save(self, width=None, height=None, file_name="artwork"):
@@ -429,7 +432,8 @@ class DeviceCommands:
         print("Press ENTER to stop")
 
         self.atv.push_updater.start()
-        await self.loop.run_in_executor(None, sys.stdin.readline)
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(None, sys.stdin.readline)
         self.atv.push_updater.stop()
         return 0
 
@@ -473,10 +477,9 @@ class DeviceCommands:
 class SettingsCommands:
     """Commands to work with settings."""
 
-    def __init__(self, atv, loop, storage: Storage, args):
+    def __init__(self, atv, storage: Storage, args):
         """Initialize a new instance of SettingsCommand."""
         self.atv = atv
-        self.loop = loop
         self.storage = storage
         self.args = args
 
@@ -548,7 +551,7 @@ def _in_range(lower, upper, allow_none=False):
     return _checker
 
 
-async def cli_handler(loop):  # pylint: disable=too-many-statements,too-many-branches
+async def cli_handler():  # pylint: disable=too-many-statements,too-many-branches
     """Application starts here."""
     parser = create_common_parser()
 
@@ -712,26 +715,27 @@ async def cli_handler(loop):  # pylint: disable=too-many-statements,too-many-bra
 
     cmds = retrieve_commands(GlobalCommands)
 
+    loop = asyncio.get_running_loop()
     storage = get_storage(args, loop)
     await storage.load()
 
     try:
         if args.command[0] in cmds:
-            glob_cmds = GlobalCommands(args, storage, loop)
+            glob_cmds = GlobalCommands(args, storage)
             return await _exec_command(glob_cmds, args.command[0], print_result=False)
         if not args.manual:
-            config = await _autodiscover_device(args, storage, loop)
+            config = await _autodiscover_device(args, storage)
             if not config:
                 return 1
 
-            return await _handle_commands(args, config, storage, loop)
+            return await _handle_commands(args, config, storage)
 
         if args.port == 0 or args.address is None or args.protocol is None:
             _LOGGER.error("You must specify address, port and protocol in manual mode")
             return 1
 
         config = _manual_device(args)
-        return await _handle_commands(args, config, storage, loop)
+        return await _handle_commands(args, config, storage)
     finally:
         await storage.save()
 
@@ -743,9 +747,9 @@ def _print_found_apple_tvs(atvs, outstream):
         print(f"{apple_tv}\n", file=outstream)
 
 
-async def _autodiscover_device(args, storage: Storage, loop):
+async def _autodiscover_device(args, storage: Storage):
     apple_tv = await _scan_for_device(
-        args, args.scan_timeout, storage, loop, protocol=args.scan_protocols
+        args, args.scan_timeout, storage, protocol=args.scan_protocols
     )
     if not apple_tv:
         return None
@@ -859,10 +863,11 @@ def _extract_command_with_args(cmd):
     return command, _parse_args(command, args)
 
 
-async def _handle_commands(args, config, storage: Storage, loop):
+async def _handle_commands(args, config, storage: Storage):
     device_listener = DeviceListener()
     push_listener = PushListener()
     power_listener = PowerListener()
+    loop = asyncio.get_running_loop()
     atv = await connect(config, loop, protocol=args.protocol, storage=storage)
     atv.listener = device_listener
     atv.power.listener = power_listener
@@ -874,7 +879,7 @@ async def _handle_commands(args, config, storage: Storage, loop):
 
     try:
         for cmd in args.command:
-            ret = await _handle_device_command(args, cmd, atv, storage, loop)
+            ret = await _handle_device_command(args, cmd, atv, storage)
             if ret != 0:
                 return ret
     finally:
@@ -886,7 +891,7 @@ async def _handle_commands(args, config, storage: Storage, loop):
 
 # pylint: disable=too-many-return-statements disable=too-many-locals
 # pylint: disable=too-many-branches
-async def _handle_device_command(args, cmd, atv, storage: Storage, loop):
+async def _handle_device_command(args, cmd, atv, storage: Storage):
     device = retrieve_commands(DeviceCommands)
     settings = retrieve_commands(SettingsCommands)
     ctrl = retrieve_commands(interface.RemoteControl)
@@ -905,11 +910,11 @@ async def _handle_device_command(args, cmd, atv, storage: Storage, loop):
     cmd, cmd_args = _extract_command_with_args(cmd)
     if cmd in device:
         return await _exec_command(
-            DeviceCommands(atv, loop, storage, args), cmd, False, *cmd_args
+            DeviceCommands(atv, storage, args), cmd, False, *cmd_args
         )
     if cmd in settings:
         return await _exec_command(
-            SettingsCommands(atv, loop, storage, args), cmd, False, *cmd_args
+            SettingsCommands(atv, storage, args), cmd, False, *cmd_args
         )
     # NB: Needs to be above RemoteControl for now as volume_up/down exists in both
     # but implementations in Audio shall be called
@@ -990,12 +995,12 @@ def _pretty_print(data):
         print(data)
 
 
-async def appstart(loop):
+async def appstart():
     """Start the asyncio event loop and runs the application."""
 
-    async def _run_application(loop):
+    async def _run_application():
         try:
-            return await cli_handler(loop)
+            return await cli_handler()
 
         except KeyboardInterrupt:
             pass  # User pressed Ctrl+C, just ignore it
@@ -1010,7 +1015,7 @@ async def appstart(loop):
         return 1
 
     try:
-        return await _run_application(loop)
+        return await _run_application()
     except KeyboardInterrupt:
         pass
 
@@ -1019,8 +1024,7 @@ async def appstart(loop):
 
 def main():
     """Application start here."""
-    loop = asyncio.get_event_loop()
-    return loop.run_until_complete(appstart(loop))
+    return asyncio.run(appstart())
 
 
 if __name__ == "__main__":
