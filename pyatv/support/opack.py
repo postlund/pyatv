@@ -1,7 +1,6 @@
 """Support for the OPACK serialization format.
 
 Notes:
- * Absolute time (0x06) is not implemented (can unpack as integer, not pack)
  * Pack implementation does not implement UID referencing
  * Likely other cases missing
 """
@@ -14,6 +13,8 @@ from typing import Dict, Tuple, Type
 from uuid import UUID
 
 _SIZED_INT_TYPES: Dict[int, Type] = {}
+
+_OPACK_TIME_OFFSET: float = 978307200.0
 
 
 def _sized_int(value: int, size: int) -> int:
@@ -44,7 +45,9 @@ def _pack(data, object_list):
     elif isinstance(data, UUID):
         packed_bytes = b"\x05" + data.bytes
     elif isinstance(data, datetime):
-        raise NotImplementedError("absolute time")
+        packed_bytes = b"\x06" + struct.pack(
+            ">d", data.timestamp() - _OPACK_TIME_OFFSET
+        )
     elif isinstance(data, int):
         size_hint = getattr(data, "size", None)  # if created with _sized_int()
         if data < 0x28 and not size_hint:
@@ -154,8 +157,12 @@ def _unpack(data, object_list):
         value = UUID(bytes=data[1:17])
         remaining = data[17:]
     elif data[0] == 0x06:
-        # TODO: Dummy implementation: only parse as integer
-        value, remaining = int.from_bytes(data[1:9], byteorder="little"), data[9:]
+        value, remaining = (
+            datetime.fromtimestamp(
+                struct.unpack(">d", data[1:9])[0] + _OPACK_TIME_OFFSET
+            ),
+            data[9:],
+        )
     elif 0x08 <= data[0] <= 0x2F:
         value, remaining = data[0] - 8, data[1:]
         add_to_object_list = False
