@@ -353,6 +353,17 @@ class RemoteControl:
         """Press key menu."""
         raise exceptions.NotSupportedError()
 
+    async def send_command(
+        self,
+        command,
+        *,
+        wait_for_response: bool = True,
+        timeout: Optional[float] = None,
+        **kwargs,
+    ) -> None:
+        """Send a protocol-specific command (fire-and-forget or with response)."""
+        raise exceptions.NotSupportedError()
+
     @feature(12, "VolumeUp", "Increase volume (deprecated: use Audio.volume_up).")
     async def volume_up(self) -> None:
         """Press key volume up.
