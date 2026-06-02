@@ -606,7 +606,7 @@ class InternetSource(AudioSource):
                     sample_rate=sample_rate,
                 ),
             )
-        except miniaudio.DecodeError as ex:
+        except miniaudio.DecodeError:
             # Make sure the download thread has finished so any HTTP/network error
             # it raised is captured in source.error before we inspect it. Otherwise
             # we'd race the thread and re-raise the (less informative) DecodeError.
