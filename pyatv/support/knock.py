@@ -11,7 +11,7 @@ from asyncio.tasks import FIRST_EXCEPTION
 import errno
 from ipaddress import IPv4Address
 import logging
-from typing import List
+from typing import List, Optional
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -68,7 +68,7 @@ async def knock(address: IPv4Address, ports: List[int], timeout: float) -> None:
 async def knocker(
     address: IPv4Address,
     ports: List[int],
-    loop: asyncio.AbstractEventLoop,
+    loop: Optional[asyncio.AbstractEventLoop] = None,
     timeout: int = 4,
 ) -> asyncio.Future:
     """Continuously knock on a set of ports.

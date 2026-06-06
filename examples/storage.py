@@ -11,7 +11,7 @@ LOOP = asyncio.get_event_loop()
 
 async def connect_with_storage(host):
     """Connect to a device using a storage."""
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
 
     # Load the same storage that pyatv uses internally (e.g. in atvremote)
     storage = FileStorage.default_storage(loop)
