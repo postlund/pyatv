@@ -121,14 +121,15 @@ async def connect(request):
     if device_id in request.app["atv"]:
         return web.Response(text=f"Already connected to {device_id}")
 
-    results = await pyatv.scan(identifier=device_id, loop=loop)
+    loop = asyncio.get_running_loop()
+    results = await pyatv.scan(loop, identifier=device_id)
     if not results:
         return web.Response(text="Device not found", status=500)
 
     add_credentials(results[0], request.query)
 
     try:
-        atv = await pyatv.connect(results[0], loop=loop)
+        atv = await pyatv.connect(results[0], loop)
     except Exception as ex:
         return web.Response(text=f"Failed to connect to device: {ex}", status=500)
 
