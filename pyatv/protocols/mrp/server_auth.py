@@ -93,21 +93,22 @@ class MrpServerAuth(ABC):
         resp = messages.create(
             protobuf.DEVICE_INFO_MESSAGE, identifier=message.identifier
         )
-        resp.inner().uniqueIdentifier = self.unique_id
-        resp.inner().name = self.device_name
-        resp.inner().localizedModelName = self.device_name
-        resp.inner().systemBuildVersion = "17K449"
-        resp.inner().applicationBundleIdentifier = "com.apple.mediaremoted"
-        resp.inner().protocolVersion = 1
-        resp.inner().lastSupportedMessageType = 77
-        resp.inner().supportsSystemPairing = True
-        resp.inner().allowsPairing = True
-        resp.inner().systemMediaApplication = "com.apple.TVMusic"
-        resp.inner().supportsACL = True
-        resp.inner().supportsSharedQueue = True
-        resp.inner().supportsExtendedMotion = True
-        resp.inner().sharedQueueVersion = 2
-        resp.inner().deviceClass = 4
+        inner = protobuf.extract_inner(resp)
+        inner.uniqueIdentifier = self.unique_id
+        inner.name = self.device_name
+        inner.localizedModelName = self.device_name
+        inner.systemBuildVersion = "17K449"
+        inner.applicationBundleIdentifier = "com.apple.mediaremoted"
+        inner.protocolVersion = 1
+        inner.lastSupportedMessageType = 77
+        inner.supportsSystemPairing = True
+        inner.allowsPairing = True
+        inner.systemMediaApplication = "com.apple.TVMusic"
+        inner.supportsACL = True
+        inner.supportsSharedQueue = True
+        inner.supportsExtendedMotion = True
+        inner.sharedQueueVersion = 2
+        inner.deviceClass = 4
         self.send_to_client(resp)
 
     def handle_crypto_pairing(self, message, inner):

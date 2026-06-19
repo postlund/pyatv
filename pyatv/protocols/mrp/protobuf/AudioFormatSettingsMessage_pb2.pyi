@@ -3,25 +3,34 @@
 isort:skip_file
 """
 
-import builtins
-import google.protobuf.descriptor
-import google.protobuf.message
-import typing
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+import builtins as _builtins
+import sys
+import typing as _typing
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
+else:
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-@typing.final
-class AudioFormatSettings(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-    FORMATSETTINGSPLISTDATA_FIELD_NUMBER: builtins.int
-    formatSettingsPlistData: builtins.bytes
+@_typing.final
+class AudioFormatSettings(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    FORMATSETTINGSPLISTDATA_FIELD_NUMBER: _builtins.int
+    formatSettingsPlistData: _builtins.bytes
     def __init__(
         self,
         *,
-        formatSettingsPlistData: builtins.bytes | None = ...,
+        formatSettingsPlistData: _builtins.bytes | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["formatSettingsPlistData", b"formatSettingsPlistData"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["formatSettingsPlistData", b"formatSettingsPlistData"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["formatSettingsPlistData", b"formatSettingsPlistData"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["formatSettingsPlistData", b"formatSettingsPlistData"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___AudioFormatSettings = AudioFormatSettings
+Global___AudioFormatSettings: _TypeAlias = AudioFormatSettings  # noqa: Y015

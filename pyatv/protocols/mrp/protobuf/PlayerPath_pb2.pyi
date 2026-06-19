@@ -3,37 +3,46 @@
 isort:skip_file
 """
 
-import builtins
-import google.protobuf.descriptor
-import google.protobuf.message
-import pyatv.protocols.mrp.protobuf.NowPlayingClient_pb2
-import pyatv.protocols.mrp.protobuf.NowPlayingPlayer_pb2
-import pyatv.protocols.mrp.protobuf.Origin_pb2
-import typing
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from pyatv.protocols.mrp.protobuf import NowPlayingClient_pb2 as _NowPlayingClient_pb2
+from pyatv.protocols.mrp.protobuf import NowPlayingPlayer_pb2 as _NowPlayingPlayer_pb2
+from pyatv.protocols.mrp.protobuf import Origin_pb2 as _Origin_pb2
+import builtins as _builtins
+import sys
+import typing as _typing
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
+else:
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-@typing.final
-class PlayerPath(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-    ORIGIN_FIELD_NUMBER: builtins.int
-    CLIENT_FIELD_NUMBER: builtins.int
-    PLAYER_FIELD_NUMBER: builtins.int
-    @property
-    def origin(self) -> pyatv.protocols.mrp.protobuf.Origin_pb2.Origin: ...
-    @property
-    def client(self) -> pyatv.protocols.mrp.protobuf.NowPlayingClient_pb2.NowPlayingClient: ...
-    @property
-    def player(self) -> pyatv.protocols.mrp.protobuf.NowPlayingPlayer_pb2.NowPlayingPlayer: ...
+@_typing.final
+class PlayerPath(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    ORIGIN_FIELD_NUMBER: _builtins.int
+    CLIENT_FIELD_NUMBER: _builtins.int
+    PLAYER_FIELD_NUMBER: _builtins.int
+    @_builtins.property
+    def origin(self) -> _Origin_pb2.Origin: ...
+    @_builtins.property
+    def client(self) -> _NowPlayingClient_pb2.NowPlayingClient: ...
+    @_builtins.property
+    def player(self) -> _NowPlayingPlayer_pb2.NowPlayingPlayer: ...
     def __init__(
         self,
         *,
-        origin: pyatv.protocols.mrp.protobuf.Origin_pb2.Origin | None = ...,
-        client: pyatv.protocols.mrp.protobuf.NowPlayingClient_pb2.NowPlayingClient | None = ...,
-        player: pyatv.protocols.mrp.protobuf.NowPlayingPlayer_pb2.NowPlayingPlayer | None = ...,
+        origin: _Origin_pb2.Origin | None = ...,
+        client: _NowPlayingClient_pb2.NowPlayingClient | None = ...,
+        player: _NowPlayingPlayer_pb2.NowPlayingPlayer | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["client", b"client", "origin", b"origin", "player", b"player"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["client", b"client", "origin", b"origin", "player", b"player"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["client", b"client", "origin", b"origin", "player", b"player"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["client", b"client", "origin", b"origin", "player", b"player"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___PlayerPath = PlayerPath
+Global___PlayerPath: _TypeAlias = PlayerPath  # noqa: Y015

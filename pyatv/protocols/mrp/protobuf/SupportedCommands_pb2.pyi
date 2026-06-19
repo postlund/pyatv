@@ -3,28 +3,38 @@
 isort:skip_file
 """
 
-import builtins
-import collections.abc
-import google.protobuf.descriptor
-import google.protobuf.internal.containers
-import google.protobuf.message
-import pyatv.protocols.mrp.protobuf.CommandInfo_pb2
-import typing
+from collections import abc as _abc
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import containers as _containers
+from pyatv.protocols.mrp.protobuf import CommandInfo_pb2 as _CommandInfo_pb2
+import builtins as _builtins
+import sys
+import typing as _typing
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
+else:
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-@typing.final
-class SupportedCommands(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-    SUPPORTEDCOMMANDS_FIELD_NUMBER: builtins.int
-    @property
-    def supportedCommands(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[pyatv.protocols.mrp.protobuf.CommandInfo_pb2.CommandInfo]: ...
+@_typing.final
+class SupportedCommands(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    SUPPORTEDCOMMANDS_FIELD_NUMBER: _builtins.int
+    @_builtins.property
+    def supportedCommands(self) -> _containers.RepeatedCompositeFieldContainer[_CommandInfo_pb2.CommandInfo]: ...
     def __init__(
         self,
         *,
-        supportedCommands: collections.abc.Iterable[pyatv.protocols.mrp.protobuf.CommandInfo_pb2.CommandInfo] | None = ...,
+        supportedCommands: _abc.Iterable[_CommandInfo_pb2.CommandInfo] | None = ...,
     ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["supportedCommands", b"supportedCommands"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["supportedCommands", b"supportedCommands"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___SupportedCommands = SupportedCommands
+Global___SupportedCommands: _TypeAlias = SupportedCommands  # noqa: Y015

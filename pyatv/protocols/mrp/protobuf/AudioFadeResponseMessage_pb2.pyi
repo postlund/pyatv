@@ -3,30 +3,39 @@
 isort:skip_file
 """
 
-import builtins
-import google.protobuf.descriptor
-import google.protobuf.internal.extension_dict
-import google.protobuf.message
-import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import typing
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import extension_dict as _extension_dict
+from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as _ProtocolMessage_pb2
+import builtins as _builtins
+import sys
+import typing as _typing
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
+else:
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-@typing.final
-class AudioFadeResponseMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-    FADEDURATION_FIELD_NUMBER: builtins.int
-    fadeDuration: builtins.int
+@_typing.final
+class AudioFadeResponseMessage(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    FADEDURATION_FIELD_NUMBER: _builtins.int
+    fadeDuration: _builtins.int
     def __init__(
         self,
         *,
-        fadeDuration: builtins.int | None = ...,
+        fadeDuration: _builtins.int | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["fadeDuration", b"fadeDuration"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["fadeDuration", b"fadeDuration"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["fadeDuration", b"fadeDuration"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["fadeDuration", b"fadeDuration"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___AudioFadeResponseMessage = AudioFadeResponseMessage
+Global___AudioFadeResponseMessage: _TypeAlias = AudioFadeResponseMessage  # noqa: Y015
 
-AUDIOFADERESPONSEMESSAGE_FIELD_NUMBER: builtins.int
-audioFadeResponseMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___AudioFadeResponseMessage]
+AUDIOFADERESPONSEMESSAGE_FIELD_NUMBER: _builtins.int
+audioFadeResponseMessage: _extension_dict._ExtensionFieldDescriptor[_ProtocolMessage_pb2.ProtocolMessage, Global___AudioFadeResponseMessage]

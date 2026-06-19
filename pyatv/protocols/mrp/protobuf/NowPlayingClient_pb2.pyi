@@ -3,47 +3,56 @@
 isort:skip_file
 """
 
-import builtins
-import collections.abc
-import google.protobuf.descriptor
-import google.protobuf.internal.containers
-import google.protobuf.message
-import typing
+from collections import abc as _abc
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import containers as _containers
+import builtins as _builtins
+import sys
+import typing as _typing
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
+else:
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-@typing.final
-class NowPlayingClient(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-    PROCESSIDENTIFIER_FIELD_NUMBER: builtins.int
-    BUNDLEIDENTIFIER_FIELD_NUMBER: builtins.int
-    PARENTAPPLICATIONBUNDLEIDENTIFIER_FIELD_NUMBER: builtins.int
-    PROCESSUSERIDENTIFIER_FIELD_NUMBER: builtins.int
-    NOWPLAYINGVISIBILITY_FIELD_NUMBER: builtins.int
-    DISPLAYNAME_FIELD_NUMBER: builtins.int
-    BUNDLEIDENTIFIERHIERARCHYS_FIELD_NUMBER: builtins.int
-    processIdentifier: builtins.int
-    bundleIdentifier: builtins.str
-    parentApplicationBundleIdentifier: builtins.str
-    processUserIdentifier: builtins.int
-    nowPlayingVisibility: builtins.int
-    displayName: builtins.str
+@_typing.final
+class NowPlayingClient(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    PROCESSIDENTIFIER_FIELD_NUMBER: _builtins.int
+    BUNDLEIDENTIFIER_FIELD_NUMBER: _builtins.int
+    PARENTAPPLICATIONBUNDLEIDENTIFIER_FIELD_NUMBER: _builtins.int
+    PROCESSUSERIDENTIFIER_FIELD_NUMBER: _builtins.int
+    NOWPLAYINGVISIBILITY_FIELD_NUMBER: _builtins.int
+    DISPLAYNAME_FIELD_NUMBER: _builtins.int
+    BUNDLEIDENTIFIERHIERARCHYS_FIELD_NUMBER: _builtins.int
+    processIdentifier: _builtins.int
+    bundleIdentifier: _builtins.str
+    parentApplicationBundleIdentifier: _builtins.str
+    processUserIdentifier: _builtins.int
+    nowPlayingVisibility: _builtins.int
+    displayName: _builtins.str
     """   optional TintColor tintColor = 6;"""
-    @property
-    def bundleIdentifierHierarchys(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]: ...
+    @_builtins.property
+    def bundleIdentifierHierarchys(self) -> _containers.RepeatedScalarFieldContainer[_builtins.str]: ...
     def __init__(
         self,
         *,
-        processIdentifier: builtins.int | None = ...,
-        bundleIdentifier: builtins.str | None = ...,
-        parentApplicationBundleIdentifier: builtins.str | None = ...,
-        processUserIdentifier: builtins.int | None = ...,
-        nowPlayingVisibility: builtins.int | None = ...,
-        displayName: builtins.str | None = ...,
-        bundleIdentifierHierarchys: collections.abc.Iterable[builtins.str] | None = ...,
+        processIdentifier: _builtins.int | None = ...,
+        bundleIdentifier: _builtins.str | None = ...,
+        parentApplicationBundleIdentifier: _builtins.str | None = ...,
+        processUserIdentifier: _builtins.int | None = ...,
+        nowPlayingVisibility: _builtins.int | None = ...,
+        displayName: _builtins.str | None = ...,
+        bundleIdentifierHierarchys: _abc.Iterable[_builtins.str] | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["bundleIdentifier", b"bundleIdentifier", "displayName", b"displayName", "nowPlayingVisibility", b"nowPlayingVisibility", "parentApplicationBundleIdentifier", b"parentApplicationBundleIdentifier", "processIdentifier", b"processIdentifier", "processUserIdentifier", b"processUserIdentifier"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["bundleIdentifier", b"bundleIdentifier", "bundleIdentifierHierarchys", b"bundleIdentifierHierarchys", "displayName", b"displayName", "nowPlayingVisibility", b"nowPlayingVisibility", "parentApplicationBundleIdentifier", b"parentApplicationBundleIdentifier", "processIdentifier", b"processIdentifier", "processUserIdentifier", b"processUserIdentifier"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["bundleIdentifier", b"bundleIdentifier", "displayName", b"displayName", "nowPlayingVisibility", b"nowPlayingVisibility", "parentApplicationBundleIdentifier", b"parentApplicationBundleIdentifier", "processIdentifier", b"processIdentifier", "processUserIdentifier", b"processUserIdentifier"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["bundleIdentifier", b"bundleIdentifier", "bundleIdentifierHierarchys", b"bundleIdentifierHierarchys", "displayName", b"displayName", "nowPlayingVisibility", b"nowPlayingVisibility", "parentApplicationBundleIdentifier", b"parentApplicationBundleIdentifier", "processIdentifier", b"processIdentifier", "processUserIdentifier", b"processUserIdentifier"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___NowPlayingClient = NowPlayingClient
+Global___NowPlayingClient: _TypeAlias = NowPlayingClient  # noqa: Y015
