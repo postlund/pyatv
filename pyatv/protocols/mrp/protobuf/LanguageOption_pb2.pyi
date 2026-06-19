@@ -3,40 +3,49 @@
 isort:skip_file
 """
 
-import builtins
-import collections.abc
-import google.protobuf.descriptor
-import google.protobuf.internal.containers
-import google.protobuf.message
-import typing
+from collections import abc as _abc
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import containers as _containers
+import builtins as _builtins
+import sys
+import typing as _typing
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
+else:
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-@typing.final
-class LanguageOption(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-    TYPE_FIELD_NUMBER: builtins.int
-    LANGUAGETAG_FIELD_NUMBER: builtins.int
-    CHARACTERISTICS_FIELD_NUMBER: builtins.int
-    DISPLAYNAME_FIELD_NUMBER: builtins.int
-    IDENTIFIER_FIELD_NUMBER: builtins.int
-    type: builtins.int
-    languageTag: builtins.str
-    displayName: builtins.str
-    identifier: builtins.str
-    @property
-    def characteristics(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]: ...
+@_typing.final
+class LanguageOption(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    TYPE_FIELD_NUMBER: _builtins.int
+    LANGUAGETAG_FIELD_NUMBER: _builtins.int
+    CHARACTERISTICS_FIELD_NUMBER: _builtins.int
+    DISPLAYNAME_FIELD_NUMBER: _builtins.int
+    IDENTIFIER_FIELD_NUMBER: _builtins.int
+    type: _builtins.int
+    languageTag: _builtins.str
+    displayName: _builtins.str
+    identifier: _builtins.str
+    @_builtins.property
+    def characteristics(self) -> _containers.RepeatedScalarFieldContainer[_builtins.str]: ...
     def __init__(
         self,
         *,
-        type: builtins.int | None = ...,
-        languageTag: builtins.str | None = ...,
-        characteristics: collections.abc.Iterable[builtins.str] | None = ...,
-        displayName: builtins.str | None = ...,
-        identifier: builtins.str | None = ...,
+        type: _builtins.int | None = ...,
+        languageTag: _builtins.str | None = ...,
+        characteristics: _abc.Iterable[_builtins.str] | None = ...,
+        displayName: _builtins.str | None = ...,
+        identifier: _builtins.str | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["displayName", b"displayName", "identifier", b"identifier", "languageTag", b"languageTag", "type", b"type"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["characteristics", b"characteristics", "displayName", b"displayName", "identifier", b"identifier", "languageTag", b"languageTag", "type", b"type"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["displayName", b"displayName", "identifier", b"identifier", "languageTag", b"languageTag", "type", b"type"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["characteristics", b"characteristics", "displayName", b"displayName", "identifier", b"identifier", "languageTag", b"languageTag", "type", b"type"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___LanguageOption = LanguageOption
+Global___LanguageOption: _TypeAlias = LanguageOption  # noqa: Y015

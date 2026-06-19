@@ -3,34 +3,34 @@
 isort:skip_file
 """
 
-import builtins
-import collections.abc
-import google.protobuf.descriptor
-import google.protobuf.internal.containers
-import google.protobuf.internal.enum_type_wrapper
-import google.protobuf.internal.extension_dict
-import google.protobuf.message
-import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
+from collections import abc as _abc
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import containers as _containers
+from google.protobuf.internal import enum_type_wrapper as _enum_type_wrapper
+from google.protobuf.internal import extension_dict as _extension_dict
+from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as _ProtocolMessage_pb2
+import builtins as _builtins
 import sys
-import typing
+import typing as _typing
 
-if sys.version_info >= (3, 10):
-    import typing as typing_extensions
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
 else:
-    import typing_extensions
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-@typing.final
-class KeyboardState(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class KeyboardState(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
     class _Enum:
-        ValueType = typing.NewType("ValueType", builtins.int)
-        V: typing_extensions.TypeAlias = ValueType
+        ValueType = _typing.NewType("ValueType", _builtins.int)
+        V: _TypeAlias = ValueType  # noqa: Y015
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[KeyboardState._Enum.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    class _EnumEnumTypeWrapper(_enum_type_wrapper._EnumTypeWrapper[KeyboardState._Enum.ValueType], _builtins.type):
+        DESCRIPTOR: _descriptor.EnumDescriptor
         Unknown: KeyboardState._Enum.ValueType  # 0
         NotEditing: KeyboardState._Enum.ValueType  # 1
         DidBeginEditing: KeyboardState._Enum.ValueType  # 2
@@ -51,19 +51,24 @@ class KeyboardState(google.protobuf.message.Message):
     def __init__(
         self,
     ) -> None: ...
+    _HasFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___KeyboardState = KeyboardState
+Global___KeyboardState: _TypeAlias = KeyboardState  # noqa: Y015
 
-@typing.final
-class AutocapitalizationType(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class AutocapitalizationType(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
     class _Enum:
-        ValueType = typing.NewType("ValueType", builtins.int)
-        V: typing_extensions.TypeAlias = ValueType
+        ValueType = _typing.NewType("ValueType", _builtins.int)
+        V: _TypeAlias = ValueType  # noqa: Y015
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[AutocapitalizationType._Enum.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    class _EnumEnumTypeWrapper(_enum_type_wrapper._EnumTypeWrapper[AutocapitalizationType._Enum.ValueType], _builtins.type):
+        DESCRIPTOR: _descriptor.EnumDescriptor
         Words: AutocapitalizationType._Enum.ValueType  # 1
         Sentences: AutocapitalizationType._Enum.ValueType  # 2
         AllCharacters: AutocapitalizationType._Enum.ValueType  # 3
@@ -76,19 +81,24 @@ class AutocapitalizationType(google.protobuf.message.Message):
     def __init__(
         self,
     ) -> None: ...
+    _HasFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___AutocapitalizationType = AutocapitalizationType
+Global___AutocapitalizationType: _TypeAlias = AutocapitalizationType  # noqa: Y015
 
-@typing.final
-class KeyboardType(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class KeyboardType(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
     class _Enum:
-        ValueType = typing.NewType("ValueType", builtins.int)
-        V: typing_extensions.TypeAlias = ValueType
+        ValueType = _typing.NewType("ValueType", _builtins.int)
+        V: _TypeAlias = ValueType  # noqa: Y015
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[KeyboardType._Enum.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    class _EnumEnumTypeWrapper(_enum_type_wrapper._EnumTypeWrapper[KeyboardType._Enum.ValueType], _builtins.type):
+        DESCRIPTOR: _descriptor.EnumDescriptor
         Default: KeyboardType._Enum.ValueType  # 0
         ASCII_Capable: KeyboardType._Enum.ValueType  # 1
         NumbersAndPunctuation: KeyboardType._Enum.ValueType  # 2
@@ -121,19 +131,24 @@ class KeyboardType(google.protobuf.message.Message):
     def __init__(
         self,
     ) -> None: ...
+    _HasFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___KeyboardType = KeyboardType
+Global___KeyboardType: _TypeAlias = KeyboardType  # noqa: Y015
 
-@typing.final
-class ReturnKeyType(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class ReturnKeyType(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
     class _Enum:
-        ValueType = typing.NewType("ValueType", builtins.int)
-        V: typing_extensions.TypeAlias = ValueType
+        ValueType = _typing.NewType("ValueType", _builtins.int)
+        V: _TypeAlias = ValueType  # noqa: Y015
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[ReturnKeyType._Enum.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    class _EnumEnumTypeWrapper(_enum_type_wrapper._EnumTypeWrapper[ReturnKeyType._Enum.ValueType], _builtins.type):
+        DESCRIPTOR: _descriptor.EnumDescriptor
         Default: ReturnKeyType._Enum.ValueType  # 0
         Go: ReturnKeyType._Enum.ValueType  # 1
         Google: ReturnKeyType._Enum.ValueType  # 2
@@ -164,98 +179,112 @@ class ReturnKeyType(google.protobuf.message.Message):
     def __init__(
         self,
     ) -> None: ...
+    _HasFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___ReturnKeyType = ReturnKeyType
+Global___ReturnKeyType: _TypeAlias = ReturnKeyType  # noqa: Y015
 
-@typing.final
-class TextInputTraits(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class TextInputTraits(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
-    AUTOCAPITALIZATIONTYPE_FIELD_NUMBER: builtins.int
-    KEYBOARDTYPE_FIELD_NUMBER: builtins.int
-    RETURNKEYTYPE_FIELD_NUMBER: builtins.int
-    AUTOCORRECTION_FIELD_NUMBER: builtins.int
-    SPELLCHECKING_FIELD_NUMBER: builtins.int
-    ENABLESRETURNKEYAUTOMATICALLY_FIELD_NUMBER: builtins.int
-    SECURETEXTENTRY_FIELD_NUMBER: builtins.int
-    VALIDTEXTRANGELOCATION_FIELD_NUMBER: builtins.int
-    VALIDTEXTRANGELENGTH_FIELD_NUMBER: builtins.int
-    PINENTRYSEPARATORINDEXES_FIELD_NUMBER: builtins.int
-    autocapitalizationType: global___AutocapitalizationType.Enum.ValueType
-    keyboardType: global___KeyboardType.Enum.ValueType
-    returnKeyType: global___ReturnKeyType.Enum.ValueType
-    autocorrection: builtins.bool
-    spellchecking: builtins.bool
-    enablesReturnKeyAutomatically: builtins.bool
-    secureTextEntry: builtins.bool
-    validTextRangeLocation: builtins.int
-    validTextRangeLength: builtins.int
-    @property
-    def pINEntrySeparatorIndexes(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.int]: ...
+    AUTOCAPITALIZATIONTYPE_FIELD_NUMBER: _builtins.int
+    KEYBOARDTYPE_FIELD_NUMBER: _builtins.int
+    RETURNKEYTYPE_FIELD_NUMBER: _builtins.int
+    AUTOCORRECTION_FIELD_NUMBER: _builtins.int
+    SPELLCHECKING_FIELD_NUMBER: _builtins.int
+    ENABLESRETURNKEYAUTOMATICALLY_FIELD_NUMBER: _builtins.int
+    SECURETEXTENTRY_FIELD_NUMBER: _builtins.int
+    VALIDTEXTRANGELOCATION_FIELD_NUMBER: _builtins.int
+    VALIDTEXTRANGELENGTH_FIELD_NUMBER: _builtins.int
+    PINENTRYSEPARATORINDEXES_FIELD_NUMBER: _builtins.int
+    autocapitalizationType: Global___AutocapitalizationType.Enum.ValueType
+    keyboardType: Global___KeyboardType.Enum.ValueType
+    returnKeyType: Global___ReturnKeyType.Enum.ValueType
+    autocorrection: _builtins.bool
+    spellchecking: _builtins.bool
+    enablesReturnKeyAutomatically: _builtins.bool
+    secureTextEntry: _builtins.bool
+    validTextRangeLocation: _builtins.int
+    validTextRangeLength: _builtins.int
+    @_builtins.property
+    def pINEntrySeparatorIndexes(self) -> _containers.RepeatedScalarFieldContainer[_builtins.int]: ...
     def __init__(
         self,
         *,
-        autocapitalizationType: global___AutocapitalizationType.Enum.ValueType | None = ...,
-        keyboardType: global___KeyboardType.Enum.ValueType | None = ...,
-        returnKeyType: global___ReturnKeyType.Enum.ValueType | None = ...,
-        autocorrection: builtins.bool | None = ...,
-        spellchecking: builtins.bool | None = ...,
-        enablesReturnKeyAutomatically: builtins.bool | None = ...,
-        secureTextEntry: builtins.bool | None = ...,
-        validTextRangeLocation: builtins.int | None = ...,
-        validTextRangeLength: builtins.int | None = ...,
-        pINEntrySeparatorIndexes: collections.abc.Iterable[builtins.int] | None = ...,
+        autocapitalizationType: Global___AutocapitalizationType.Enum.ValueType | None = ...,
+        keyboardType: Global___KeyboardType.Enum.ValueType | None = ...,
+        returnKeyType: Global___ReturnKeyType.Enum.ValueType | None = ...,
+        autocorrection: _builtins.bool | None = ...,
+        spellchecking: _builtins.bool | None = ...,
+        enablesReturnKeyAutomatically: _builtins.bool | None = ...,
+        secureTextEntry: _builtins.bool | None = ...,
+        validTextRangeLocation: _builtins.int | None = ...,
+        validTextRangeLength: _builtins.int | None = ...,
+        pINEntrySeparatorIndexes: _abc.Iterable[_builtins.int] | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["autocapitalizationType", b"autocapitalizationType", "autocorrection", b"autocorrection", "enablesReturnKeyAutomatically", b"enablesReturnKeyAutomatically", "keyboardType", b"keyboardType", "returnKeyType", b"returnKeyType", "secureTextEntry", b"secureTextEntry", "spellchecking", b"spellchecking", "validTextRangeLength", b"validTextRangeLength", "validTextRangeLocation", b"validTextRangeLocation"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["autocapitalizationType", b"autocapitalizationType", "autocorrection", b"autocorrection", "enablesReturnKeyAutomatically", b"enablesReturnKeyAutomatically", "keyboardType", b"keyboardType", "pINEntrySeparatorIndexes", b"pINEntrySeparatorIndexes", "returnKeyType", b"returnKeyType", "secureTextEntry", b"secureTextEntry", "spellchecking", b"spellchecking", "validTextRangeLength", b"validTextRangeLength", "validTextRangeLocation", b"validTextRangeLocation"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["autocapitalizationType", b"autocapitalizationType", "autocorrection", b"autocorrection", "enablesReturnKeyAutomatically", b"enablesReturnKeyAutomatically", "keyboardType", b"keyboardType", "returnKeyType", b"returnKeyType", "secureTextEntry", b"secureTextEntry", "spellchecking", b"spellchecking", "validTextRangeLength", b"validTextRangeLength", "validTextRangeLocation", b"validTextRangeLocation"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["autocapitalizationType", b"autocapitalizationType", "autocorrection", b"autocorrection", "enablesReturnKeyAutomatically", b"enablesReturnKeyAutomatically", "keyboardType", b"keyboardType", "pINEntrySeparatorIndexes", b"pINEntrySeparatorIndexes", "returnKeyType", b"returnKeyType", "secureTextEntry", b"secureTextEntry", "spellchecking", b"spellchecking", "validTextRangeLength", b"validTextRangeLength", "validTextRangeLocation", b"validTextRangeLocation"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___TextInputTraits = TextInputTraits
+Global___TextInputTraits: _TypeAlias = TextInputTraits  # noqa: Y015
 
-@typing.final
-class TextEditingAttributes(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class TextEditingAttributes(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
-    TITLE_FIELD_NUMBER: builtins.int
-    PROMPT_FIELD_NUMBER: builtins.int
-    INPUTTRAITS_FIELD_NUMBER: builtins.int
-    title: builtins.str
-    prompt: builtins.str
-    @property
-    def inputTraits(self) -> global___TextInputTraits: ...
+    TITLE_FIELD_NUMBER: _builtins.int
+    PROMPT_FIELD_NUMBER: _builtins.int
+    INPUTTRAITS_FIELD_NUMBER: _builtins.int
+    title: _builtins.str
+    prompt: _builtins.str
+    @_builtins.property
+    def inputTraits(self) -> Global___TextInputTraits: ...
     def __init__(
         self,
         *,
-        title: builtins.str | None = ...,
-        prompt: builtins.str | None = ...,
-        inputTraits: global___TextInputTraits | None = ...,
+        title: _builtins.str | None = ...,
+        prompt: _builtins.str | None = ...,
+        inputTraits: Global___TextInputTraits | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["inputTraits", b"inputTraits", "prompt", b"prompt", "title", b"title"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["inputTraits", b"inputTraits", "prompt", b"prompt", "title", b"title"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["inputTraits", b"inputTraits", "prompt", b"prompt", "title", b"title"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["inputTraits", b"inputTraits", "prompt", b"prompt", "title", b"title"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___TextEditingAttributes = TextEditingAttributes
+Global___TextEditingAttributes: _TypeAlias = TextEditingAttributes  # noqa: Y015
 
-@typing.final
-class KeyboardMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class KeyboardMessage(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
-    STATE_FIELD_NUMBER: builtins.int
-    ATTRIBUTES_FIELD_NUMBER: builtins.int
-    ENCRYPTEDTEXTCYPHERTEXT_FIELD_NUMBER: builtins.int
-    state: global___KeyboardState.Enum.ValueType
-    encryptedTextCyphertext: builtins.bytes
-    @property
-    def attributes(self) -> global___TextEditingAttributes: ...
+    STATE_FIELD_NUMBER: _builtins.int
+    ATTRIBUTES_FIELD_NUMBER: _builtins.int
+    ENCRYPTEDTEXTCYPHERTEXT_FIELD_NUMBER: _builtins.int
+    state: Global___KeyboardState.Enum.ValueType
+    encryptedTextCyphertext: _builtins.bytes
+    @_builtins.property
+    def attributes(self) -> Global___TextEditingAttributes: ...
     def __init__(
         self,
         *,
-        state: global___KeyboardState.Enum.ValueType | None = ...,
-        attributes: global___TextEditingAttributes | None = ...,
-        encryptedTextCyphertext: builtins.bytes | None = ...,
+        state: Global___KeyboardState.Enum.ValueType | None = ...,
+        attributes: Global___TextEditingAttributes | None = ...,
+        encryptedTextCyphertext: _builtins.bytes | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["attributes", b"attributes", "encryptedTextCyphertext", b"encryptedTextCyphertext", "state", b"state"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["attributes", b"attributes", "encryptedTextCyphertext", b"encryptedTextCyphertext", "state", b"state"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["attributes", b"attributes", "encryptedTextCyphertext", b"encryptedTextCyphertext", "state", b"state"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["attributes", b"attributes", "encryptedTextCyphertext", b"encryptedTextCyphertext", "state", b"state"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___KeyboardMessage = KeyboardMessage
+Global___KeyboardMessage: _TypeAlias = KeyboardMessage  # noqa: Y015
 
-KEYBOARDMESSAGE_FIELD_NUMBER: builtins.int
-keyboardMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___KeyboardMessage]
+KEYBOARDMESSAGE_FIELD_NUMBER: _builtins.int
+keyboardMessage: _extension_dict._ExtensionFieldDescriptor[_ProtocolMessage_pb2.ProtocolMessage, Global___KeyboardMessage]

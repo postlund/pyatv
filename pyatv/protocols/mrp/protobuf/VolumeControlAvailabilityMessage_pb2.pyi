@@ -3,32 +3,32 @@
 isort:skip_file
 """
 
-import builtins
-import google.protobuf.descriptor
-import google.protobuf.internal.enum_type_wrapper
-import google.protobuf.internal.extension_dict
-import google.protobuf.message
-import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import enum_type_wrapper as _enum_type_wrapper
+from google.protobuf.internal import extension_dict as _extension_dict
+from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as _ProtocolMessage_pb2
+import builtins as _builtins
 import sys
-import typing
+import typing as _typing
 
-if sys.version_info >= (3, 10):
-    import typing as typing_extensions
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
 else:
-    import typing_extensions
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-@typing.final
-class VolumeCapabilities(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class VolumeCapabilities(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
     class _Enum:
-        ValueType = typing.NewType("ValueType", builtins.int)
-        V: typing_extensions.TypeAlias = ValueType
+        ValueType = _typing.NewType("ValueType", _builtins.int)
+        V: _TypeAlias = ValueType  # noqa: Y015
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[VolumeCapabilities._Enum.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    class _EnumEnumTypeWrapper(_enum_type_wrapper._EnumTypeWrapper[VolumeCapabilities._Enum.ValueType], _builtins.type):
+        DESCRIPTOR: _descriptor.EnumDescriptor
         Relative: VolumeCapabilities._Enum.ValueType  # 1
         Absolute: VolumeCapabilities._Enum.ValueType  # 2
         Both: VolumeCapabilities._Enum.ValueType  # 3
@@ -45,27 +45,35 @@ class VolumeCapabilities(google.protobuf.message.Message):
     def __init__(
         self,
     ) -> None: ...
+    _HasFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___VolumeCapabilities = VolumeCapabilities
+Global___VolumeCapabilities: _TypeAlias = VolumeCapabilities  # noqa: Y015
 
-@typing.final
-class VolumeControlAvailabilityMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class VolumeControlAvailabilityMessage(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
-    VOLUMECONTROLAVAILABLE_FIELD_NUMBER: builtins.int
-    VOLUMECAPABILITIES_FIELD_NUMBER: builtins.int
-    volumeControlAvailable: builtins.bool
-    volumeCapabilities: global___VolumeCapabilities.Enum.ValueType
+    VOLUMECONTROLAVAILABLE_FIELD_NUMBER: _builtins.int
+    VOLUMECAPABILITIES_FIELD_NUMBER: _builtins.int
+    volumeControlAvailable: _builtins.bool
+    volumeCapabilities: Global___VolumeCapabilities.Enum.ValueType
     def __init__(
         self,
         *,
-        volumeControlAvailable: builtins.bool | None = ...,
-        volumeCapabilities: global___VolumeCapabilities.Enum.ValueType | None = ...,
+        volumeControlAvailable: _builtins.bool | None = ...,
+        volumeCapabilities: Global___VolumeCapabilities.Enum.ValueType | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["volumeCapabilities", b"volumeCapabilities", "volumeControlAvailable", b"volumeControlAvailable"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["volumeCapabilities", b"volumeCapabilities", "volumeControlAvailable", b"volumeControlAvailable"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["volumeCapabilities", b"volumeCapabilities", "volumeControlAvailable", b"volumeControlAvailable"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["volumeCapabilities", b"volumeCapabilities", "volumeControlAvailable", b"volumeControlAvailable"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___VolumeControlAvailabilityMessage = VolumeControlAvailabilityMessage
+Global___VolumeControlAvailabilityMessage: _TypeAlias = VolumeControlAvailabilityMessage  # noqa: Y015
 
-VOLUMECONTROLAVAILABILITYMESSAGE_FIELD_NUMBER: builtins.int
-volumeControlAvailabilityMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___VolumeControlAvailabilityMessage]
+VOLUMECONTROLAVAILABILITYMESSAGE_FIELD_NUMBER: _builtins.int
+volumeControlAvailabilityMessage: _extension_dict._ExtensionFieldDescriptor[_ProtocolMessage_pb2.ProtocolMessage, Global___VolumeControlAvailabilityMessage]

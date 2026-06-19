@@ -34,6 +34,7 @@ DEVICES = [
 
 async def print_what_is_playing(device, loop):
     """Find a device and print what is playing."""
+    loop = asyncio.get_running_loop()
     print(f"Discovering {device['name']} on network...")
     confs = await pyatv.scan(loop, identifier=device["identifiers"])
 

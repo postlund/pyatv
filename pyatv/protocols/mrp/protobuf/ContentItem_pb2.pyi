@@ -3,92 +3,104 @@
 isort:skip_file
 """
 
-import builtins
-import collections.abc
-import google.protobuf.descriptor
-import google.protobuf.internal.containers
-import google.protobuf.message
-import pyatv.protocols.mrp.protobuf.ContentItemMetadata_pb2
-import pyatv.protocols.mrp.protobuf.LanguageOption_pb2
-import typing
+from collections import abc as _abc
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import containers as _containers
+from pyatv.protocols.mrp.protobuf import ContentItemMetadata_pb2 as _ContentItemMetadata_pb2
+from pyatv.protocols.mrp.protobuf import LanguageOption_pb2 as _LanguageOption_pb2
+import builtins as _builtins
+import sys
+import typing as _typing
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
+else:
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-@typing.final
-class LanguageOptionGroup(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-    ALLOWEMPTYSELECTION_FIELD_NUMBER: builtins.int
-    DEFAULTLANGUAGEOPTION_FIELD_NUMBER: builtins.int
-    LANGUAGEOPTIONS_FIELD_NUMBER: builtins.int
-    allowEmptySelection: builtins.bool
-    @property
-    def defaultLanguageOption(self) -> pyatv.protocols.mrp.protobuf.LanguageOption_pb2.LanguageOption: ...
-    @property
-    def languageOptions(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[pyatv.protocols.mrp.protobuf.LanguageOption_pb2.LanguageOption]: ...
+@_typing.final
+class LanguageOptionGroup(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    ALLOWEMPTYSELECTION_FIELD_NUMBER: _builtins.int
+    DEFAULTLANGUAGEOPTION_FIELD_NUMBER: _builtins.int
+    LANGUAGEOPTIONS_FIELD_NUMBER: _builtins.int
+    allowEmptySelection: _builtins.bool
+    @_builtins.property
+    def defaultLanguageOption(self) -> _LanguageOption_pb2.LanguageOption: ...
+    @_builtins.property
+    def languageOptions(self) -> _containers.RepeatedCompositeFieldContainer[_LanguageOption_pb2.LanguageOption]: ...
     def __init__(
         self,
         *,
-        allowEmptySelection: builtins.bool | None = ...,
-        defaultLanguageOption: pyatv.protocols.mrp.protobuf.LanguageOption_pb2.LanguageOption | None = ...,
-        languageOptions: collections.abc.Iterable[pyatv.protocols.mrp.protobuf.LanguageOption_pb2.LanguageOption] | None = ...,
+        allowEmptySelection: _builtins.bool | None = ...,
+        defaultLanguageOption: _LanguageOption_pb2.LanguageOption | None = ...,
+        languageOptions: _abc.Iterable[_LanguageOption_pb2.LanguageOption] | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["allowEmptySelection", b"allowEmptySelection", "defaultLanguageOption", b"defaultLanguageOption"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["allowEmptySelection", b"allowEmptySelection", "defaultLanguageOption", b"defaultLanguageOption", "languageOptions", b"languageOptions"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["allowEmptySelection", b"allowEmptySelection", "defaultLanguageOption", b"defaultLanguageOption"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["allowEmptySelection", b"allowEmptySelection", "defaultLanguageOption", b"defaultLanguageOption", "languageOptions", b"languageOptions"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___LanguageOptionGroup = LanguageOptionGroup
+Global___LanguageOptionGroup: _TypeAlias = LanguageOptionGroup  # noqa: Y015
 
-@typing.final
-class ContentItem(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class ContentItem(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
-    IDENTIFIER_FIELD_NUMBER: builtins.int
-    METADATA_FIELD_NUMBER: builtins.int
-    ARTWORKDATA_FIELD_NUMBER: builtins.int
-    INFO_FIELD_NUMBER: builtins.int
-    AVAILABLELANGUAGEOPTIONS_FIELD_NUMBER: builtins.int
-    CURRENTLANGUAGEOPTIONS_FIELD_NUMBER: builtins.int
-    PARENTIDENTIFIER_FIELD_NUMBER: builtins.int
-    ANCESTORIDENTIFIER_FIELD_NUMBER: builtins.int
-    QUEUEIDENTIFIER_FIELD_NUMBER: builtins.int
-    REQUESTIDENTIFIER_FIELD_NUMBER: builtins.int
-    ARTWORKDATAWIDTH_FIELD_NUMBER: builtins.int
-    ARTWORKDATAHEIGHT_FIELD_NUMBER: builtins.int
-    identifier: builtins.str
-    artworkData: builtins.bytes
-    info: builtins.str
-    parentIdentifier: builtins.str
+    IDENTIFIER_FIELD_NUMBER: _builtins.int
+    METADATA_FIELD_NUMBER: _builtins.int
+    ARTWORKDATA_FIELD_NUMBER: _builtins.int
+    INFO_FIELD_NUMBER: _builtins.int
+    AVAILABLELANGUAGEOPTIONS_FIELD_NUMBER: _builtins.int
+    CURRENTLANGUAGEOPTIONS_FIELD_NUMBER: _builtins.int
+    PARENTIDENTIFIER_FIELD_NUMBER: _builtins.int
+    ANCESTORIDENTIFIER_FIELD_NUMBER: _builtins.int
+    QUEUEIDENTIFIER_FIELD_NUMBER: _builtins.int
+    REQUESTIDENTIFIER_FIELD_NUMBER: _builtins.int
+    ARTWORKDATAWIDTH_FIELD_NUMBER: _builtins.int
+    ARTWORKDATAHEIGHT_FIELD_NUMBER: _builtins.int
+    identifier: _builtins.str
+    artworkData: _builtins.bytes
+    info: _builtins.str
+    parentIdentifier: _builtins.str
     """ optional Lyrics lyrics = 7;
      repeated Sections sections = 8;
     """
-    ancestorIdentifier: builtins.str
-    queueIdentifier: builtins.str
-    requestIdentifier: builtins.str
-    artworkDataWidth: builtins.int
-    artworkDataHeight: builtins.int
-    @property
-    def metadata(self) -> pyatv.protocols.mrp.protobuf.ContentItemMetadata_pb2.ContentItemMetadata: ...
-    @property
-    def availableLanguageOptions(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___LanguageOptionGroup]: ...
-    @property
-    def currentLanguageOptions(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[pyatv.protocols.mrp.protobuf.LanguageOption_pb2.LanguageOption]: ...
+    ancestorIdentifier: _builtins.str
+    queueIdentifier: _builtins.str
+    requestIdentifier: _builtins.str
+    artworkDataWidth: _builtins.int
+    artworkDataHeight: _builtins.int
+    @_builtins.property
+    def metadata(self) -> _ContentItemMetadata_pb2.ContentItemMetadata: ...
+    @_builtins.property
+    def availableLanguageOptions(self) -> _containers.RepeatedCompositeFieldContainer[Global___LanguageOptionGroup]: ...
+    @_builtins.property
+    def currentLanguageOptions(self) -> _containers.RepeatedCompositeFieldContainer[_LanguageOption_pb2.LanguageOption]: ...
     def __init__(
         self,
         *,
-        identifier: builtins.str | None = ...,
-        metadata: pyatv.protocols.mrp.protobuf.ContentItemMetadata_pb2.ContentItemMetadata | None = ...,
-        artworkData: builtins.bytes | None = ...,
-        info: builtins.str | None = ...,
-        availableLanguageOptions: collections.abc.Iterable[global___LanguageOptionGroup] | None = ...,
-        currentLanguageOptions: collections.abc.Iterable[pyatv.protocols.mrp.protobuf.LanguageOption_pb2.LanguageOption] | None = ...,
-        parentIdentifier: builtins.str | None = ...,
-        ancestorIdentifier: builtins.str | None = ...,
-        queueIdentifier: builtins.str | None = ...,
-        requestIdentifier: builtins.str | None = ...,
-        artworkDataWidth: builtins.int | None = ...,
-        artworkDataHeight: builtins.int | None = ...,
+        identifier: _builtins.str | None = ...,
+        metadata: _ContentItemMetadata_pb2.ContentItemMetadata | None = ...,
+        artworkData: _builtins.bytes | None = ...,
+        info: _builtins.str | None = ...,
+        availableLanguageOptions: _abc.Iterable[Global___LanguageOptionGroup] | None = ...,
+        currentLanguageOptions: _abc.Iterable[_LanguageOption_pb2.LanguageOption] | None = ...,
+        parentIdentifier: _builtins.str | None = ...,
+        ancestorIdentifier: _builtins.str | None = ...,
+        queueIdentifier: _builtins.str | None = ...,
+        requestIdentifier: _builtins.str | None = ...,
+        artworkDataWidth: _builtins.int | None = ...,
+        artworkDataHeight: _builtins.int | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["ancestorIdentifier", b"ancestorIdentifier", "artworkData", b"artworkData", "artworkDataHeight", b"artworkDataHeight", "artworkDataWidth", b"artworkDataWidth", "identifier", b"identifier", "info", b"info", "metadata", b"metadata", "parentIdentifier", b"parentIdentifier", "queueIdentifier", b"queueIdentifier", "requestIdentifier", b"requestIdentifier"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["ancestorIdentifier", b"ancestorIdentifier", "artworkData", b"artworkData", "artworkDataHeight", b"artworkDataHeight", "artworkDataWidth", b"artworkDataWidth", "availableLanguageOptions", b"availableLanguageOptions", "currentLanguageOptions", b"currentLanguageOptions", "identifier", b"identifier", "info", b"info", "metadata", b"metadata", "parentIdentifier", b"parentIdentifier", "queueIdentifier", b"queueIdentifier", "requestIdentifier", b"requestIdentifier"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["ancestorIdentifier", b"ancestorIdentifier", "artworkData", b"artworkData", "artworkDataHeight", b"artworkDataHeight", "artworkDataWidth", b"artworkDataWidth", "identifier", b"identifier", "info", b"info", "metadata", b"metadata", "parentIdentifier", b"parentIdentifier", "queueIdentifier", b"queueIdentifier", "requestIdentifier", b"requestIdentifier"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["ancestorIdentifier", b"ancestorIdentifier", "artworkData", b"artworkData", "artworkDataHeight", b"artworkDataHeight", "artworkDataWidth", b"artworkDataWidth", "availableLanguageOptions", b"availableLanguageOptions", "currentLanguageOptions", b"currentLanguageOptions", "identifier", b"identifier", "info", b"info", "metadata", b"metadata", "parentIdentifier", b"parentIdentifier", "queueIdentifier", b"queueIdentifier", "requestIdentifier", b"requestIdentifier"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___ContentItem = ContentItem
+Global___ContentItem: _TypeAlias = ContentItem  # noqa: Y015

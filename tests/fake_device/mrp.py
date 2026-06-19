@@ -126,7 +126,7 @@ def _set_state_message(metadata, identifier):
     # Most things are hardcoded here for simplicity. Will change that
     # as time goes by and more dynamic content is needed.
     set_state = messages.create(protobuf.SET_STATE_MESSAGE)
-    inner = set_state.inner()
+    inner = protobuf.extract_inner(set_state)
     inner.playbackState = metadata.playback_state
     inner.displayName = "Fake Player"
 
@@ -246,14 +246,14 @@ class FakeMrpState:
 
         self.active_player = identifier
         now_playing = messages.create(protobuf.SET_NOW_PLAYING_CLIENT_MESSAGE)
-        client = now_playing.inner().client
+        client = protobuf.extract_inner(now_playing).client
         if identifier:
             client.bundleIdentifier = identifier
         self._send(now_playing)
 
     def item_update(self, metadata, identifier):
         msg = messages.create(protobuf.UPDATE_CONTENT_ITEM_MESSAGE)
-        inner = msg.inner()
+        inner = protobuf.extract_inner(msg)
 
         _fill_item(inner.contentItems.add(), metadata)
 
@@ -274,7 +274,7 @@ class FakeMrpState:
 
     def update_client(self, display_name, identifier):
         msg = messages.create(protobuf.UPDATE_CLIENT_MESSAGE)
-        client = msg.inner().client
+        client = protobuf.extract_inner(msg).client
         client.bundleIdentifier = identifier
         if display_name is not None:
             client.displayName = display_name
@@ -295,24 +295,29 @@ class FakeMrpState:
             capabilities = None
 
         msg = messages.create(protobuf.VOLUME_CONTROL_AVAILABILITY_MESSAGE)
-        msg.inner().volumeControlAvailable = available
-        msg.inner().volumeCapabilities = capabilities
+        protobuf.extract_inner(msg).volumeControlAvailable = available
+        protobuf.extract_inner(msg).volumeCapabilities = capabilities
         self._send(msg)
 
         msg = messages.create(protobuf.VOLUME_CONTROL_CAPABILITIES_DID_CHANGE_MESSAGE)
-        msg.inner().capabilities.volumeControlAvailable = available
-        msg.inner().capabilities.volumeCapabilities = capabilities
-        msg.inner().outputDeviceUID = DEVICE_UID
+        inner = protobuf.extract_inner(msg)
+        inner.capabilities.volumeControlAvailable = available
+        inner.capabilities.volumeCapabilities = capabilities
+        inner.outputDeviceUID = DEVICE_UID
         self._send(msg)
 
     def default_supported_commands(self, commands):
         msg = messages.create(protobuf.SET_DEFAULT_SUPPORTED_COMMANDS_MESSAGE)
-        supported_commands = msg.inner().supportedCommands.supportedCommands
+        supported_commands = protobuf.extract_inner(
+            msg
+        ).supportedCommands.supportedCommands
         for command in commands:
             item = supported_commands.add()
             item.command = command
             item.enabled = True
-        msg.inner().playerPath.client.bundleIdentifier = PLAYER_IDENTIFIER
+        protobuf.extract_inner(msg).playerPath.client.bundleIdentifier = (
+            PLAYER_IDENTIFIER
+        )
         self._send(msg)
 
     def set_volume(self, volume, device_uid):
@@ -320,8 +325,9 @@ class FakeMrpState:
             self.volume = volume
 
             msg = messages.create(protobuf.VOLUME_DID_CHANGE_MESSAGE)
-            msg.inner().outputDeviceUID = device_uid
-            msg.inner().volume = volume
+            inner = protobuf.extract_inner(msg)
+            inner.outputDeviceUID = device_uid
+            inner.volume = volume
             self._send(msg)
         else:
             _LOGGER.debug("Value %f out of range", volume)
@@ -417,11 +423,12 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
         resp = messages.device_information(info, DEVICE_UID, update=update)
         if identifier:
             resp.identifier = identifier
-        resp.inner().logicalDeviceCount = 1 if self.state.powered_on else 0
-        resp.inner().deviceUID = DEVICE_UID
-        resp.inner().modelID = DEVICE_MODEL
-        resp.inner().isGroupLeader = bool(len(self.state.output_devices) > 0)
-        resp.inner().isProxyGroupPlayer = bool(
+        inner = protobuf.extract_inner(resp)
+        inner.logicalDeviceCount = 1 if self.state.powered_on else 0
+        inner.deviceUID = DEVICE_UID
+        inner.modelID = DEVICE_MODEL
+        inner.isGroupLeader = bool(len(self.state.output_devices) > 0)
+        inner.isProxyGroupPlayer = bool(
             len(self.state.output_devices) > 0
             and DEVICE_UID not in self.state.output_devices
         )
@@ -431,7 +438,7 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
             device_info = protobuf.DeviceInfoMessage()
             device_info.name = f"Device {device[:2]}"
             device_info.deviceUID = device
-            resp.inner().groupedDevices.append(device_info)
+            protobuf.extract_inner(resp).groupedDevices.append(device_info)
         self.send_to_client(resp)
 
     def data_received(self, data):
@@ -455,7 +462,7 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
                 name = parsed.Type.Name(parsed.type).lower().replace("_message", "")
 
                 _LOGGER.debug("Received %s message", name)
-                getattr(self, "handle_" + name)(parsed, parsed.inner())
+                getattr(self, "handle_" + name)(parsed, protobuf.extract_inner(parsed))
             except AttributeError:
                 _LOGGER.exception("No message handler for %s", parsed)
             except Exception:
@@ -575,7 +582,9 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
             self.state.update_state(self.state.active_player)
             _LOGGER.debug("Skip backwards %d", inner.options.skipInterval)
         else:
-            _LOGGER.warning("Unhandled button press: %s", message.inner().command)
+            _LOGGER.warning(
+                "Unhandled button press: %s", protobuf.extract_inner(message).command
+            )
             self.send_to_client(
                 messages.command_result(
                     message.identifier, send_error=protobuf.SendError.NoCommandHandlers
@@ -595,7 +604,7 @@ class FakeMrpService(MrpServerAuth, asyncio.Protocol):
 
         artwork_data = self.state.states[self.state.active_player].artwork
         if artwork_data:
-            queue = setstate.inner().playbackQueue
+            queue = protobuf.extract_inner(setstate).playbackQueue
             queue.location = 0
             item = queue.contentItems.add()
             item.artworkData = artwork_data

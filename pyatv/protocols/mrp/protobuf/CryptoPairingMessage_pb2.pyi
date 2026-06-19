@@ -3,44 +3,53 @@
 isort:skip_file
 """
 
-import builtins
-import google.protobuf.descriptor
-import google.protobuf.internal.extension_dict
-import google.protobuf.message
-import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import typing
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import extension_dict as _extension_dict
+from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as _ProtocolMessage_pb2
+import builtins as _builtins
+import sys
+import typing as _typing
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
+else:
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-@typing.final
-class CryptoPairingMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-    PAIRINGDATA_FIELD_NUMBER: builtins.int
-    STATUS_FIELD_NUMBER: builtins.int
-    ISRETRYING_FIELD_NUMBER: builtins.int
-    ISUSINGSYSTEMPAIRING_FIELD_NUMBER: builtins.int
-    STATE_FIELD_NUMBER: builtins.int
-    pairingData: builtins.bytes
+@_typing.final
+class CryptoPairingMessage(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    PAIRINGDATA_FIELD_NUMBER: _builtins.int
+    STATUS_FIELD_NUMBER: _builtins.int
+    ISRETRYING_FIELD_NUMBER: _builtins.int
+    ISUSINGSYSTEMPAIRING_FIELD_NUMBER: _builtins.int
+    STATE_FIELD_NUMBER: _builtins.int
+    pairingData: _builtins.bytes
     """Example: <00010006 0101>"""
-    status: builtins.int
+    status: _builtins.int
     """Example: 0"""
-    isRetrying: builtins.bool
-    isUsingSystemPairing: builtins.bool
-    state: builtins.int
+    isRetrying: _builtins.bool
+    isUsingSystemPairing: _builtins.bool
+    state: _builtins.int
     def __init__(
         self,
         *,
-        pairingData: builtins.bytes | None = ...,
-        status: builtins.int | None = ...,
-        isRetrying: builtins.bool | None = ...,
-        isUsingSystemPairing: builtins.bool | None = ...,
-        state: builtins.int | None = ...,
+        pairingData: _builtins.bytes | None = ...,
+        status: _builtins.int | None = ...,
+        isRetrying: _builtins.bool | None = ...,
+        isUsingSystemPairing: _builtins.bool | None = ...,
+        state: _builtins.int | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["isRetrying", b"isRetrying", "isUsingSystemPairing", b"isUsingSystemPairing", "pairingData", b"pairingData", "state", b"state", "status", b"status"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["isRetrying", b"isRetrying", "isUsingSystemPairing", b"isUsingSystemPairing", "pairingData", b"pairingData", "state", b"state", "status", b"status"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["isRetrying", b"isRetrying", "isUsingSystemPairing", b"isUsingSystemPairing", "pairingData", b"pairingData", "state", b"state", "status", b"status"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["isRetrying", b"isRetrying", "isUsingSystemPairing", b"isUsingSystemPairing", "pairingData", b"pairingData", "state", b"state", "status", b"status"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___CryptoPairingMessage = CryptoPairingMessage
+Global___CryptoPairingMessage: _TypeAlias = CryptoPairingMessage  # noqa: Y015
 
-CRYPTOPAIRINGMESSAGE_FIELD_NUMBER: builtins.int
-cryptoPairingMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___CryptoPairingMessage]
+CRYPTOPAIRINGMESSAGE_FIELD_NUMBER: _builtins.int
+cryptoPairingMessage: _extension_dict._ExtensionFieldDescriptor[_ProtocolMessage_pb2.ProtocolMessage, Global___CryptoPairingMessage]

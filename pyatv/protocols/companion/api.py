@@ -153,6 +153,7 @@ class CompanionAPI(
         await self.system_info()
         await self._touch_start()
         await self._session_start()
+        await self._tv_rc_session_start()
         await self._text_input_start()
 
         await self.subscribe_event("_iMC")
@@ -196,7 +197,9 @@ class CompanionAPI(
                 "_bf": 0,
                 "_cf": 512,
                 "_clFl": 128,
-                "_i": info.rp_id,
+                # A null "_i" stops the device from pushing TVSystemStatus
+                # (power state) events; fall back to a stable identifier.
+                "_i": info.rp_id or info.device_id.replace(":", "").lower(),
                 "_idsID": creds.client_id,
                 # Not really device id here, but better then anything...
                 "_pubID": info.device_id,
@@ -220,6 +223,20 @@ class CompanionAPI(
         remote_sid = cast(Mapping[str, Any], resp["_c"])["_sid"]
         self.sid = (remote_sid << 32) | local_sid
         _LOGGER.debug("Started session with SID 0x%X", self.sid)
+
+    async def _tv_rc_session_start(self) -> None:
+        """Open a TV Remote Client session.
+
+        tvOS does not answer FetchAttentionState until a TV Remote
+        Client session is registered with the tvremoted process.
+        """
+        try:
+            resp = await self._send_command(
+                "TVRCSessionStart", {"ProtocolVersionKey": "1.2"}
+            )
+            _LOGGER.debug("Started TV RC session: %s", resp.get("_c"))
+        except Exception as ex:  # pylint: disable=broad-except
+            _LOGGER.debug("TVRCSessionStart not supported: %s", ex)
 
     async def _session_stop(self) -> None:
         await self._send_command(

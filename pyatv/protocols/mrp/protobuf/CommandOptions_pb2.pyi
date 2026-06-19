@@ -3,113 +3,122 @@
 isort:skip_file
 """
 
-import builtins
-import google.protobuf.descriptor
-import google.protobuf.message
-import pyatv.protocols.mrp.protobuf.Common_pb2
-import typing
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from pyatv.protocols.mrp.protobuf import Common_pb2 as _Common_pb2
+import builtins as _builtins
+import sys
+import typing as _typing
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
+else:
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-@typing.final
-class CommandOptions(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-    SOURCEID_FIELD_NUMBER: builtins.int
-    MEDIATYPE_FIELD_NUMBER: builtins.int
-    EXTERNALPLAYERCOMMAND_FIELD_NUMBER: builtins.int
-    SKIPINTERVAL_FIELD_NUMBER: builtins.int
-    PLAYBACKRATE_FIELD_NUMBER: builtins.int
-    RATING_FIELD_NUMBER: builtins.int
-    NEGATIVE_FIELD_NUMBER: builtins.int
-    PLAYBACKPOSITION_FIELD_NUMBER: builtins.int
-    REPEATMODE_FIELD_NUMBER: builtins.int
-    SHUFFLEMODE_FIELD_NUMBER: builtins.int
-    TRACKID_FIELD_NUMBER: builtins.int
-    RADIOSTATIONID_FIELD_NUMBER: builtins.int
-    RADIOSTATIONHASH_FIELD_NUMBER: builtins.int
-    SYSTEMAPPPLAYBACKQUEUEDATA_FIELD_NUMBER: builtins.int
-    DESTINATIONAPPDISPLAYID_FIELD_NUMBER: builtins.int
-    SENDOPTIONS_FIELD_NUMBER: builtins.int
-    REQUESTDEFERMENTTOPLAYBACKQUEUEPOSITION_FIELD_NUMBER: builtins.int
-    CONTEXTID_FIELD_NUMBER: builtins.int
-    SHOULDOVERRIDEMANUALLYCURATEDQUEUE_FIELD_NUMBER: builtins.int
-    STATIONURL_FIELD_NUMBER: builtins.int
-    SHOULDBEGINRADIOPLAYBACK_FIELD_NUMBER: builtins.int
-    PLAYBACKQUEUEINSERTIONPOSITION_FIELD_NUMBER: builtins.int
-    CONTENTITEMID_FIELD_NUMBER: builtins.int
-    PLAYBACKQUEUEOFFSET_FIELD_NUMBER: builtins.int
-    PLAYBACKQUEUEDESTINATIONOFFSET_FIELD_NUMBER: builtins.int
-    LANGUAGEOPTION_FIELD_NUMBER: builtins.int
-    PLAYBACKQUEUECONTEXT_FIELD_NUMBER: builtins.int
-    INSERTAFTERCONTENTITEMID_FIELD_NUMBER: builtins.int
-    NOWPLAYINGCONTENTITEMID_FIELD_NUMBER: builtins.int
-    REPLACEINTENT_FIELD_NUMBER: builtins.int
-    sourceId: builtins.str
-    mediaType: builtins.str
-    externalPlayerCommand: builtins.bool
-    skipInterval: builtins.float
-    playbackRate: builtins.float
-    rating: builtins.float
-    negative: builtins.bool
-    playbackPosition: builtins.float
-    repeatMode: pyatv.protocols.mrp.protobuf.Common_pb2.RepeatMode.Enum.ValueType
-    shuffleMode: pyatv.protocols.mrp.protobuf.Common_pb2.ShuffleMode.Enum.ValueType
-    trackID: builtins.int
-    radioStationID: builtins.int
-    radioStationHash: builtins.str
-    systemAppPlaybackQueueData: builtins.bytes
-    destinationAppDisplayID: builtins.str
-    sendOptions: builtins.int
-    requestDefermentToPlaybackQueuePosition: builtins.bool
-    contextID: builtins.str
-    shouldOverrideManuallyCuratedQueue: builtins.bool
-    stationURL: builtins.str
-    shouldBeginRadioPlayback: builtins.bool
-    playbackQueueInsertionPosition: builtins.int
-    contentItemID: builtins.str
-    playbackQueueOffset: builtins.int
-    playbackQueueDestinationOffset: builtins.int
-    languageOption: builtins.bytes
-    playbackQueueContext: builtins.bytes
-    insertAfterContentItemID: builtins.str
-    nowPlayingContentItemID: builtins.str
-    replaceIntent: builtins.int
+@_typing.final
+class CommandOptions(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    SOURCEID_FIELD_NUMBER: _builtins.int
+    MEDIATYPE_FIELD_NUMBER: _builtins.int
+    EXTERNALPLAYERCOMMAND_FIELD_NUMBER: _builtins.int
+    SKIPINTERVAL_FIELD_NUMBER: _builtins.int
+    PLAYBACKRATE_FIELD_NUMBER: _builtins.int
+    RATING_FIELD_NUMBER: _builtins.int
+    NEGATIVE_FIELD_NUMBER: _builtins.int
+    PLAYBACKPOSITION_FIELD_NUMBER: _builtins.int
+    REPEATMODE_FIELD_NUMBER: _builtins.int
+    SHUFFLEMODE_FIELD_NUMBER: _builtins.int
+    TRACKID_FIELD_NUMBER: _builtins.int
+    RADIOSTATIONID_FIELD_NUMBER: _builtins.int
+    RADIOSTATIONHASH_FIELD_NUMBER: _builtins.int
+    SYSTEMAPPPLAYBACKQUEUEDATA_FIELD_NUMBER: _builtins.int
+    DESTINATIONAPPDISPLAYID_FIELD_NUMBER: _builtins.int
+    SENDOPTIONS_FIELD_NUMBER: _builtins.int
+    REQUESTDEFERMENTTOPLAYBACKQUEUEPOSITION_FIELD_NUMBER: _builtins.int
+    CONTEXTID_FIELD_NUMBER: _builtins.int
+    SHOULDOVERRIDEMANUALLYCURATEDQUEUE_FIELD_NUMBER: _builtins.int
+    STATIONURL_FIELD_NUMBER: _builtins.int
+    SHOULDBEGINRADIOPLAYBACK_FIELD_NUMBER: _builtins.int
+    PLAYBACKQUEUEINSERTIONPOSITION_FIELD_NUMBER: _builtins.int
+    CONTENTITEMID_FIELD_NUMBER: _builtins.int
+    PLAYBACKQUEUEOFFSET_FIELD_NUMBER: _builtins.int
+    PLAYBACKQUEUEDESTINATIONOFFSET_FIELD_NUMBER: _builtins.int
+    LANGUAGEOPTION_FIELD_NUMBER: _builtins.int
+    PLAYBACKQUEUECONTEXT_FIELD_NUMBER: _builtins.int
+    INSERTAFTERCONTENTITEMID_FIELD_NUMBER: _builtins.int
+    NOWPLAYINGCONTENTITEMID_FIELD_NUMBER: _builtins.int
+    REPLACEINTENT_FIELD_NUMBER: _builtins.int
+    sourceId: _builtins.str
+    mediaType: _builtins.str
+    externalPlayerCommand: _builtins.bool
+    skipInterval: _builtins.float
+    playbackRate: _builtins.float
+    rating: _builtins.float
+    negative: _builtins.bool
+    playbackPosition: _builtins.float
+    repeatMode: _Common_pb2.RepeatMode.Enum.ValueType
+    shuffleMode: _Common_pb2.ShuffleMode.Enum.ValueType
+    trackID: _builtins.int
+    radioStationID: _builtins.int
+    radioStationHash: _builtins.str
+    systemAppPlaybackQueueData: _builtins.bytes
+    destinationAppDisplayID: _builtins.str
+    sendOptions: _builtins.int
+    requestDefermentToPlaybackQueuePosition: _builtins.bool
+    contextID: _builtins.str
+    shouldOverrideManuallyCuratedQueue: _builtins.bool
+    stationURL: _builtins.str
+    shouldBeginRadioPlayback: _builtins.bool
+    playbackQueueInsertionPosition: _builtins.int
+    contentItemID: _builtins.str
+    playbackQueueOffset: _builtins.int
+    playbackQueueDestinationOffset: _builtins.int
+    languageOption: _builtins.bytes
+    playbackQueueContext: _builtins.bytes
+    insertAfterContentItemID: _builtins.str
+    nowPlayingContentItemID: _builtins.str
+    replaceIntent: _builtins.int
     def __init__(
         self,
         *,
-        sourceId: builtins.str | None = ...,
-        mediaType: builtins.str | None = ...,
-        externalPlayerCommand: builtins.bool | None = ...,
-        skipInterval: builtins.float | None = ...,
-        playbackRate: builtins.float | None = ...,
-        rating: builtins.float | None = ...,
-        negative: builtins.bool | None = ...,
-        playbackPosition: builtins.float | None = ...,
-        repeatMode: pyatv.protocols.mrp.protobuf.Common_pb2.RepeatMode.Enum.ValueType | None = ...,
-        shuffleMode: pyatv.protocols.mrp.protobuf.Common_pb2.ShuffleMode.Enum.ValueType | None = ...,
-        trackID: builtins.int | None = ...,
-        radioStationID: builtins.int | None = ...,
-        radioStationHash: builtins.str | None = ...,
-        systemAppPlaybackQueueData: builtins.bytes | None = ...,
-        destinationAppDisplayID: builtins.str | None = ...,
-        sendOptions: builtins.int | None = ...,
-        requestDefermentToPlaybackQueuePosition: builtins.bool | None = ...,
-        contextID: builtins.str | None = ...,
-        shouldOverrideManuallyCuratedQueue: builtins.bool | None = ...,
-        stationURL: builtins.str | None = ...,
-        shouldBeginRadioPlayback: builtins.bool | None = ...,
-        playbackQueueInsertionPosition: builtins.int | None = ...,
-        contentItemID: builtins.str | None = ...,
-        playbackQueueOffset: builtins.int | None = ...,
-        playbackQueueDestinationOffset: builtins.int | None = ...,
-        languageOption: builtins.bytes | None = ...,
-        playbackQueueContext: builtins.bytes | None = ...,
-        insertAfterContentItemID: builtins.str | None = ...,
-        nowPlayingContentItemID: builtins.str | None = ...,
-        replaceIntent: builtins.int | None = ...,
+        sourceId: _builtins.str | None = ...,
+        mediaType: _builtins.str | None = ...,
+        externalPlayerCommand: _builtins.bool | None = ...,
+        skipInterval: _builtins.float | None = ...,
+        playbackRate: _builtins.float | None = ...,
+        rating: _builtins.float | None = ...,
+        negative: _builtins.bool | None = ...,
+        playbackPosition: _builtins.float | None = ...,
+        repeatMode: _Common_pb2.RepeatMode.Enum.ValueType | None = ...,
+        shuffleMode: _Common_pb2.ShuffleMode.Enum.ValueType | None = ...,
+        trackID: _builtins.int | None = ...,
+        radioStationID: _builtins.int | None = ...,
+        radioStationHash: _builtins.str | None = ...,
+        systemAppPlaybackQueueData: _builtins.bytes | None = ...,
+        destinationAppDisplayID: _builtins.str | None = ...,
+        sendOptions: _builtins.int | None = ...,
+        requestDefermentToPlaybackQueuePosition: _builtins.bool | None = ...,
+        contextID: _builtins.str | None = ...,
+        shouldOverrideManuallyCuratedQueue: _builtins.bool | None = ...,
+        stationURL: _builtins.str | None = ...,
+        shouldBeginRadioPlayback: _builtins.bool | None = ...,
+        playbackQueueInsertionPosition: _builtins.int | None = ...,
+        contentItemID: _builtins.str | None = ...,
+        playbackQueueOffset: _builtins.int | None = ...,
+        playbackQueueDestinationOffset: _builtins.int | None = ...,
+        languageOption: _builtins.bytes | None = ...,
+        playbackQueueContext: _builtins.bytes | None = ...,
+        insertAfterContentItemID: _builtins.str | None = ...,
+        nowPlayingContentItemID: _builtins.str | None = ...,
+        replaceIntent: _builtins.int | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["contentItemID", b"contentItemID", "contextID", b"contextID", "destinationAppDisplayID", b"destinationAppDisplayID", "externalPlayerCommand", b"externalPlayerCommand", "insertAfterContentItemID", b"insertAfterContentItemID", "languageOption", b"languageOption", "mediaType", b"mediaType", "negative", b"negative", "nowPlayingContentItemID", b"nowPlayingContentItemID", "playbackPosition", b"playbackPosition", "playbackQueueContext", b"playbackQueueContext", "playbackQueueDestinationOffset", b"playbackQueueDestinationOffset", "playbackQueueInsertionPosition", b"playbackQueueInsertionPosition", "playbackQueueOffset", b"playbackQueueOffset", "playbackRate", b"playbackRate", "radioStationHash", b"radioStationHash", "radioStationID", b"radioStationID", "rating", b"rating", "repeatMode", b"repeatMode", "replaceIntent", b"replaceIntent", "requestDefermentToPlaybackQueuePosition", b"requestDefermentToPlaybackQueuePosition", "sendOptions", b"sendOptions", "shouldBeginRadioPlayback", b"shouldBeginRadioPlayback", "shouldOverrideManuallyCuratedQueue", b"shouldOverrideManuallyCuratedQueue", "shuffleMode", b"shuffleMode", "skipInterval", b"skipInterval", "sourceId", b"sourceId", "stationURL", b"stationURL", "systemAppPlaybackQueueData", b"systemAppPlaybackQueueData", "trackID", b"trackID"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["contentItemID", b"contentItemID", "contextID", b"contextID", "destinationAppDisplayID", b"destinationAppDisplayID", "externalPlayerCommand", b"externalPlayerCommand", "insertAfterContentItemID", b"insertAfterContentItemID", "languageOption", b"languageOption", "mediaType", b"mediaType", "negative", b"negative", "nowPlayingContentItemID", b"nowPlayingContentItemID", "playbackPosition", b"playbackPosition", "playbackQueueContext", b"playbackQueueContext", "playbackQueueDestinationOffset", b"playbackQueueDestinationOffset", "playbackQueueInsertionPosition", b"playbackQueueInsertionPosition", "playbackQueueOffset", b"playbackQueueOffset", "playbackRate", b"playbackRate", "radioStationHash", b"radioStationHash", "radioStationID", b"radioStationID", "rating", b"rating", "repeatMode", b"repeatMode", "replaceIntent", b"replaceIntent", "requestDefermentToPlaybackQueuePosition", b"requestDefermentToPlaybackQueuePosition", "sendOptions", b"sendOptions", "shouldBeginRadioPlayback", b"shouldBeginRadioPlayback", "shouldOverrideManuallyCuratedQueue", b"shouldOverrideManuallyCuratedQueue", "shuffleMode", b"shuffleMode", "skipInterval", b"skipInterval", "sourceId", b"sourceId", "stationURL", b"stationURL", "systemAppPlaybackQueueData", b"systemAppPlaybackQueueData", "trackID", b"trackID"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["contentItemID", b"contentItemID", "contextID", b"contextID", "destinationAppDisplayID", b"destinationAppDisplayID", "externalPlayerCommand", b"externalPlayerCommand", "insertAfterContentItemID", b"insertAfterContentItemID", "languageOption", b"languageOption", "mediaType", b"mediaType", "negative", b"negative", "nowPlayingContentItemID", b"nowPlayingContentItemID", "playbackPosition", b"playbackPosition", "playbackQueueContext", b"playbackQueueContext", "playbackQueueDestinationOffset", b"playbackQueueDestinationOffset", "playbackQueueInsertionPosition", b"playbackQueueInsertionPosition", "playbackQueueOffset", b"playbackQueueOffset", "playbackRate", b"playbackRate", "radioStationHash", b"radioStationHash", "radioStationID", b"radioStationID", "rating", b"rating", "repeatMode", b"repeatMode", "replaceIntent", b"replaceIntent", "requestDefermentToPlaybackQueuePosition", b"requestDefermentToPlaybackQueuePosition", "sendOptions", b"sendOptions", "shouldBeginRadioPlayback", b"shouldBeginRadioPlayback", "shouldOverrideManuallyCuratedQueue", b"shouldOverrideManuallyCuratedQueue", "shuffleMode", b"shuffleMode", "skipInterval", b"skipInterval", "sourceId", b"sourceId", "stationURL", b"stationURL", "systemAppPlaybackQueueData", b"systemAppPlaybackQueueData", "trackID", b"trackID"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["contentItemID", b"contentItemID", "contextID", b"contextID", "destinationAppDisplayID", b"destinationAppDisplayID", "externalPlayerCommand", b"externalPlayerCommand", "insertAfterContentItemID", b"insertAfterContentItemID", "languageOption", b"languageOption", "mediaType", b"mediaType", "negative", b"negative", "nowPlayingContentItemID", b"nowPlayingContentItemID", "playbackPosition", b"playbackPosition", "playbackQueueContext", b"playbackQueueContext", "playbackQueueDestinationOffset", b"playbackQueueDestinationOffset", "playbackQueueInsertionPosition", b"playbackQueueInsertionPosition", "playbackQueueOffset", b"playbackQueueOffset", "playbackRate", b"playbackRate", "radioStationHash", b"radioStationHash", "radioStationID", b"radioStationID", "rating", b"rating", "repeatMode", b"repeatMode", "replaceIntent", b"replaceIntent", "requestDefermentToPlaybackQueuePosition", b"requestDefermentToPlaybackQueuePosition", "sendOptions", b"sendOptions", "shouldBeginRadioPlayback", b"shouldBeginRadioPlayback", "shouldOverrideManuallyCuratedQueue", b"shouldOverrideManuallyCuratedQueue", "shuffleMode", b"shuffleMode", "skipInterval", b"skipInterval", "sourceId", b"sourceId", "stationURL", b"stationURL", "systemAppPlaybackQueueData", b"systemAppPlaybackQueueData", "trackID", b"trackID"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___CommandOptions = CommandOptions
+Global___CommandOptions: _TypeAlias = CommandOptions  # noqa: Y015

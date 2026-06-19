@@ -27,6 +27,8 @@ OUTPUT_TEMPLATE = """\"\"\"Simplified extension handling for protobuf messages.
 THIS CODE IS AUTO-GENERATED - DO NOT EDIT!!!
 \"\"\"
 
+from typing import Any
+
 from .ProtocolMessage_pb2 import ProtocolMessage
 
 
@@ -36,7 +38,7 @@ from .ProtocolMessage_pb2 import ProtocolMessage
 {messages}
 
 
-_EXTENSION_LOOKUP = {{
+_EXTENSION_LOOKUP: dict[int, Any] = {{
     {extensions}
 }}
 
@@ -44,15 +46,13 @@ _EXTENSION_LOOKUP = {{
 {constants}
 
 
-def _inner_message(self):
-    extension = _EXTENSION_LOOKUP.get(self.type, None)
-    if extension:
-        return self.Extensions[extension]
+def extract_inner(message: ProtocolMessage):
+    \"\"\"Extract inner message based on type.\"\"\"
+    if extension := _EXTENSION_LOOKUP.get(message.type, None):
+        return message.Extensions[extension]
 
-    raise Exception('unknown type: ' + str(self.type))
+    raise Exception('unknown type: ' + str(message.type))
 
-
-ProtocolMessage.inner = _inner_message  # type: ignore
 """
 
 MessageInfo = namedtuple("MessageInfo", ["module", "title", "accessor", "const"])

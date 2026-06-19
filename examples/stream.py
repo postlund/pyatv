@@ -28,6 +28,7 @@ async def stream_with_push_updates(
     address: str, filename: str, loop: asyncio.AbstractEventLoop
 ):
     """Find a device and print what is playing."""
+    loop = asyncio.get_running_loop()
     print("* Discovering device on network...")
     atvs = await pyatv.scan(loop, hosts=[address], timeout=5)
 

@@ -3,31 +3,40 @@
 isort:skip_file
 """
 
-import builtins
-import google.protobuf.descriptor
-import google.protobuf.message
-import typing
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+import builtins as _builtins
+import sys
+import typing as _typing
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
+else:
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-@typing.final
-class PlaybackQueueCapabilities(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-    REQUESTBYRANGE_FIELD_NUMBER: builtins.int
-    REQUESTBYIDENTIFIERS_FIELD_NUMBER: builtins.int
-    REQUESTBYREQUEST_FIELD_NUMBER: builtins.int
-    requestByRange: builtins.bool
-    requestByIdentifiers: builtins.bool
-    requestByRequest: builtins.bool
+@_typing.final
+class PlaybackQueueCapabilities(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    REQUESTBYRANGE_FIELD_NUMBER: _builtins.int
+    REQUESTBYIDENTIFIERS_FIELD_NUMBER: _builtins.int
+    REQUESTBYREQUEST_FIELD_NUMBER: _builtins.int
+    requestByRange: _builtins.bool
+    requestByIdentifiers: _builtins.bool
+    requestByRequest: _builtins.bool
     def __init__(
         self,
         *,
-        requestByRange: builtins.bool | None = ...,
-        requestByIdentifiers: builtins.bool | None = ...,
-        requestByRequest: builtins.bool | None = ...,
+        requestByRange: _builtins.bool | None = ...,
+        requestByIdentifiers: _builtins.bool | None = ...,
+        requestByRequest: _builtins.bool | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["requestByIdentifiers", b"requestByIdentifiers", "requestByRange", b"requestByRange", "requestByRequest", b"requestByRequest"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["requestByIdentifiers", b"requestByIdentifiers", "requestByRange", b"requestByRange", "requestByRequest", b"requestByRequest"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["requestByIdentifiers", b"requestByIdentifiers", "requestByRange", b"requestByRange", "requestByRequest", b"requestByRequest"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["requestByIdentifiers", b"requestByIdentifiers", "requestByRange", b"requestByRange", "requestByRequest", b"requestByRequest"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___PlaybackQueueCapabilities = PlaybackQueueCapabilities
+Global___PlaybackQueueCapabilities: _TypeAlias = PlaybackQueueCapabilities  # noqa: Y015

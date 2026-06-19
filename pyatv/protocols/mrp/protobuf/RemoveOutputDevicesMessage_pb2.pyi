@@ -3,36 +3,45 @@
 isort:skip_file
 """
 
-import builtins
-import collections.abc
-import google.protobuf.descriptor
-import google.protobuf.internal.containers
-import google.protobuf.internal.extension_dict
-import google.protobuf.message
-import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import typing
+from collections import abc as _abc
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import containers as _containers
+from google.protobuf.internal import extension_dict as _extension_dict
+from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as _ProtocolMessage_pb2
+import builtins as _builtins
+import sys
+import typing as _typing
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
+else:
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-@typing.final
-class RemoveOutputDevicesMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-    OUTPUTDEVICEUIDS_FIELD_NUMBER: builtins.int
-    ENDPOINTUID_FIELD_NUMBER: builtins.int
-    endpointUID: builtins.str
-    @property
-    def outputDeviceUIDs(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]: ...
+@_typing.final
+class RemoveOutputDevicesMessage(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    OUTPUTDEVICEUIDS_FIELD_NUMBER: _builtins.int
+    ENDPOINTUID_FIELD_NUMBER: _builtins.int
+    endpointUID: _builtins.str
+    @_builtins.property
+    def outputDeviceUIDs(self) -> _containers.RepeatedScalarFieldContainer[_builtins.str]: ...
     def __init__(
         self,
         *,
-        outputDeviceUIDs: collections.abc.Iterable[builtins.str] | None = ...,
-        endpointUID: builtins.str | None = ...,
+        outputDeviceUIDs: _abc.Iterable[_builtins.str] | None = ...,
+        endpointUID: _builtins.str | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["endpointUID", b"endpointUID"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["endpointUID", b"endpointUID", "outputDeviceUIDs", b"outputDeviceUIDs"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["endpointUID", b"endpointUID"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["endpointUID", b"endpointUID", "outputDeviceUIDs", b"outputDeviceUIDs"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___RemoveOutputDevicesMessage = RemoveOutputDevicesMessage
+Global___RemoveOutputDevicesMessage: _TypeAlias = RemoveOutputDevicesMessage  # noqa: Y015
 
-REMOVEOUTPUTDEVICESMESSAGE_FIELD_NUMBER: builtins.int
-removeOutputDevicesMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___RemoveOutputDevicesMessage]
+REMOVEOUTPUTDEVICESMESSAGE_FIELD_NUMBER: _builtins.int
+removeOutputDevicesMessage: _extension_dict._ExtensionFieldDescriptor[_ProtocolMessage_pb2.ProtocolMessage, Global___RemoveOutputDevicesMessage]
