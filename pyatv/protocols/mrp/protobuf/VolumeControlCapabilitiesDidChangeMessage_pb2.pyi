@@ -3,38 +3,47 @@
 isort:skip_file
 """
 
-import builtins
-import google.protobuf.descriptor
-import google.protobuf.internal.extension_dict
-import google.protobuf.message
-import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import pyatv.protocols.mrp.protobuf.VolumeControlAvailabilityMessage_pb2
-import typing
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import extension_dict as _extension_dict
+from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as _ProtocolMessage_pb2
+from pyatv.protocols.mrp.protobuf import VolumeControlAvailabilityMessage_pb2 as _VolumeControlAvailabilityMessage_pb2
+import builtins as _builtins
+import sys
+import typing as _typing
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
+else:
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-@typing.final
-class VolumeControlCapabilitiesDidChangeMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-    CAPABILITIES_FIELD_NUMBER: builtins.int
-    ENDPOINTUID_FIELD_NUMBER: builtins.int
-    OUTPUTDEVICEUID_FIELD_NUMBER: builtins.int
-    endpointUID: builtins.str
-    outputDeviceUID: builtins.str
-    @property
-    def capabilities(self) -> pyatv.protocols.mrp.protobuf.VolumeControlAvailabilityMessage_pb2.VolumeControlAvailabilityMessage: ...
+@_typing.final
+class VolumeControlCapabilitiesDidChangeMessage(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    CAPABILITIES_FIELD_NUMBER: _builtins.int
+    ENDPOINTUID_FIELD_NUMBER: _builtins.int
+    OUTPUTDEVICEUID_FIELD_NUMBER: _builtins.int
+    endpointUID: _builtins.str
+    outputDeviceUID: _builtins.str
+    @_builtins.property
+    def capabilities(self) -> _VolumeControlAvailabilityMessage_pb2.VolumeControlAvailabilityMessage: ...
     def __init__(
         self,
         *,
-        capabilities: pyatv.protocols.mrp.protobuf.VolumeControlAvailabilityMessage_pb2.VolumeControlAvailabilityMessage | None = ...,
-        endpointUID: builtins.str | None = ...,
-        outputDeviceUID: builtins.str | None = ...,
+        capabilities: _VolumeControlAvailabilityMessage_pb2.VolumeControlAvailabilityMessage | None = ...,
+        endpointUID: _builtins.str | None = ...,
+        outputDeviceUID: _builtins.str | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["capabilities", b"capabilities", "endpointUID", b"endpointUID", "outputDeviceUID", b"outputDeviceUID"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["capabilities", b"capabilities", "endpointUID", b"endpointUID", "outputDeviceUID", b"outputDeviceUID"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["capabilities", b"capabilities", "endpointUID", b"endpointUID", "outputDeviceUID", b"outputDeviceUID"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["capabilities", b"capabilities", "endpointUID", b"endpointUID", "outputDeviceUID", b"outputDeviceUID"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___VolumeControlCapabilitiesDidChangeMessage = VolumeControlCapabilitiesDidChangeMessage
+Global___VolumeControlCapabilitiesDidChangeMessage: _TypeAlias = VolumeControlCapabilitiesDidChangeMessage  # noqa: Y015
 
-VOLUMECONTROLCAPABILITIESDIDCHANGEMESSAGE_FIELD_NUMBER: builtins.int
-volumeControlCapabilitiesDidChangeMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___VolumeControlCapabilitiesDidChangeMessage]
+VOLUMECONTROLCAPABILITIESDIDCHANGEMESSAGE_FIELD_NUMBER: _builtins.int
+volumeControlCapabilitiesDidChangeMessage: _extension_dict._ExtensionFieldDescriptor[_ProtocolMessage_pb2.ProtocolMessage, Global___VolumeControlCapabilitiesDidChangeMessage]

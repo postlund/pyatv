@@ -3,132 +3,153 @@
 isort:skip_file
 """
 
-import builtins
-import collections.abc
-import google.protobuf.descriptor
-import google.protobuf.internal.containers
-import google.protobuf.internal.extension_dict
-import google.protobuf.message
-import pyatv.protocols.mrp.protobuf.AudioFormatSettingsMessage_pb2
-import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import typing
+from collections import abc as _abc
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import containers as _containers
+from google.protobuf.internal import extension_dict as _extension_dict
+from pyatv.protocols.mrp.protobuf import AudioFormatSettingsMessage_pb2 as _AudioFormatSettingsMessage_pb2
+from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as _ProtocolMessage_pb2
+import builtins as _builtins
+import sys
+import typing as _typing
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
+else:
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-@typing.final
-class AudioStreamPacketDescription(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-    STARTOFFSET_FIELD_NUMBER: builtins.int
-    VARIABLEFRAMESINPACKET_FIELD_NUMBER: builtins.int
-    DATABYTESIZE_FIELD_NUMBER: builtins.int
-    startOffset: builtins.int
-    variableFramesInPacket: builtins.int
-    dataByteSize: builtins.int
+@_typing.final
+class AudioStreamPacketDescription(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    STARTOFFSET_FIELD_NUMBER: _builtins.int
+    VARIABLEFRAMESINPACKET_FIELD_NUMBER: _builtins.int
+    DATABYTESIZE_FIELD_NUMBER: _builtins.int
+    startOffset: _builtins.int
+    variableFramesInPacket: _builtins.int
+    dataByteSize: _builtins.int
     def __init__(
         self,
         *,
-        startOffset: builtins.int | None = ...,
-        variableFramesInPacket: builtins.int | None = ...,
-        dataByteSize: builtins.int | None = ...,
+        startOffset: _builtins.int | None = ...,
+        variableFramesInPacket: _builtins.int | None = ...,
+        dataByteSize: _builtins.int | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["dataByteSize", b"dataByteSize", "startOffset", b"startOffset", "variableFramesInPacket", b"variableFramesInPacket"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["dataByteSize", b"dataByteSize", "startOffset", b"startOffset", "variableFramesInPacket", b"variableFramesInPacket"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["dataByteSize", b"dataByteSize", "startOffset", b"startOffset", "variableFramesInPacket", b"variableFramesInPacket"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["dataByteSize", b"dataByteSize", "startOffset", b"startOffset", "variableFramesInPacket", b"variableFramesInPacket"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___AudioStreamPacketDescription = AudioStreamPacketDescription
+Global___AudioStreamPacketDescription: _TypeAlias = AudioStreamPacketDescription  # noqa: Y015
 
-@typing.final
-class AudioBuffer(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class AudioBuffer(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
-    FORMATSETTINGS_FIELD_NUMBER: builtins.int
-    PACKETCAPACITY_FIELD_NUMBER: builtins.int
-    MAXIMUMPACKETSIZE_FIELD_NUMBER: builtins.int
-    PACKETCOUNT_FIELD_NUMBER: builtins.int
-    CONTENTS_FIELD_NUMBER: builtins.int
-    PACKETDESCRIPTIONS_FIELD_NUMBER: builtins.int
-    packetCapacity: builtins.int
-    maximumPacketSize: builtins.int
-    packetCount: builtins.int
-    contents: builtins.bytes
-    @property
-    def formatSettings(self) -> pyatv.protocols.mrp.protobuf.AudioFormatSettingsMessage_pb2.AudioFormatSettings: ...
-    @property
-    def packetDescriptions(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___AudioStreamPacketDescription]: ...
+    FORMATSETTINGS_FIELD_NUMBER: _builtins.int
+    PACKETCAPACITY_FIELD_NUMBER: _builtins.int
+    MAXIMUMPACKETSIZE_FIELD_NUMBER: _builtins.int
+    PACKETCOUNT_FIELD_NUMBER: _builtins.int
+    CONTENTS_FIELD_NUMBER: _builtins.int
+    PACKETDESCRIPTIONS_FIELD_NUMBER: _builtins.int
+    packetCapacity: _builtins.int
+    maximumPacketSize: _builtins.int
+    packetCount: _builtins.int
+    contents: _builtins.bytes
+    @_builtins.property
+    def formatSettings(self) -> _AudioFormatSettingsMessage_pb2.AudioFormatSettings: ...
+    @_builtins.property
+    def packetDescriptions(self) -> _containers.RepeatedCompositeFieldContainer[Global___AudioStreamPacketDescription]: ...
     def __init__(
         self,
         *,
-        formatSettings: pyatv.protocols.mrp.protobuf.AudioFormatSettingsMessage_pb2.AudioFormatSettings | None = ...,
-        packetCapacity: builtins.int | None = ...,
-        maximumPacketSize: builtins.int | None = ...,
-        packetCount: builtins.int | None = ...,
-        contents: builtins.bytes | None = ...,
-        packetDescriptions: collections.abc.Iterable[global___AudioStreamPacketDescription] | None = ...,
+        formatSettings: _AudioFormatSettingsMessage_pb2.AudioFormatSettings | None = ...,
+        packetCapacity: _builtins.int | None = ...,
+        maximumPacketSize: _builtins.int | None = ...,
+        packetCount: _builtins.int | None = ...,
+        contents: _builtins.bytes | None = ...,
+        packetDescriptions: _abc.Iterable[Global___AudioStreamPacketDescription] | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["contents", b"contents", "formatSettings", b"formatSettings", "maximumPacketSize", b"maximumPacketSize", "packetCapacity", b"packetCapacity", "packetCount", b"packetCount"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["contents", b"contents", "formatSettings", b"formatSettings", "maximumPacketSize", b"maximumPacketSize", "packetCapacity", b"packetCapacity", "packetCount", b"packetCount", "packetDescriptions", b"packetDescriptions"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["contents", b"contents", "formatSettings", b"formatSettings", "maximumPacketSize", b"maximumPacketSize", "packetCapacity", b"packetCapacity", "packetCount", b"packetCount"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["contents", b"contents", "formatSettings", b"formatSettings", "maximumPacketSize", b"maximumPacketSize", "packetCapacity", b"packetCapacity", "packetCount", b"packetCount", "packetDescriptions", b"packetDescriptions"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___AudioBuffer = AudioBuffer
+Global___AudioBuffer: _TypeAlias = AudioBuffer  # noqa: Y015
 
-@typing.final
-class AudioTime(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class AudioTime(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
-    TIMESTAMP_FIELD_NUMBER: builtins.int
-    SAMPLERATE_FIELD_NUMBER: builtins.int
-    timestamp: builtins.float
-    sampleRate: builtins.float
+    TIMESTAMP_FIELD_NUMBER: _builtins.int
+    SAMPLERATE_FIELD_NUMBER: _builtins.int
+    timestamp: _builtins.float
+    sampleRate: _builtins.float
     def __init__(
         self,
         *,
-        timestamp: builtins.float | None = ...,
-        sampleRate: builtins.float | None = ...,
+        timestamp: _builtins.float | None = ...,
+        sampleRate: _builtins.float | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["sampleRate", b"sampleRate", "timestamp", b"timestamp"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["sampleRate", b"sampleRate", "timestamp", b"timestamp"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["sampleRate", b"sampleRate", "timestamp", b"timestamp"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["sampleRate", b"sampleRate", "timestamp", b"timestamp"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___AudioTime = AudioTime
+Global___AudioTime: _TypeAlias = AudioTime  # noqa: Y015
 
-@typing.final
-class AudioDataBlock(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class AudioDataBlock(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
-    BUFFER_FIELD_NUMBER: builtins.int
-    TIME_FIELD_NUMBER: builtins.int
-    GAIN_FIELD_NUMBER: builtins.int
-    gain: builtins.float
-    @property
-    def buffer(self) -> global___AudioBuffer: ...
-    @property
-    def time(self) -> global___AudioTime: ...
+    BUFFER_FIELD_NUMBER: _builtins.int
+    TIME_FIELD_NUMBER: _builtins.int
+    GAIN_FIELD_NUMBER: _builtins.int
+    gain: _builtins.float
+    @_builtins.property
+    def buffer(self) -> Global___AudioBuffer: ...
+    @_builtins.property
+    def time(self) -> Global___AudioTime: ...
     def __init__(
         self,
         *,
-        buffer: global___AudioBuffer | None = ...,
-        time: global___AudioTime | None = ...,
-        gain: builtins.float | None = ...,
+        buffer: Global___AudioBuffer | None = ...,
+        time: Global___AudioTime | None = ...,
+        gain: _builtins.float | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["buffer", b"buffer", "gain", b"gain", "time", b"time"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["buffer", b"buffer", "gain", b"gain", "time", b"time"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["buffer", b"buffer", "gain", b"gain", "time", b"time"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["buffer", b"buffer", "gain", b"gain", "time", b"time"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___AudioDataBlock = AudioDataBlock
+Global___AudioDataBlock: _TypeAlias = AudioDataBlock  # noqa: Y015
 
-@typing.final
-class SendVoiceInputMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class SendVoiceInputMessage(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
-    DATABLOCK_FIELD_NUMBER: builtins.int
-    @property
-    def dataBlock(self) -> global___AudioDataBlock: ...
+    DATABLOCK_FIELD_NUMBER: _builtins.int
+    @_builtins.property
+    def dataBlock(self) -> Global___AudioDataBlock: ...
     def __init__(
         self,
         *,
-        dataBlock: global___AudioDataBlock | None = ...,
+        dataBlock: Global___AudioDataBlock | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["dataBlock", b"dataBlock"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["dataBlock", b"dataBlock"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["dataBlock", b"dataBlock"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["dataBlock", b"dataBlock"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___SendVoiceInputMessage = SendVoiceInputMessage
+Global___SendVoiceInputMessage: _TypeAlias = SendVoiceInputMessage  # noqa: Y015
 
-SENDVOICEINPUTMESSAGE_FIELD_NUMBER: builtins.int
-sendVoiceInputMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___SendVoiceInputMessage]
+SENDVOICEINPUTMESSAGE_FIELD_NUMBER: _builtins.int
+sendVoiceInputMessage: _extension_dict._ExtensionFieldDescriptor[_ProtocolMessage_pb2.ProtocolMessage, Global___SendVoiceInputMessage]

@@ -3,35 +3,44 @@
 isort:skip_file
 """
 
-import builtins
-import google.protobuf.descriptor
-import google.protobuf.internal.extension_dict
-import google.protobuf.message
-import pyatv.protocols.mrp.protobuf.PlayerPath_pb2
-import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import typing
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import extension_dict as _extension_dict
+from pyatv.protocols.mrp.protobuf import PlayerPath_pb2 as _PlayerPath_pb2
+from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as _ProtocolMessage_pb2
+import builtins as _builtins
+import sys
+import typing as _typing
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
+else:
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-@typing.final
-class AudioFadeMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-    PLAYERPATH_FIELD_NUMBER: builtins.int
-    FADETYPE_FIELD_NUMBER: builtins.int
-    fadeType: builtins.int
-    @property
-    def playerPath(self) -> pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath: ...
+@_typing.final
+class AudioFadeMessage(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    PLAYERPATH_FIELD_NUMBER: _builtins.int
+    FADETYPE_FIELD_NUMBER: _builtins.int
+    fadeType: _builtins.int
+    @_builtins.property
+    def playerPath(self) -> _PlayerPath_pb2.PlayerPath: ...
     def __init__(
         self,
         *,
-        playerPath: pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath | None = ...,
-        fadeType: builtins.int | None = ...,
+        playerPath: _PlayerPath_pb2.PlayerPath | None = ...,
+        fadeType: _builtins.int | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["fadeType", b"fadeType", "playerPath", b"playerPath"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["fadeType", b"fadeType", "playerPath", b"playerPath"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["fadeType", b"fadeType", "playerPath", b"playerPath"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["fadeType", b"fadeType", "playerPath", b"playerPath"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___AudioFadeMessage = AudioFadeMessage
+Global___AudioFadeMessage: _TypeAlias = AudioFadeMessage  # noqa: Y015
 
-AUDIOFADEMESSAGE_FIELD_NUMBER: builtins.int
-audioFadeMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___AudioFadeMessage]
+AUDIOFADEMESSAGE_FIELD_NUMBER: _builtins.int
+audioFadeMessage: _extension_dict._ExtensionFieldDescriptor[_ProtocolMessage_pb2.ProtocolMessage, Global___AudioFadeMessage]

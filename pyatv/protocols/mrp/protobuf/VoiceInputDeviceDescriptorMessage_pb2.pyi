@@ -3,33 +3,42 @@
 isort:skip_file
 """
 
-import builtins
-import collections.abc
-import google.protobuf.descriptor
-import google.protobuf.internal.containers
-import google.protobuf.message
-import pyatv.protocols.mrp.protobuf.AudioFormatSettingsMessage_pb2
-import typing
+from collections import abc as _abc
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import containers as _containers
+from pyatv.protocols.mrp.protobuf import AudioFormatSettingsMessage_pb2 as _AudioFormatSettingsMessage_pb2
+import builtins as _builtins
+import sys
+import typing as _typing
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
+else:
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-@typing.final
-class VoiceInputDeviceDescriptor(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-    DEFAULTFORMAT_FIELD_NUMBER: builtins.int
-    SUPPORTEDFORMATS_FIELD_NUMBER: builtins.int
-    @property
-    def defaultFormat(self) -> pyatv.protocols.mrp.protobuf.AudioFormatSettingsMessage_pb2.AudioFormatSettings: ...
-    @property
-    def supportedFormats(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[pyatv.protocols.mrp.protobuf.AudioFormatSettingsMessage_pb2.AudioFormatSettings]: ...
+@_typing.final
+class VoiceInputDeviceDescriptor(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    DEFAULTFORMAT_FIELD_NUMBER: _builtins.int
+    SUPPORTEDFORMATS_FIELD_NUMBER: _builtins.int
+    @_builtins.property
+    def defaultFormat(self) -> _AudioFormatSettingsMessage_pb2.AudioFormatSettings: ...
+    @_builtins.property
+    def supportedFormats(self) -> _containers.RepeatedCompositeFieldContainer[_AudioFormatSettingsMessage_pb2.AudioFormatSettings]: ...
     def __init__(
         self,
         *,
-        defaultFormat: pyatv.protocols.mrp.protobuf.AudioFormatSettingsMessage_pb2.AudioFormatSettings | None = ...,
-        supportedFormats: collections.abc.Iterable[pyatv.protocols.mrp.protobuf.AudioFormatSettingsMessage_pb2.AudioFormatSettings] | None = ...,
+        defaultFormat: _AudioFormatSettingsMessage_pb2.AudioFormatSettings | None = ...,
+        supportedFormats: _abc.Iterable[_AudioFormatSettingsMessage_pb2.AudioFormatSettings] | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["defaultFormat", b"defaultFormat"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["defaultFormat", b"defaultFormat", "supportedFormats", b"supportedFormats"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["defaultFormat", b"defaultFormat"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["defaultFormat", b"defaultFormat", "supportedFormats", b"supportedFormats"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___VoiceInputDeviceDescriptor = VoiceInputDeviceDescriptor
+Global___VoiceInputDeviceDescriptor: _TypeAlias = VoiceInputDeviceDescriptor  # noqa: Y015

@@ -3,30 +3,39 @@
 isort:skip_file
 """
 
-import builtins
-import google.protobuf.descriptor
-import google.protobuf.internal.extension_dict
-import google.protobuf.message
-import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import typing
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import extension_dict as _extension_dict
+from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as _ProtocolMessage_pb2
+import builtins as _builtins
+import sys
+import typing as _typing
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
+else:
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-@typing.final
-class SetArtworkMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-    JPEGDATA_FIELD_NUMBER: builtins.int
-    jpegData: builtins.bytes
+@_typing.final
+class SetArtworkMessage(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    JPEGDATA_FIELD_NUMBER: _builtins.int
+    jpegData: _builtins.bytes
     def __init__(
         self,
         *,
-        jpegData: builtins.bytes | None = ...,
+        jpegData: _builtins.bytes | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["jpegData", b"jpegData"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["jpegData", b"jpegData"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["jpegData", b"jpegData"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["jpegData", b"jpegData"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___SetArtworkMessage = SetArtworkMessage
+Global___SetArtworkMessage: _TypeAlias = SetArtworkMessage  # noqa: Y015
 
-SETARTWORKMESSAGE_FIELD_NUMBER: builtins.int
-setArtworkMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___SetArtworkMessage]
+SETARTWORKMESSAGE_FIELD_NUMBER: _builtins.int
+setArtworkMessage: _extension_dict._ExtensionFieldDescriptor[_ProtocolMessage_pb2.ProtocolMessage, Global___SetArtworkMessage]

@@ -3,77 +3,86 @@
 isort:skip_file
 """
 
-import builtins
-import google.protobuf.descriptor
-import google.protobuf.message
-import pyatv.protocols.mrp.protobuf.Common_pb2
-import typing
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from pyatv.protocols.mrp.protobuf import Common_pb2 as _Common_pb2
+import builtins as _builtins
+import sys
+import typing as _typing
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
+else:
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-@typing.final
-class NowPlayingInfo(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-    ALBUM_FIELD_NUMBER: builtins.int
-    ARTIST_FIELD_NUMBER: builtins.int
-    DURATION_FIELD_NUMBER: builtins.int
-    ELAPSEDTIME_FIELD_NUMBER: builtins.int
-    PLAYBACKRATE_FIELD_NUMBER: builtins.int
-    REPEATMODE_FIELD_NUMBER: builtins.int
-    SHUFFLEMODE_FIELD_NUMBER: builtins.int
-    TIMESTAMP_FIELD_NUMBER: builtins.int
-    TITLE_FIELD_NUMBER: builtins.int
-    UNIQUEIDENTIFIER_FIELD_NUMBER: builtins.int
-    ISEXPLICITTRACK_FIELD_NUMBER: builtins.int
-    ISMUSICAPP_FIELD_NUMBER: builtins.int
-    RADIOSTATIONIDENTIFIER_FIELD_NUMBER: builtins.int
-    RADIOSTATIONHASH_FIELD_NUMBER: builtins.int
-    RADIOSTATIONNAME_FIELD_NUMBER: builtins.int
-    ARTWORKDATADIGEST_FIELD_NUMBER: builtins.int
-    ISALWAYSLIVE_FIELD_NUMBER: builtins.int
-    ISADVERTISEMENT_FIELD_NUMBER: builtins.int
-    album: builtins.str
-    artist: builtins.str
-    duration: builtins.float
-    elapsedTime: builtins.float
-    playbackRate: builtins.float
-    repeatMode: pyatv.protocols.mrp.protobuf.Common_pb2.RepeatMode.Enum.ValueType
-    shuffleMode: pyatv.protocols.mrp.protobuf.Common_pb2.ShuffleMode.Enum.ValueType
-    timestamp: builtins.float
-    title: builtins.str
-    uniqueIdentifier: builtins.int
-    isExplicitTrack: builtins.bool
-    isMusicApp: builtins.bool
-    radioStationIdentifier: builtins.int
-    radioStationHash: builtins.str
-    radioStationName: builtins.str
-    artworkDataDigest: builtins.bytes
-    isAlwaysLive: builtins.bool
-    isAdvertisement: builtins.bool
+@_typing.final
+class NowPlayingInfo(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    ALBUM_FIELD_NUMBER: _builtins.int
+    ARTIST_FIELD_NUMBER: _builtins.int
+    DURATION_FIELD_NUMBER: _builtins.int
+    ELAPSEDTIME_FIELD_NUMBER: _builtins.int
+    PLAYBACKRATE_FIELD_NUMBER: _builtins.int
+    REPEATMODE_FIELD_NUMBER: _builtins.int
+    SHUFFLEMODE_FIELD_NUMBER: _builtins.int
+    TIMESTAMP_FIELD_NUMBER: _builtins.int
+    TITLE_FIELD_NUMBER: _builtins.int
+    UNIQUEIDENTIFIER_FIELD_NUMBER: _builtins.int
+    ISEXPLICITTRACK_FIELD_NUMBER: _builtins.int
+    ISMUSICAPP_FIELD_NUMBER: _builtins.int
+    RADIOSTATIONIDENTIFIER_FIELD_NUMBER: _builtins.int
+    RADIOSTATIONHASH_FIELD_NUMBER: _builtins.int
+    RADIOSTATIONNAME_FIELD_NUMBER: _builtins.int
+    ARTWORKDATADIGEST_FIELD_NUMBER: _builtins.int
+    ISALWAYSLIVE_FIELD_NUMBER: _builtins.int
+    ISADVERTISEMENT_FIELD_NUMBER: _builtins.int
+    album: _builtins.str
+    artist: _builtins.str
+    duration: _builtins.float
+    elapsedTime: _builtins.float
+    playbackRate: _builtins.float
+    repeatMode: _Common_pb2.RepeatMode.Enum.ValueType
+    shuffleMode: _Common_pb2.ShuffleMode.Enum.ValueType
+    timestamp: _builtins.float
+    title: _builtins.str
+    uniqueIdentifier: _builtins.int
+    isExplicitTrack: _builtins.bool
+    isMusicApp: _builtins.bool
+    radioStationIdentifier: _builtins.int
+    radioStationHash: _builtins.str
+    radioStationName: _builtins.str
+    artworkDataDigest: _builtins.bytes
+    isAlwaysLive: _builtins.bool
+    isAdvertisement: _builtins.bool
     def __init__(
         self,
         *,
-        album: builtins.str | None = ...,
-        artist: builtins.str | None = ...,
-        duration: builtins.float | None = ...,
-        elapsedTime: builtins.float | None = ...,
-        playbackRate: builtins.float | None = ...,
-        repeatMode: pyatv.protocols.mrp.protobuf.Common_pb2.RepeatMode.Enum.ValueType | None = ...,
-        shuffleMode: pyatv.protocols.mrp.protobuf.Common_pb2.ShuffleMode.Enum.ValueType | None = ...,
-        timestamp: builtins.float | None = ...,
-        title: builtins.str | None = ...,
-        uniqueIdentifier: builtins.int | None = ...,
-        isExplicitTrack: builtins.bool | None = ...,
-        isMusicApp: builtins.bool | None = ...,
-        radioStationIdentifier: builtins.int | None = ...,
-        radioStationHash: builtins.str | None = ...,
-        radioStationName: builtins.str | None = ...,
-        artworkDataDigest: builtins.bytes | None = ...,
-        isAlwaysLive: builtins.bool | None = ...,
-        isAdvertisement: builtins.bool | None = ...,
+        album: _builtins.str | None = ...,
+        artist: _builtins.str | None = ...,
+        duration: _builtins.float | None = ...,
+        elapsedTime: _builtins.float | None = ...,
+        playbackRate: _builtins.float | None = ...,
+        repeatMode: _Common_pb2.RepeatMode.Enum.ValueType | None = ...,
+        shuffleMode: _Common_pb2.ShuffleMode.Enum.ValueType | None = ...,
+        timestamp: _builtins.float | None = ...,
+        title: _builtins.str | None = ...,
+        uniqueIdentifier: _builtins.int | None = ...,
+        isExplicitTrack: _builtins.bool | None = ...,
+        isMusicApp: _builtins.bool | None = ...,
+        radioStationIdentifier: _builtins.int | None = ...,
+        radioStationHash: _builtins.str | None = ...,
+        radioStationName: _builtins.str | None = ...,
+        artworkDataDigest: _builtins.bytes | None = ...,
+        isAlwaysLive: _builtins.bool | None = ...,
+        isAdvertisement: _builtins.bool | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["album", b"album", "artist", b"artist", "artworkDataDigest", b"artworkDataDigest", "duration", b"duration", "elapsedTime", b"elapsedTime", "isAdvertisement", b"isAdvertisement", "isAlwaysLive", b"isAlwaysLive", "isExplicitTrack", b"isExplicitTrack", "isMusicApp", b"isMusicApp", "playbackRate", b"playbackRate", "radioStationHash", b"radioStationHash", "radioStationIdentifier", b"radioStationIdentifier", "radioStationName", b"radioStationName", "repeatMode", b"repeatMode", "shuffleMode", b"shuffleMode", "timestamp", b"timestamp", "title", b"title", "uniqueIdentifier", b"uniqueIdentifier"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["album", b"album", "artist", b"artist", "artworkDataDigest", b"artworkDataDigest", "duration", b"duration", "elapsedTime", b"elapsedTime", "isAdvertisement", b"isAdvertisement", "isAlwaysLive", b"isAlwaysLive", "isExplicitTrack", b"isExplicitTrack", "isMusicApp", b"isMusicApp", "playbackRate", b"playbackRate", "radioStationHash", b"radioStationHash", "radioStationIdentifier", b"radioStationIdentifier", "radioStationName", b"radioStationName", "repeatMode", b"repeatMode", "shuffleMode", b"shuffleMode", "timestamp", b"timestamp", "title", b"title", "uniqueIdentifier", b"uniqueIdentifier"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["album", b"album", "artist", b"artist", "artworkDataDigest", b"artworkDataDigest", "duration", b"duration", "elapsedTime", b"elapsedTime", "isAdvertisement", b"isAdvertisement", "isAlwaysLive", b"isAlwaysLive", "isExplicitTrack", b"isExplicitTrack", "isMusicApp", b"isMusicApp", "playbackRate", b"playbackRate", "radioStationHash", b"radioStationHash", "radioStationIdentifier", b"radioStationIdentifier", "radioStationName", b"radioStationName", "repeatMode", b"repeatMode", "shuffleMode", b"shuffleMode", "timestamp", b"timestamp", "title", b"title", "uniqueIdentifier", b"uniqueIdentifier"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["album", b"album", "artist", b"artist", "artworkDataDigest", b"artworkDataDigest", "duration", b"duration", "elapsedTime", b"elapsedTime", "isAdvertisement", b"isAdvertisement", "isAlwaysLive", b"isAlwaysLive", "isExplicitTrack", b"isExplicitTrack", "isMusicApp", b"isMusicApp", "playbackRate", b"playbackRate", "radioStationHash", b"radioStationHash", "radioStationIdentifier", b"radioStationIdentifier", "radioStationName", b"radioStationName", "repeatMode", b"repeatMode", "shuffleMode", b"shuffleMode", "timestamp", b"timestamp", "title", b"title", "uniqueIdentifier", b"uniqueIdentifier"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___NowPlayingInfo = NowPlayingInfo
+Global___NowPlayingInfo: _TypeAlias = NowPlayingInfo  # noqa: Y015

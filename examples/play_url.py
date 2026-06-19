@@ -14,6 +14,7 @@ async def play_url(
     device_id: str, airplay_credentials: str, url: str, loop: asyncio.AbstractEventLoop
 ):
     """Connect to an Apple TV and stream file via AirPlay."""
+    loop = asyncio.get_running_loop()
     print("* Discovering device on network...")
     atvs = await pyatv.scan(loop, identifier=device_id)
     if not atvs:

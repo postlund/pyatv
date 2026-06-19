@@ -3,29 +3,29 @@
 isort:skip_file
 """
 
-import builtins
-import collections.abc
-import google.protobuf.descriptor
-import google.protobuf.internal.containers
-import google.protobuf.internal.enum_type_wrapper
-import google.protobuf.message
-import pyatv.protocols.mrp.protobuf.Common_pb2
+from collections import abc as _abc
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import containers as _containers
+from google.protobuf.internal import enum_type_wrapper as _enum_type_wrapper
+from pyatv.protocols.mrp.protobuf import Common_pb2 as _Common_pb2
+import builtins as _builtins
 import sys
-import typing
+import typing as _typing
 
-if sys.version_info >= (3, 10):
-    import typing as typing_extensions
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
 else:
-    import typing_extensions
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
 class _Command:
-    ValueType = typing.NewType("ValueType", builtins.int)
-    V: typing_extensions.TypeAlias = ValueType
+    ValueType = _typing.NewType("ValueType", _builtins.int)
+    V: _TypeAlias = ValueType  # noqa: Y015
 
-class _CommandEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Command.ValueType], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+class _CommandEnumTypeWrapper(_enum_type_wrapper._EnumTypeWrapper[_Command.ValueType], _builtins.type):
+    DESCRIPTOR: _descriptor.EnumDescriptor
     Unknown: _Command.ValueType  # 0
     Play: _Command.ValueType  # 1
     Pause: _Command.ValueType  # 2
@@ -141,18 +141,18 @@ SetPriorityForPlaybackSession: Command.ValueType  # 61
 DiscardPlaybackSession: Command.ValueType  # 62
 Reshuffle: Command.ValueType  # 63
 ChangeQueueEndAction: Command.ValueType  # 135
-global___Command = Command
+Global___Command: _TypeAlias = Command  # noqa: Y015
 
-@typing.final
-class QueueEndAction(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class QueueEndAction(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
     class _Enum:
-        ValueType = typing.NewType("ValueType", builtins.int)
-        V: typing_extensions.TypeAlias = ValueType
+        ValueType = _typing.NewType("ValueType", _builtins.int)
+        V: _TypeAlias = ValueType  # noqa: Y015
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[QueueEndAction._Enum.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    class _EnumEnumTypeWrapper(_enum_type_wrapper._EnumTypeWrapper[QueueEndAction._Enum.ValueType], _builtins.type):
+        DESCRIPTOR: _descriptor.EnumDescriptor
         ClearAction: QueueEndAction._Enum.ValueType  # 0
         Reset: QueueEndAction._Enum.ValueType  # 2
         AutoPlay: QueueEndAction._Enum.ValueType  # 3
@@ -165,19 +165,24 @@ class QueueEndAction(google.protobuf.message.Message):
     def __init__(
         self,
     ) -> None: ...
+    _HasFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___QueueEndAction = QueueEndAction
+Global___QueueEndAction: _TypeAlias = QueueEndAction  # noqa: Y015
 
-@typing.final
-class DisableReason(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class DisableReason(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
     class _Enum:
-        ValueType = typing.NewType("ValueType", builtins.int)
-        V: typing_extensions.TypeAlias = ValueType
+        ValueType = _typing.NewType("ValueType", _builtins.int)
+        V: _TypeAlias = ValueType  # noqa: Y015
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[DisableReason._Enum.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    class _EnumEnumTypeWrapper(_enum_type_wrapper._EnumTypeWrapper[DisableReason._Enum.ValueType], _builtins.type):
+        DESCRIPTOR: _descriptor.EnumDescriptor
         Unknown: DisableReason._Enum.ValueType  # 0
         AdPlayback: DisableReason._Enum.ValueType  # 1
         SkipLimitReached: DisableReason._Enum.ValueType  # 2
@@ -190,136 +195,147 @@ class DisableReason(google.protobuf.message.Message):
     def __init__(
         self,
     ) -> None: ...
+    _HasFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___DisableReason = DisableReason
+Global___DisableReason: _TypeAlias = DisableReason  # noqa: Y015
 
-@typing.final
-class PreloadedPlaybackSessionInfo(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class PreloadedPlaybackSessionInfo(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
-    PLAYBACKSESSIONIDENTIFIER_FIELD_NUMBER: builtins.int
-    PLAYBACKSESSIONREVISION_FIELD_NUMBER: builtins.int
-    PLAYBACKSESSIONPRIORITY_FIELD_NUMBER: builtins.int
-    playbackSessionIdentifier: builtins.str
-    playbackSessionRevision: builtins.str
-    playbackSessionPriority: builtins.int
+    PLAYBACKSESSIONIDENTIFIER_FIELD_NUMBER: _builtins.int
+    PLAYBACKSESSIONREVISION_FIELD_NUMBER: _builtins.int
+    PLAYBACKSESSIONPRIORITY_FIELD_NUMBER: _builtins.int
+    playbackSessionIdentifier: _builtins.str
+    playbackSessionRevision: _builtins.str
+    playbackSessionPriority: _builtins.int
     def __init__(
         self,
         *,
-        playbackSessionIdentifier: builtins.str | None = ...,
-        playbackSessionRevision: builtins.str | None = ...,
-        playbackSessionPriority: builtins.int | None = ...,
+        playbackSessionIdentifier: _builtins.str | None = ...,
+        playbackSessionRevision: _builtins.str | None = ...,
+        playbackSessionPriority: _builtins.int | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["playbackSessionIdentifier", b"playbackSessionIdentifier", "playbackSessionPriority", b"playbackSessionPriority", "playbackSessionRevision", b"playbackSessionRevision"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["playbackSessionIdentifier", b"playbackSessionIdentifier", "playbackSessionPriority", b"playbackSessionPriority", "playbackSessionRevision", b"playbackSessionRevision"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["playbackSessionIdentifier", b"playbackSessionIdentifier", "playbackSessionPriority", b"playbackSessionPriority", "playbackSessionRevision", b"playbackSessionRevision"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["playbackSessionIdentifier", b"playbackSessionIdentifier", "playbackSessionPriority", b"playbackSessionPriority", "playbackSessionRevision", b"playbackSessionRevision"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___PreloadedPlaybackSessionInfo = PreloadedPlaybackSessionInfo
+Global___PreloadedPlaybackSessionInfo: _TypeAlias = PreloadedPlaybackSessionInfo  # noqa: Y015
 
-@typing.final
-class CommandInfo(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class CommandInfo(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
-    COMMAND_FIELD_NUMBER: builtins.int
-    ENABLED_FIELD_NUMBER: builtins.int
-    ACTIVE_FIELD_NUMBER: builtins.int
-    PREFERREDINTERVALS_FIELD_NUMBER: builtins.int
-    LOCALIZEDTITLE_FIELD_NUMBER: builtins.int
-    MINIMUMRATING_FIELD_NUMBER: builtins.int
-    MAXIMUMRATING_FIELD_NUMBER: builtins.int
-    SUPPORTEDRATES_FIELD_NUMBER: builtins.int
-    LOCALIZEDSHORTTITLE_FIELD_NUMBER: builtins.int
-    REPEATMODE_FIELD_NUMBER: builtins.int
-    SHUFFLEMODE_FIELD_NUMBER: builtins.int
-    PRESENTATIONSTYLE_FIELD_NUMBER: builtins.int
-    SKIPINTERVAL_FIELD_NUMBER: builtins.int
-    NUMAVAILABLESKIPS_FIELD_NUMBER: builtins.int
-    SKIPFREQUENCY_FIELD_NUMBER: builtins.int
-    CANSCRUB_FIELD_NUMBER: builtins.int
-    SUPPORTEDPLAYBACKQUEUETYPES_FIELD_NUMBER: builtins.int
-    SUPPORTEDCUSTOMQUEUEIDENTIFIERS_FIELD_NUMBER: builtins.int
-    SUPPORTEDINSERTIONPOSITIONS_FIELD_NUMBER: builtins.int
-    SUPPORTSSHAREDQUEUE_FIELD_NUMBER: builtins.int
-    UPNEXTITEMCOUNT_FIELD_NUMBER: builtins.int
-    PREFERREDPLAYBACKRATE_FIELD_NUMBER: builtins.int
-    SUPPORTEDPLAYBACKSESSIONTYPES_FIELD_NUMBER: builtins.int
-    CURRENTPLAYBACKSESSIONTYPES_FIELD_NUMBER: builtins.int
-    PLAYBACKSESSIONIDENTIFIER_FIELD_NUMBER: builtins.int
-    CURRENTQUEUEENDACTION_FIELD_NUMBER: builtins.int
-    SUPPORTEDENDQUEUEACTIONS_FIELD_NUMBER: builtins.int
-    DISABLEREASON_FIELD_NUMBER: builtins.int
-    SUPPORTEDPLAYBACKSESSIONIDENTIFIERS_FIELD_NUMBER: builtins.int
-    command: global___Command.ValueType
-    enabled: builtins.bool
-    active: builtins.bool
-    localizedTitle: builtins.str
-    minimumRating: builtins.float
-    maximumRating: builtins.float
-    localizedShortTitle: builtins.str
-    repeatMode: pyatv.protocols.mrp.protobuf.Common_pb2.RepeatMode.Enum.ValueType
-    shuffleMode: pyatv.protocols.mrp.protobuf.Common_pb2.ShuffleMode.Enum.ValueType
-    presentationStyle: builtins.int
-    skipInterval: builtins.int
-    numAvailableSkips: builtins.int
-    skipFrequency: builtins.int
-    canScrub: builtins.int
-    supportsSharedQueue: builtins.bool
-    upNextItemCount: builtins.int
-    preferredPlaybackRate: builtins.float
-    playbackSessionIdentifier: builtins.str
-    currentQueueEndAction: global___QueueEndAction.Enum.ValueType
-    disableReason: global___DisableReason.Enum.ValueType
-    @property
-    def preferredIntervals(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.float]: ...
-    @property
-    def supportedRates(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.float]: ...
-    @property
-    def supportedPlaybackQueueTypes(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.int]: ...
-    @property
-    def supportedCustomQueueIdentifiers(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]: ...
-    @property
-    def supportedInsertionPositions(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.int]: ...
-    @property
-    def supportedPlaybackSessionTypes(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]: ...
-    @property
-    def currentPlaybackSessionTypes(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]: ...
-    @property
-    def supportedEndQueueActions(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[global___QueueEndAction.Enum.ValueType]: ...
-    @property
-    def supportedPlaybackSessionIdentifiers(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___PreloadedPlaybackSessionInfo]: ...
+    COMMAND_FIELD_NUMBER: _builtins.int
+    ENABLED_FIELD_NUMBER: _builtins.int
+    ACTIVE_FIELD_NUMBER: _builtins.int
+    PREFERREDINTERVALS_FIELD_NUMBER: _builtins.int
+    LOCALIZEDTITLE_FIELD_NUMBER: _builtins.int
+    MINIMUMRATING_FIELD_NUMBER: _builtins.int
+    MAXIMUMRATING_FIELD_NUMBER: _builtins.int
+    SUPPORTEDRATES_FIELD_NUMBER: _builtins.int
+    LOCALIZEDSHORTTITLE_FIELD_NUMBER: _builtins.int
+    REPEATMODE_FIELD_NUMBER: _builtins.int
+    SHUFFLEMODE_FIELD_NUMBER: _builtins.int
+    PRESENTATIONSTYLE_FIELD_NUMBER: _builtins.int
+    SKIPINTERVAL_FIELD_NUMBER: _builtins.int
+    NUMAVAILABLESKIPS_FIELD_NUMBER: _builtins.int
+    SKIPFREQUENCY_FIELD_NUMBER: _builtins.int
+    CANSCRUB_FIELD_NUMBER: _builtins.int
+    SUPPORTEDPLAYBACKQUEUETYPES_FIELD_NUMBER: _builtins.int
+    SUPPORTEDCUSTOMQUEUEIDENTIFIERS_FIELD_NUMBER: _builtins.int
+    SUPPORTEDINSERTIONPOSITIONS_FIELD_NUMBER: _builtins.int
+    SUPPORTSSHAREDQUEUE_FIELD_NUMBER: _builtins.int
+    UPNEXTITEMCOUNT_FIELD_NUMBER: _builtins.int
+    PREFERREDPLAYBACKRATE_FIELD_NUMBER: _builtins.int
+    SUPPORTEDPLAYBACKSESSIONTYPES_FIELD_NUMBER: _builtins.int
+    CURRENTPLAYBACKSESSIONTYPES_FIELD_NUMBER: _builtins.int
+    PLAYBACKSESSIONIDENTIFIER_FIELD_NUMBER: _builtins.int
+    CURRENTQUEUEENDACTION_FIELD_NUMBER: _builtins.int
+    SUPPORTEDENDQUEUEACTIONS_FIELD_NUMBER: _builtins.int
+    DISABLEREASON_FIELD_NUMBER: _builtins.int
+    SUPPORTEDPLAYBACKSESSIONIDENTIFIERS_FIELD_NUMBER: _builtins.int
+    command: Global___Command.ValueType
+    enabled: _builtins.bool
+    active: _builtins.bool
+    localizedTitle: _builtins.str
+    minimumRating: _builtins.float
+    maximumRating: _builtins.float
+    localizedShortTitle: _builtins.str
+    repeatMode: _Common_pb2.RepeatMode.Enum.ValueType
+    shuffleMode: _Common_pb2.ShuffleMode.Enum.ValueType
+    presentationStyle: _builtins.int
+    skipInterval: _builtins.int
+    numAvailableSkips: _builtins.int
+    skipFrequency: _builtins.int
+    canScrub: _builtins.int
+    supportsSharedQueue: _builtins.bool
+    upNextItemCount: _builtins.int
+    preferredPlaybackRate: _builtins.float
+    playbackSessionIdentifier: _builtins.str
+    currentQueueEndAction: Global___QueueEndAction.Enum.ValueType
+    disableReason: Global___DisableReason.Enum.ValueType
+    @_builtins.property
+    def preferredIntervals(self) -> _containers.RepeatedScalarFieldContainer[_builtins.float]: ...
+    @_builtins.property
+    def supportedRates(self) -> _containers.RepeatedScalarFieldContainer[_builtins.float]: ...
+    @_builtins.property
+    def supportedPlaybackQueueTypes(self) -> _containers.RepeatedScalarFieldContainer[_builtins.int]: ...
+    @_builtins.property
+    def supportedCustomQueueIdentifiers(self) -> _containers.RepeatedScalarFieldContainer[_builtins.str]: ...
+    @_builtins.property
+    def supportedInsertionPositions(self) -> _containers.RepeatedScalarFieldContainer[_builtins.int]: ...
+    @_builtins.property
+    def supportedPlaybackSessionTypes(self) -> _containers.RepeatedScalarFieldContainer[_builtins.str]: ...
+    @_builtins.property
+    def currentPlaybackSessionTypes(self) -> _containers.RepeatedScalarFieldContainer[_builtins.str]: ...
+    @_builtins.property
+    def supportedEndQueueActions(self) -> _containers.RepeatedScalarFieldContainer[Global___QueueEndAction.Enum.ValueType]: ...
+    @_builtins.property
+    def supportedPlaybackSessionIdentifiers(self) -> _containers.RepeatedCompositeFieldContainer[Global___PreloadedPlaybackSessionInfo]: ...
     def __init__(
         self,
         *,
-        command: global___Command.ValueType | None = ...,
-        enabled: builtins.bool | None = ...,
-        active: builtins.bool | None = ...,
-        preferredIntervals: collections.abc.Iterable[builtins.float] | None = ...,
-        localizedTitle: builtins.str | None = ...,
-        minimumRating: builtins.float | None = ...,
-        maximumRating: builtins.float | None = ...,
-        supportedRates: collections.abc.Iterable[builtins.float] | None = ...,
-        localizedShortTitle: builtins.str | None = ...,
-        repeatMode: pyatv.protocols.mrp.protobuf.Common_pb2.RepeatMode.Enum.ValueType | None = ...,
-        shuffleMode: pyatv.protocols.mrp.protobuf.Common_pb2.ShuffleMode.Enum.ValueType | None = ...,
-        presentationStyle: builtins.int | None = ...,
-        skipInterval: builtins.int | None = ...,
-        numAvailableSkips: builtins.int | None = ...,
-        skipFrequency: builtins.int | None = ...,
-        canScrub: builtins.int | None = ...,
-        supportedPlaybackQueueTypes: collections.abc.Iterable[builtins.int] | None = ...,
-        supportedCustomQueueIdentifiers: collections.abc.Iterable[builtins.str] | None = ...,
-        supportedInsertionPositions: collections.abc.Iterable[builtins.int] | None = ...,
-        supportsSharedQueue: builtins.bool | None = ...,
-        upNextItemCount: builtins.int | None = ...,
-        preferredPlaybackRate: builtins.float | None = ...,
-        supportedPlaybackSessionTypes: collections.abc.Iterable[builtins.str] | None = ...,
-        currentPlaybackSessionTypes: collections.abc.Iterable[builtins.str] | None = ...,
-        playbackSessionIdentifier: builtins.str | None = ...,
-        currentQueueEndAction: global___QueueEndAction.Enum.ValueType | None = ...,
-        supportedEndQueueActions: collections.abc.Iterable[global___QueueEndAction.Enum.ValueType] | None = ...,
-        disableReason: global___DisableReason.Enum.ValueType | None = ...,
-        supportedPlaybackSessionIdentifiers: collections.abc.Iterable[global___PreloadedPlaybackSessionInfo] | None = ...,
+        command: Global___Command.ValueType | None = ...,
+        enabled: _builtins.bool | None = ...,
+        active: _builtins.bool | None = ...,
+        preferredIntervals: _abc.Iterable[_builtins.float] | None = ...,
+        localizedTitle: _builtins.str | None = ...,
+        minimumRating: _builtins.float | None = ...,
+        maximumRating: _builtins.float | None = ...,
+        supportedRates: _abc.Iterable[_builtins.float] | None = ...,
+        localizedShortTitle: _builtins.str | None = ...,
+        repeatMode: _Common_pb2.RepeatMode.Enum.ValueType | None = ...,
+        shuffleMode: _Common_pb2.ShuffleMode.Enum.ValueType | None = ...,
+        presentationStyle: _builtins.int | None = ...,
+        skipInterval: _builtins.int | None = ...,
+        numAvailableSkips: _builtins.int | None = ...,
+        skipFrequency: _builtins.int | None = ...,
+        canScrub: _builtins.int | None = ...,
+        supportedPlaybackQueueTypes: _abc.Iterable[_builtins.int] | None = ...,
+        supportedCustomQueueIdentifiers: _abc.Iterable[_builtins.str] | None = ...,
+        supportedInsertionPositions: _abc.Iterable[_builtins.int] | None = ...,
+        supportsSharedQueue: _builtins.bool | None = ...,
+        upNextItemCount: _builtins.int | None = ...,
+        preferredPlaybackRate: _builtins.float | None = ...,
+        supportedPlaybackSessionTypes: _abc.Iterable[_builtins.str] | None = ...,
+        currentPlaybackSessionTypes: _abc.Iterable[_builtins.str] | None = ...,
+        playbackSessionIdentifier: _builtins.str | None = ...,
+        currentQueueEndAction: Global___QueueEndAction.Enum.ValueType | None = ...,
+        supportedEndQueueActions: _abc.Iterable[Global___QueueEndAction.Enum.ValueType] | None = ...,
+        disableReason: Global___DisableReason.Enum.ValueType | None = ...,
+        supportedPlaybackSessionIdentifiers: _abc.Iterable[Global___PreloadedPlaybackSessionInfo] | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["active", b"active", "canScrub", b"canScrub", "command", b"command", "currentQueueEndAction", b"currentQueueEndAction", "disableReason", b"disableReason", "enabled", b"enabled", "localizedShortTitle", b"localizedShortTitle", "localizedTitle", b"localizedTitle", "maximumRating", b"maximumRating", "minimumRating", b"minimumRating", "numAvailableSkips", b"numAvailableSkips", "playbackSessionIdentifier", b"playbackSessionIdentifier", "preferredPlaybackRate", b"preferredPlaybackRate", "presentationStyle", b"presentationStyle", "repeatMode", b"repeatMode", "shuffleMode", b"shuffleMode", "skipFrequency", b"skipFrequency", "skipInterval", b"skipInterval", "supportsSharedQueue", b"supportsSharedQueue", "upNextItemCount", b"upNextItemCount"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["active", b"active", "canScrub", b"canScrub", "command", b"command", "currentPlaybackSessionTypes", b"currentPlaybackSessionTypes", "currentQueueEndAction", b"currentQueueEndAction", "disableReason", b"disableReason", "enabled", b"enabled", "localizedShortTitle", b"localizedShortTitle", "localizedTitle", b"localizedTitle", "maximumRating", b"maximumRating", "minimumRating", b"minimumRating", "numAvailableSkips", b"numAvailableSkips", "playbackSessionIdentifier", b"playbackSessionIdentifier", "preferredIntervals", b"preferredIntervals", "preferredPlaybackRate", b"preferredPlaybackRate", "presentationStyle", b"presentationStyle", "repeatMode", b"repeatMode", "shuffleMode", b"shuffleMode", "skipFrequency", b"skipFrequency", "skipInterval", b"skipInterval", "supportedCustomQueueIdentifiers", b"supportedCustomQueueIdentifiers", "supportedEndQueueActions", b"supportedEndQueueActions", "supportedInsertionPositions", b"supportedInsertionPositions", "supportedPlaybackQueueTypes", b"supportedPlaybackQueueTypes", "supportedPlaybackSessionIdentifiers", b"supportedPlaybackSessionIdentifiers", "supportedPlaybackSessionTypes", b"supportedPlaybackSessionTypes", "supportedRates", b"supportedRates", "supportsSharedQueue", b"supportsSharedQueue", "upNextItemCount", b"upNextItemCount"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["active", b"active", "canScrub", b"canScrub", "command", b"command", "currentQueueEndAction", b"currentQueueEndAction", "disableReason", b"disableReason", "enabled", b"enabled", "localizedShortTitle", b"localizedShortTitle", "localizedTitle", b"localizedTitle", "maximumRating", b"maximumRating", "minimumRating", b"minimumRating", "numAvailableSkips", b"numAvailableSkips", "playbackSessionIdentifier", b"playbackSessionIdentifier", "preferredPlaybackRate", b"preferredPlaybackRate", "presentationStyle", b"presentationStyle", "repeatMode", b"repeatMode", "shuffleMode", b"shuffleMode", "skipFrequency", b"skipFrequency", "skipInterval", b"skipInterval", "supportsSharedQueue", b"supportsSharedQueue", "upNextItemCount", b"upNextItemCount"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["active", b"active", "canScrub", b"canScrub", "command", b"command", "currentPlaybackSessionTypes", b"currentPlaybackSessionTypes", "currentQueueEndAction", b"currentQueueEndAction", "disableReason", b"disableReason", "enabled", b"enabled", "localizedShortTitle", b"localizedShortTitle", "localizedTitle", b"localizedTitle", "maximumRating", b"maximumRating", "minimumRating", b"minimumRating", "numAvailableSkips", b"numAvailableSkips", "playbackSessionIdentifier", b"playbackSessionIdentifier", "preferredIntervals", b"preferredIntervals", "preferredPlaybackRate", b"preferredPlaybackRate", "presentationStyle", b"presentationStyle", "repeatMode", b"repeatMode", "shuffleMode", b"shuffleMode", "skipFrequency", b"skipFrequency", "skipInterval", b"skipInterval", "supportedCustomQueueIdentifiers", b"supportedCustomQueueIdentifiers", "supportedEndQueueActions", b"supportedEndQueueActions", "supportedInsertionPositions", b"supportedInsertionPositions", "supportedPlaybackQueueTypes", b"supportedPlaybackQueueTypes", "supportedPlaybackSessionIdentifiers", b"supportedPlaybackSessionIdentifiers", "supportedPlaybackSessionTypes", b"supportedPlaybackSessionTypes", "supportedRates", b"supportedRates", "supportsSharedQueue", b"supportsSharedQueue", "upNextItemCount", b"upNextItemCount"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___CommandInfo = CommandInfo
+Global___CommandInfo: _TypeAlias = CommandInfo  # noqa: Y015

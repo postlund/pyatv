@@ -3,28 +3,37 @@
 isort:skip_file
 """
 
-import builtins
-import google.protobuf.descriptor
-import google.protobuf.message
-import typing
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+import builtins as _builtins
+import sys
+import typing as _typing
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
+else:
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-@typing.final
-class TransactionKey(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-    IDENTIFIER_FIELD_NUMBER: builtins.int
-    USERDATA_FIELD_NUMBER: builtins.int
-    identifier: builtins.str
-    userData: builtins.bytes
+@_typing.final
+class TransactionKey(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    IDENTIFIER_FIELD_NUMBER: _builtins.int
+    USERDATA_FIELD_NUMBER: _builtins.int
+    identifier: _builtins.str
+    userData: _builtins.bytes
     def __init__(
         self,
         *,
-        identifier: builtins.str | None = ...,
-        userData: builtins.bytes | None = ...,
+        identifier: _builtins.str | None = ...,
+        userData: _builtins.bytes | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["identifier", b"identifier", "userData", b"userData"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["identifier", b"identifier", "userData", b"userData"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["identifier", b"identifier", "userData", b"userData"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["identifier", b"identifier", "userData", b"userData"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___TransactionKey = TransactionKey
+Global___TransactionKey: _TypeAlias = TransactionKey  # noqa: Y015

@@ -341,7 +341,7 @@ class MrpRemoteControl(RemoteControl):
 
     async def _send_command(self, command, **kwargs):
         resp = await self.protocol.send_and_receive(messages.command(command, **kwargs))
-        inner = resp.inner()
+        inner = protobuf.extract_inner(resp)
 
         if inner.sendError == protobuf.SendError.NoError:
             return
@@ -589,7 +589,7 @@ class MrpMetadata(Metadata):
         if not resp.HasField("type"):
             return None
 
-        item = resp.inner().playbackQueue.contentItems[playing.location]
+        item = protobuf.extract_inner(resp).playbackQueue.contentItems[playing.location]
         return ArtworkInfo(
             bytes=item.artworkData,
             mimetype=playing.metadata.artworkMIMEType,
@@ -685,7 +685,9 @@ class MrpPower(Power):
 
     @staticmethod
     def _get_power_state(device_info_message) -> PowerState:
-        logical_device_count = device_info_message.inner().logicalDeviceCount
+        logical_device_count = protobuf.extract_inner(
+            device_info_message
+        ).logicalDeviceCount
         if logical_device_count >= 1:
             return PowerState.On
         if logical_device_count == 0:
@@ -763,7 +765,7 @@ class MrpAudio(Audio):
     def device_uid(self) -> Optional[str]:
         """Return the UID of our device."""
         if self.protocol.device_info is not None:
-            inner = self.protocol.device_info.inner()
+            inner = protobuf.extract_inner(self.protocol.device_info)
             return inner.clusterID or inner.deviceUID  # type: ignore
         return None
 
@@ -802,10 +804,10 @@ class MrpAudio(Audio):
         )
 
     async def _volume_control_availability(self, message) -> None:
-        self._update_volume_controls(message.inner())
+        self._update_volume_controls(protobuf.extract_inner(message))
 
     async def _volume_control_changed(self, message) -> None:
-        inner = message.inner()
+        inner = protobuf.extract_inner(message)
 
         # Make sure update is for our device (in case it changed for someone else)
         if inner.outputDeviceUID == self.device_uid:
@@ -828,7 +830,7 @@ class MrpAudio(Audio):
         )
 
     async def _volume_did_change(self, message) -> None:
-        inner = message.inner()
+        inner = protobuf.extract_inner(message)
 
         # Make sure update is for our device (in case it changed for someone else)
         if inner.outputDeviceUID == self.device_uid:
@@ -909,7 +911,7 @@ class MrpAudio(Audio):
             await self.set_volume(max(self.volume - 5, 0.0))
 
     async def _update_output_devices(self, message: protobuf.ProtocolMessage) -> None:
-        inner = cast(protobuf.DeviceInfoMessage, message.inner())
+        inner = cast(protobuf.DeviceInfoMessage, protobuf.extract_inner(message))
         devices = []
         if inner.isGroupLeader and not inner.isProxyGroupPlayer:
             devices.append(
@@ -1138,7 +1140,7 @@ def create_with_connection(  # pylint: disable=too-many-locals
 
         # Extract build number from DEVICE_INFO_MESSAGE from device
         if protocol.device_info:
-            info = protocol.device_info.inner()  # type: ignore
+            info = protobuf.extract_inner(protocol.device_info)
             devinfo[DeviceInfo.BUILD_NUMBER] = info.systemBuildVersion
             if info.modelID:
                 devinfo[DeviceInfo.RAW_MODEL] = info.modelID

@@ -27,7 +27,7 @@ def device_information(info_settings: InfoSettings, identifier, update=False):
         protobuf.DEVICE_INFO_UPDATE_MESSAGE if update else protobuf.DEVICE_INFO_MESSAGE
     )
     message = create(msg_type)
-    info = message.inner()
+    info = protobuf.extract_inner(message)
     info.allowsPairing = True
     info.applicationBundleIdentifier = "com.apple.TVRemote"
     info.applicationBundleVersion = "344.28"
@@ -56,7 +56,7 @@ def wake_device():
 def set_connection_state():
     """Create a new SET_CONNECTION_STATE."""
     message = create(protobuf.ProtocolMessage.SET_CONNECTION_STATE_MESSAGE)
-    message.inner().state = protobuf.SetConnectionStateMessage.Connected
+    protobuf.extract_inner(message).state = protobuf.SetConnectionStateMessage.Connected
     return message
 
 
@@ -68,7 +68,7 @@ def get_keyboard_session():
 def crypto_pairing(pairing_data, is_pairing=False):
     """Create a new CRYPTO_PAIRING_MESSAGE."""
     message = create(protobuf.CRYPTO_PAIRING_MESSAGE)
-    crypto = message.inner()
+    crypto = protobuf.extract_inner(message)
     crypto.status = 0
     crypto.pairingData = hap_tlv8.write_tlv(pairing_data)
 
@@ -88,7 +88,7 @@ def client_updates_config(
 ):
     """Create a new CLIENT_UPDATES_CONFIG_MESSAGE."""
     message = create(protobuf.CLIENT_UPDATES_CONFIG_MESSAGE)
-    config = message.inner()
+    config = protobuf.extract_inner(message)
     config.artworkUpdates = artwork
     config.nowPlayingUpdates = now_playing
     config.volumeUpdates = volume
@@ -100,7 +100,7 @@ def client_updates_config(
 def playback_queue_request(location, width=-1, height=400):
     """Create a new PLAYBACK_QUEUE_REQUEST."""
     message = create(protobuf.PLAYBACK_QUEUE_REQUEST_MESSAGE)
-    request = message.inner()
+    request = protobuf.extract_inner(message)
     request.location = location
     request.length = 1
     request.artworkWidth = width
@@ -112,7 +112,7 @@ def playback_queue_request(location, width=-1, height=400):
 def send_hid_event(use_page, usage, down):
     """Create a new SEND_HID_EVENT_MESSAGE."""
     message = create(protobuf.SEND_HID_EVENT_MESSAGE)
-    event = message.inner()
+    event = protobuf.extract_inner(message)
 
     # TODO: This should be generated somehow. I guess it's mach AbsoluteTime
     # which is tricky to generate. The device does not seem to care much about
@@ -141,7 +141,7 @@ def send_hid_event(use_page, usage, down):
 def send_button(usage_page, usage, button_down):
     """Create a new SEND_BUTTON_EVENT_MESSAGE.."""
     message = create(protobuf.SEND_BUTTON_EVENT_MESSAGE)
-    inner = message.inner()
+    inner = protobuf.extract_inner(message)
     inner.usagePage = usage_page
     inner.usage = usage
     inner.buttonDown = button_down
@@ -151,7 +151,7 @@ def send_button(usage_page, usage, button_down):
 def command(cmd, **kwargs):
     """Playback command request."""
     message = create(protobuf.SEND_COMMAND_MESSAGE)
-    send_command = message.inner()
+    send_command = protobuf.extract_inner(message)
     send_command.command = cmd
     for key, value in kwargs.items():
         setattr(send_command.options, key, value)
@@ -161,7 +161,7 @@ def command(cmd, **kwargs):
 def command_result(identifier, send_error=protobuf.SendError.NoError):
     """Playback command request."""
     message = create(protobuf.SEND_COMMAND_RESULT_MESSAGE, identifier=identifier)
-    inner = message.inner()
+    inner = protobuf.extract_inner(message)
     inner.sendError = send_error
     inner.handlerReturnStatus = protobuf.HandlerReturnStatus.Success
     return message
@@ -170,7 +170,7 @@ def command_result(identifier, send_error=protobuf.SendError.NoError):
 def repeat(mode):
     """Change repeat mode of current player."""
     message = command(protobuf.CommandInfo_pb2.ChangeRepeatMode)
-    options = message.inner().options
+    options = protobuf.extract_inner(message).options
     options.sendOptions = 0
     if mode == const.RepeatState.Off:
         options.repeatMode = protobuf.RepeatMode.Off
@@ -184,7 +184,7 @@ def repeat(mode):
 def shuffle(state):
     """Change shuffle mode of current player."""
     message = command(protobuf.CommandInfo_pb2.ChangeShuffleMode)
-    options = message.inner().options
+    options = protobuf.extract_inner(message).options
     options.sendOptions = 0
     if state == const.ShuffleState.Off:
         options.shuffleMode = protobuf.ShuffleMode.Off
@@ -198,7 +198,7 @@ def shuffle(state):
 def seek_to_position(position):
     """Seek to an absolute position in stream."""
     message = command(protobuf.CommandInfo_pb2.SeekToPlaybackPosition)
-    send_command = message.inner()
+    send_command = protobuf.extract_inner(message)
     send_command.options.playbackPosition = position
     return message
 
@@ -206,7 +206,7 @@ def seek_to_position(position):
 def set_volume(device_uid: str, volume: float) -> protobuf.ProtocolMessage:
     """Change volume on a device."""
     message = create(protobuf.SET_VOLUME_MESSAGE)
-    inner = message.inner()
+    inner = protobuf.extract_inner(message)
     inner.outputDeviceUID = device_uid
     inner.volume = volume
     return message
@@ -215,7 +215,7 @@ def set_volume(device_uid: str, volume: float) -> protobuf.ProtocolMessage:
 def add_output_devices(*device_uids: List[str]) -> protobuf.ProtocolMessage:
     """Add AirPlay devices to the speaker group."""
     message = create(protobuf.MODIFY_OUTPUT_CONTEXT_REQUEST_MESSAGE)
-    inner = message.inner()
+    inner = protobuf.extract_inner(message)
     inner.type = protobuf.ModifyOutputContextRequestType.SharedAudioPresentation
     for device_uid in device_uids:
         inner.addingDevices.append(device_uid)
@@ -226,7 +226,7 @@ def add_output_devices(*device_uids: List[str]) -> protobuf.ProtocolMessage:
 def remove_output_devices(*device_uids: List[str]) -> protobuf.ProtocolMessage:
     """Remove AirPlay devices from the speaker group."""
     message = create(protobuf.MODIFY_OUTPUT_CONTEXT_REQUEST_MESSAGE)
-    inner = message.inner()
+    inner = protobuf.extract_inner(message)
     inner.type = protobuf.ModifyOutputContextRequestType.SharedAudioPresentation
     for device_uid in device_uids:
         inner.removingDevices.append(device_uid)
@@ -237,7 +237,7 @@ def remove_output_devices(*device_uids: List[str]) -> protobuf.ProtocolMessage:
 def set_output_devices(*device_uids: List[str]) -> protobuf.ProtocolMessage:
     """Set AirPlay devices as the speaker group."""
     message = create(protobuf.MODIFY_OUTPUT_CONTEXT_REQUEST_MESSAGE)
-    inner = message.inner()
+    inner = protobuf.extract_inner(message)
     inner.type = protobuf.ModifyOutputContextRequestType.SharedAudioPresentation
     for device_uid in device_uids:
         inner.settingDevices.append(device_uid)

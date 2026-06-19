@@ -3,30 +3,30 @@
 isort:skip_file
 """
 
-import builtins
-import google.protobuf.descriptor
-import google.protobuf.internal.enum_type_wrapper
-import google.protobuf.message
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import enum_type_wrapper as _enum_type_wrapper
+import builtins as _builtins
 import sys
-import typing
+import typing as _typing
 
-if sys.version_info >= (3, 10):
-    import typing as typing_extensions
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
 else:
-    import typing_extensions
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-@typing.final
-class ErrorCode(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class ErrorCode(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
     class _Enum:
-        ValueType = typing.NewType("ValueType", builtins.int)
-        V: typing_extensions.TypeAlias = ValueType
+        ValueType = _typing.NewType("ValueType", _builtins.int)
+        V: _TypeAlias = ValueType  # noqa: Y015
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[ErrorCode._Enum.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    class _EnumEnumTypeWrapper(_enum_type_wrapper._EnumTypeWrapper[ErrorCode._Enum.ValueType], _builtins.type):
+        DESCRIPTOR: _descriptor.EnumDescriptor
         NoError: ErrorCode._Enum.ValueType  # 0
         UnknownError: ErrorCode._Enum.ValueType  # 1
         InvalidOperation: ErrorCode._Enum.ValueType  # 2
@@ -161,19 +161,24 @@ class ErrorCode(google.protobuf.message.Message):
     def __init__(
         self,
     ) -> None: ...
+    _HasFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___ErrorCode = ErrorCode
+Global___ErrorCode: _TypeAlias = ErrorCode  # noqa: Y015
 
-@typing.final
-class ProtocolMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class ProtocolMessage(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
     class _Type:
-        ValueType = typing.NewType("ValueType", builtins.int)
-        V: typing_extensions.TypeAlias = ValueType
+        ValueType = _typing.NewType("ValueType", _builtins.int)
+        V: _TypeAlias = ValueType  # noqa: Y015
 
-    class _TypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[ProtocolMessage._Type.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    class _TypeEnumTypeWrapper(_enum_type_wrapper._EnumTypeWrapper[ProtocolMessage._Type.ValueType], _builtins.type):
+        DESCRIPTOR: _descriptor.EnumDescriptor
         UNKNOWN_MESSAGE: ProtocolMessage._Type.ValueType  # 0
         SEND_COMMAND_MESSAGE: ProtocolMessage._Type.ValueType  # 1
         SEND_COMMAND_RESULT_MESSAGE: ProtocolMessage._Type.ValueType  # 2
@@ -345,33 +350,36 @@ class ProtocolMessage(google.protobuf.message.Message):
     AUDIO_FADE_RESPONSE_MESSAGE: ProtocolMessage.Type.ValueType  # 107
     CONFIGURE_CONNECTION_MESSAGE: ProtocolMessage.Type.ValueType  # 120
 
-    TYPE_FIELD_NUMBER: builtins.int
-    IDENTIFIER_FIELD_NUMBER: builtins.int
-    AUTHENTICATIONTOKEN_FIELD_NUMBER: builtins.int
-    ERRORCODE_FIELD_NUMBER: builtins.int
-    TIMESTAMP_FIELD_NUMBER: builtins.int
-    ERRORDESCRIPTION_FIELD_NUMBER: builtins.int
-    UNIQUEIDENTIFIER_FIELD_NUMBER: builtins.int
-    type: global___ProtocolMessage.Type.ValueType
+    TYPE_FIELD_NUMBER: _builtins.int
+    IDENTIFIER_FIELD_NUMBER: _builtins.int
+    AUTHENTICATIONTOKEN_FIELD_NUMBER: _builtins.int
+    ERRORCODE_FIELD_NUMBER: _builtins.int
+    TIMESTAMP_FIELD_NUMBER: _builtins.int
+    ERRORDESCRIPTION_FIELD_NUMBER: _builtins.int
+    UNIQUEIDENTIFIER_FIELD_NUMBER: _builtins.int
+    type: Global___ProtocolMessage.Type.ValueType
     """Identifies which underlying message is filled in."""
-    identifier: builtins.str
-    authenticationToken: builtins.str
-    errorCode: global___ErrorCode.Enum.ValueType
-    timestamp: builtins.int
-    errorDescription: builtins.str
-    uniqueIdentifier: builtins.str
+    identifier: _builtins.str
+    authenticationToken: _builtins.str
+    errorCode: Global___ErrorCode.Enum.ValueType
+    timestamp: _builtins.int
+    errorDescription: _builtins.str
+    uniqueIdentifier: _builtins.str
     def __init__(
         self,
         *,
-        type: global___ProtocolMessage.Type.ValueType | None = ...,
-        identifier: builtins.str | None = ...,
-        authenticationToken: builtins.str | None = ...,
-        errorCode: global___ErrorCode.Enum.ValueType | None = ...,
-        timestamp: builtins.int | None = ...,
-        errorDescription: builtins.str | None = ...,
-        uniqueIdentifier: builtins.str | None = ...,
+        type: Global___ProtocolMessage.Type.ValueType | None = ...,
+        identifier: _builtins.str | None = ...,
+        authenticationToken: _builtins.str | None = ...,
+        errorCode: Global___ErrorCode.Enum.ValueType | None = ...,
+        timestamp: _builtins.int | None = ...,
+        errorDescription: _builtins.str | None = ...,
+        uniqueIdentifier: _builtins.str | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["authenticationToken", b"authenticationToken", "errorCode", b"errorCode", "errorDescription", b"errorDescription", "identifier", b"identifier", "timestamp", b"timestamp", "type", b"type", "uniqueIdentifier", b"uniqueIdentifier"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["authenticationToken", b"authenticationToken", "errorCode", b"errorCode", "errorDescription", b"errorDescription", "identifier", b"identifier", "timestamp", b"timestamp", "type", b"type", "uniqueIdentifier", b"uniqueIdentifier"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["authenticationToken", b"authenticationToken", "errorCode", b"errorCode", "errorDescription", b"errorDescription", "identifier", b"identifier", "timestamp", b"timestamp", "type", b"type", "uniqueIdentifier", b"uniqueIdentifier"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["authenticationToken", b"authenticationToken", "errorCode", b"errorCode", "errorDescription", b"errorDescription", "identifier", b"identifier", "timestamp", b"timestamp", "type", b"type", "uniqueIdentifier", b"uniqueIdentifier"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___ProtocolMessage = ProtocolMessage
+Global___ProtocolMessage: _TypeAlias = ProtocolMessage  # noqa: Y015

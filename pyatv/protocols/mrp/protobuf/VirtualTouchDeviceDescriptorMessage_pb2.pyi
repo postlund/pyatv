@@ -3,34 +3,43 @@
 isort:skip_file
 """
 
-import builtins
-import google.protobuf.descriptor
-import google.protobuf.message
-import typing
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+import builtins as _builtins
+import sys
+import typing as _typing
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
+else:
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-@typing.final
-class VirtualTouchDeviceDescriptor(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-    ABSOLUTE_FIELD_NUMBER: builtins.int
-    INTEGRATEDDISPLAY_FIELD_NUMBER: builtins.int
-    SCREENSIZEWIDTH_FIELD_NUMBER: builtins.int
-    SCREENSIZEHEIGHT_FIELD_NUMBER: builtins.int
-    absolute: builtins.bool
-    integratedDisplay: builtins.bool
-    screenSizeWidth: builtins.float
-    screenSizeHeight: builtins.float
+@_typing.final
+class VirtualTouchDeviceDescriptor(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    ABSOLUTE_FIELD_NUMBER: _builtins.int
+    INTEGRATEDDISPLAY_FIELD_NUMBER: _builtins.int
+    SCREENSIZEWIDTH_FIELD_NUMBER: _builtins.int
+    SCREENSIZEHEIGHT_FIELD_NUMBER: _builtins.int
+    absolute: _builtins.bool
+    integratedDisplay: _builtins.bool
+    screenSizeWidth: _builtins.float
+    screenSizeHeight: _builtins.float
     def __init__(
         self,
         *,
-        absolute: builtins.bool | None = ...,
-        integratedDisplay: builtins.bool | None = ...,
-        screenSizeWidth: builtins.float | None = ...,
-        screenSizeHeight: builtins.float | None = ...,
+        absolute: _builtins.bool | None = ...,
+        integratedDisplay: _builtins.bool | None = ...,
+        screenSizeWidth: _builtins.float | None = ...,
+        screenSizeHeight: _builtins.float | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["absolute", b"absolute", "integratedDisplay", b"integratedDisplay", "screenSizeHeight", b"screenSizeHeight", "screenSizeWidth", b"screenSizeWidth"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["absolute", b"absolute", "integratedDisplay", b"integratedDisplay", "screenSizeHeight", b"screenSizeHeight", "screenSizeWidth", b"screenSizeWidth"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["absolute", b"absolute", "integratedDisplay", b"integratedDisplay", "screenSizeHeight", b"screenSizeHeight", "screenSizeWidth", b"screenSizeWidth"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["absolute", b"absolute", "integratedDisplay", b"integratedDisplay", "screenSizeHeight", b"screenSizeHeight", "screenSizeWidth", b"screenSizeWidth"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___VirtualTouchDeviceDescriptor = VirtualTouchDeviceDescriptor
+Global___VirtualTouchDeviceDescriptor: _TypeAlias = VirtualTouchDeviceDescriptor  # noqa: Y015
