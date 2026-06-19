@@ -3,30 +3,39 @@
 isort:skip_file
 """
 
-import builtins
-import google.protobuf.descriptor
-import google.protobuf.internal.extension_dict
-import google.protobuf.message
-import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import typing
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import extension_dict as _extension_dict
+from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as _ProtocolMessage_pb2
+import builtins as _builtins
+import sys
+import typing as _typing
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
+else:
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-@typing.final
-class ConfigureConnectionMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-    GROUPID_FIELD_NUMBER: builtins.int
-    groupID: builtins.str
+@_typing.final
+class ConfigureConnectionMessage(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    GROUPID_FIELD_NUMBER: _builtins.int
+    groupID: _builtins.str
     def __init__(
         self,
         *,
-        groupID: builtins.str | None = ...,
+        groupID: _builtins.str | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["groupID", b"groupID"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["groupID", b"groupID"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["groupID", b"groupID"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["groupID", b"groupID"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___ConfigureConnectionMessage = ConfigureConnectionMessage
+Global___ConfigureConnectionMessage: _TypeAlias = ConfigureConnectionMessage  # noqa: Y015
 
-CONFIGURECONNECTIONMESSAGE_FIELD_NUMBER: builtins.int
-configureConnectionMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___ConfigureConnectionMessage]
+CONFIGURECONNECTIONMESSAGE_FIELD_NUMBER: _builtins.int
+configureConnectionMessage: _extension_dict._ExtensionFieldDescriptor[_ProtocolMessage_pb2.ProtocolMessage, Global___ConfigureConnectionMessage]

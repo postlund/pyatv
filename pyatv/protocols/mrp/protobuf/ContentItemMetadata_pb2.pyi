@@ -3,32 +3,32 @@
 isort:skip_file
 """
 
-import builtins
-import collections.abc
-import google.protobuf.descriptor
-import google.protobuf.internal.containers
-import google.protobuf.internal.enum_type_wrapper
-import google.protobuf.message
+from collections import abc as _abc
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import containers as _containers
+from google.protobuf.internal import enum_type_wrapper as _enum_type_wrapper
+import builtins as _builtins
 import sys
-import typing
+import typing as _typing
 
-if sys.version_info >= (3, 10):
-    import typing as typing_extensions
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
 else:
-    import typing_extensions
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-@typing.final
-class AudioRouteType(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class AudioRouteType(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
     class _Enum:
-        ValueType = typing.NewType("ValueType", builtins.int)
-        V: typing_extensions.TypeAlias = ValueType
+        ValueType = _typing.NewType("ValueType", _builtins.int)
+        V: _TypeAlias = ValueType  # noqa: Y015
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[AudioRouteType._Enum.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    class _EnumEnumTypeWrapper(_enum_type_wrapper._EnumTypeWrapper[AudioRouteType._Enum.ValueType], _builtins.type):
+        DESCRIPTOR: _descriptor.EnumDescriptor
         Unknown: AudioRouteType._Enum.ValueType  # 0
         DevicesSpeaker: AudioRouteType._Enum.ValueType  # 1
         LineOut: AudioRouteType._Enum.ValueType  # 2
@@ -55,42 +55,50 @@ class AudioRouteType(google.protobuf.message.Message):
     def __init__(
         self,
     ) -> None: ...
+    _HasFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___AudioRouteType = AudioRouteType
+Global___AudioRouteType: _TypeAlias = AudioRouteType  # noqa: Y015
 
-@typing.final
-class AudioRoute(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class AudioRoute(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
-    TYPE_FIELD_NUMBER: builtins.int
-    NAME_FIELD_NUMBER: builtins.int
-    SUPPORTSSPATIALIZATION_FIELD_NUMBER: builtins.int
-    name: builtins.str
-    supportsSpatialization: builtins.bool
-    @property
-    def type(self) -> global___AudioRouteType: ...
+    TYPE_FIELD_NUMBER: _builtins.int
+    NAME_FIELD_NUMBER: _builtins.int
+    SUPPORTSSPATIALIZATION_FIELD_NUMBER: _builtins.int
+    name: _builtins.str
+    supportsSpatialization: _builtins.bool
+    @_builtins.property
+    def type(self) -> Global___AudioRouteType: ...
     def __init__(
         self,
         *,
-        type: global___AudioRouteType | None = ...,
-        name: builtins.str | None = ...,
-        supportsSpatialization: builtins.bool | None = ...,
+        type: Global___AudioRouteType | None = ...,
+        name: _builtins.str | None = ...,
+        supportsSpatialization: _builtins.bool | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["name", b"name", "supportsSpatialization", b"supportsSpatialization", "type", b"type"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["name", b"name", "supportsSpatialization", b"supportsSpatialization", "type", b"type"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["name", b"name", "supportsSpatialization", b"supportsSpatialization", "type", b"type"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["name", b"name", "supportsSpatialization", b"supportsSpatialization", "type", b"type"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___AudioRoute = AudioRoute
+Global___AudioRoute: _TypeAlias = AudioRoute  # noqa: Y015
 
-@typing.final
-class AudioTier(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class AudioTier(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
     class _Enum:
-        ValueType = typing.NewType("ValueType", builtins.int)
-        V: typing_extensions.TypeAlias = ValueType
+        ValueType = _typing.NewType("ValueType", _builtins.int)
+        V: _TypeAlias = ValueType  # noqa: Y015
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[AudioTier._Enum.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    class _EnumEnumTypeWrapper(_enum_type_wrapper._EnumTypeWrapper[AudioTier._Enum.ValueType], _builtins.type):
+        DESCRIPTOR: _descriptor.EnumDescriptor
         LowBandwidthStereo: AudioTier._Enum.ValueType  # 1
         HighQualityStereo: AudioTier._Enum.ValueType  # 2
         Lossless: AudioTier._Enum.ValueType  # 3
@@ -107,19 +115,24 @@ class AudioTier(google.protobuf.message.Message):
     def __init__(
         self,
     ) -> None: ...
+    _HasFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___AudioTier = AudioTier
+Global___AudioTier: _TypeAlias = AudioTier  # noqa: Y015
 
-@typing.final
-class SongTraits(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class SongTraits(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
     class _Enum:
-        ValueType = typing.NewType("ValueType", builtins.int)
-        V: typing_extensions.TypeAlias = ValueType
+        ValueType = _typing.NewType("ValueType", _builtins.int)
+        V: _TypeAlias = ValueType  # noqa: Y015
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[SongTraits._Enum.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    class _EnumEnumTypeWrapper(_enum_type_wrapper._EnumTypeWrapper[SongTraits._Enum.ValueType], _builtins.type):
+        DESCRIPTOR: _descriptor.EnumDescriptor
         AppleDigitialMaster: SongTraits._Enum.ValueType  # 1
         Lossless: SongTraits._Enum.ValueType  # 2
         HighResolutionLossless: SongTraits._Enum.ValueType  # 4
@@ -138,19 +151,24 @@ class SongTraits(google.protobuf.message.Message):
     def __init__(
         self,
     ) -> None: ...
+    _HasFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___SongTraits = SongTraits
+Global___SongTraits: _TypeAlias = SongTraits  # noqa: Y015
 
-@typing.final
-class AlbumTraits(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class AlbumTraits(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
     class _Enum:
-        ValueType = typing.NewType("ValueType", builtins.int)
-        V: typing_extensions.TypeAlias = ValueType
+        ValueType = _typing.NewType("ValueType", _builtins.int)
+        V: _TypeAlias = ValueType  # noqa: Y015
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[AlbumTraits._Enum.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    class _EnumEnumTypeWrapper(_enum_type_wrapper._EnumTypeWrapper[AlbumTraits._Enum.ValueType], _builtins.type):
+        DESCRIPTOR: _descriptor.EnumDescriptor
         AppleDigitialMaster: AlbumTraits._Enum.ValueType  # 1
         Lossless: AlbumTraits._Enum.ValueType  # 2
         HighResolutionLossless: AlbumTraits._Enum.ValueType  # 4
@@ -169,19 +187,24 @@ class AlbumTraits(google.protobuf.message.Message):
     def __init__(
         self,
     ) -> None: ...
+    _HasFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___AlbumTraits = AlbumTraits
+Global___AlbumTraits: _TypeAlias = AlbumTraits  # noqa: Y015
 
-@typing.final
-class PlaylistTraits(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class PlaylistTraits(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
     class _Enum:
-        ValueType = typing.NewType("ValueType", builtins.int)
-        V: typing_extensions.TypeAlias = ValueType
+        ValueType = _typing.NewType("ValueType", _builtins.int)
+        V: _TypeAlias = ValueType  # noqa: Y015
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[PlaylistTraits._Enum.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    class _EnumEnumTypeWrapper(_enum_type_wrapper._EnumTypeWrapper[PlaylistTraits._Enum.ValueType], _builtins.type):
+        DESCRIPTOR: _descriptor.EnumDescriptor
         Spatial: PlaylistTraits._Enum.ValueType  # 8
         Atmos: PlaylistTraits._Enum.ValueType  # 16
         Surround: PlaylistTraits._Enum.ValueType  # 32
@@ -194,19 +217,24 @@ class PlaylistTraits(google.protobuf.message.Message):
     def __init__(
         self,
     ) -> None: ...
+    _HasFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___PlaylistTraits = PlaylistTraits
+Global___PlaylistTraits: _TypeAlias = PlaylistTraits  # noqa: Y015
 
-@typing.final
-class ActiveFormatJustification(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class ActiveFormatJustification(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
     class _Enum:
-        ValueType = typing.NewType("ValueType", builtins.int)
-        V: typing_extensions.TypeAlias = ValueType
+        ValueType = _typing.NewType("ValueType", _builtins.int)
+        V: _TypeAlias = ValueType  # noqa: Y015
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[ActiveFormatJustification._Enum.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    class _EnumEnumTypeWrapper(_enum_type_wrapper._EnumTypeWrapper[ActiveFormatJustification._Enum.ValueType], _builtins.type):
+        DESCRIPTOR: _descriptor.EnumDescriptor
         Unknown: ActiveFormatJustification._Enum.ValueType  # 0
         Unavailable: ActiveFormatJustification._Enum.ValueType  # 1
         UserPreference: ActiveFormatJustification._Enum.ValueType  # 100
@@ -227,19 +255,24 @@ class ActiveFormatJustification(google.protobuf.message.Message):
     def __init__(
         self,
     ) -> None: ...
+    _HasFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___ActiveFormatJustification = ActiveFormatJustification
+Global___ActiveFormatJustification: _TypeAlias = ActiveFormatJustification  # noqa: Y015
 
-@typing.final
-class FormatTier(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class FormatTier(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
     class _Enum:
-        ValueType = typing.NewType("ValueType", builtins.int)
-        V: typing_extensions.TypeAlias = ValueType
+        ValueType = _typing.NewType("ValueType", _builtins.int)
+        V: _TypeAlias = ValueType  # noqa: Y015
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[FormatTier._Enum.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    class _EnumEnumTypeWrapper(_enum_type_wrapper._EnumTypeWrapper[FormatTier._Enum.ValueType], _builtins.type):
+        DESCRIPTOR: _descriptor.EnumDescriptor
         LowBandwidthStereo: FormatTier._Enum.ValueType  # 1
         HighQualityStereo: FormatTier._Enum.ValueType  # 2
         Lossless: FormatTier._Enum.ValueType  # 4
@@ -256,65 +289,73 @@ class FormatTier(google.protobuf.message.Message):
     def __init__(
         self,
     ) -> None: ...
+    _HasFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___FormatTier = FormatTier
+Global___FormatTier: _TypeAlias = FormatTier  # noqa: Y015
 
-@typing.final
-class AudioFormat(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class AudioFormat(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
-    TIER_FIELD_NUMBER: builtins.int
-    BITRATE_FIELD_NUMBER: builtins.int
-    SAMPLERATE_FIELD_NUMBER: builtins.int
-    BITDEPTH_FIELD_NUMBER: builtins.int
-    CODEC_FIELD_NUMBER: builtins.int
-    SPATIALIZED_FIELD_NUMBER: builtins.int
-    MULTICHANNEL_FIELD_NUMBER: builtins.int
-    CHANNELLAYOUT_FIELD_NUMBER: builtins.int
-    AUDIOCHANNELLAYOUTDESCRIPTION_FIELD_NUMBER: builtins.int
-    GROUPID_FIELD_NUMBER: builtins.int
-    STABLEVARIANTID_FIELD_NUMBER: builtins.int
-    tier: global___AudioTier.Enum.ValueType
-    bitrate: builtins.int
-    sampleRate: builtins.int
-    bitDepth: builtins.int
-    codec: builtins.int
-    spatialized: builtins.bool
-    multiChannel: builtins.bool
-    channelLayout: builtins.int
-    audioChannelLayoutDescription: builtins.str
-    groupID: builtins.str
-    stableVariantID: builtins.str
+    TIER_FIELD_NUMBER: _builtins.int
+    BITRATE_FIELD_NUMBER: _builtins.int
+    SAMPLERATE_FIELD_NUMBER: _builtins.int
+    BITDEPTH_FIELD_NUMBER: _builtins.int
+    CODEC_FIELD_NUMBER: _builtins.int
+    SPATIALIZED_FIELD_NUMBER: _builtins.int
+    MULTICHANNEL_FIELD_NUMBER: _builtins.int
+    CHANNELLAYOUT_FIELD_NUMBER: _builtins.int
+    AUDIOCHANNELLAYOUTDESCRIPTION_FIELD_NUMBER: _builtins.int
+    GROUPID_FIELD_NUMBER: _builtins.int
+    STABLEVARIANTID_FIELD_NUMBER: _builtins.int
+    tier: Global___AudioTier.Enum.ValueType
+    bitrate: _builtins.int
+    sampleRate: _builtins.int
+    bitDepth: _builtins.int
+    codec: _builtins.int
+    spatialized: _builtins.bool
+    multiChannel: _builtins.bool
+    channelLayout: _builtins.int
+    audioChannelLayoutDescription: _builtins.str
+    groupID: _builtins.str
+    stableVariantID: _builtins.str
     def __init__(
         self,
         *,
-        tier: global___AudioTier.Enum.ValueType | None = ...,
-        bitrate: builtins.int | None = ...,
-        sampleRate: builtins.int | None = ...,
-        bitDepth: builtins.int | None = ...,
-        codec: builtins.int | None = ...,
-        spatialized: builtins.bool | None = ...,
-        multiChannel: builtins.bool | None = ...,
-        channelLayout: builtins.int | None = ...,
-        audioChannelLayoutDescription: builtins.str | None = ...,
-        groupID: builtins.str | None = ...,
-        stableVariantID: builtins.str | None = ...,
+        tier: Global___AudioTier.Enum.ValueType | None = ...,
+        bitrate: _builtins.int | None = ...,
+        sampleRate: _builtins.int | None = ...,
+        bitDepth: _builtins.int | None = ...,
+        codec: _builtins.int | None = ...,
+        spatialized: _builtins.bool | None = ...,
+        multiChannel: _builtins.bool | None = ...,
+        channelLayout: _builtins.int | None = ...,
+        audioChannelLayoutDescription: _builtins.str | None = ...,
+        groupID: _builtins.str | None = ...,
+        stableVariantID: _builtins.str | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["audioChannelLayoutDescription", b"audioChannelLayoutDescription", "bitDepth", b"bitDepth", "bitrate", b"bitrate", "channelLayout", b"channelLayout", "codec", b"codec", "groupID", b"groupID", "multiChannel", b"multiChannel", "sampleRate", b"sampleRate", "spatialized", b"spatialized", "stableVariantID", b"stableVariantID", "tier", b"tier"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["audioChannelLayoutDescription", b"audioChannelLayoutDescription", "bitDepth", b"bitDepth", "bitrate", b"bitrate", "channelLayout", b"channelLayout", "codec", b"codec", "groupID", b"groupID", "multiChannel", b"multiChannel", "sampleRate", b"sampleRate", "spatialized", b"spatialized", "stableVariantID", b"stableVariantID", "tier", b"tier"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["audioChannelLayoutDescription", b"audioChannelLayoutDescription", "bitDepth", b"bitDepth", "bitrate", b"bitrate", "channelLayout", b"channelLayout", "codec", b"codec", "groupID", b"groupID", "multiChannel", b"multiChannel", "sampleRate", b"sampleRate", "spatialized", b"spatialized", "stableVariantID", b"stableVariantID", "tier", b"tier"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["audioChannelLayoutDescription", b"audioChannelLayoutDescription", "bitDepth", b"bitDepth", "bitrate", b"bitrate", "channelLayout", b"channelLayout", "codec", b"codec", "groupID", b"groupID", "multiChannel", b"multiChannel", "sampleRate", b"sampleRate", "spatialized", b"spatialized", "stableVariantID", b"stableVariantID", "tier", b"tier"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___AudioFormat = AudioFormat
+Global___AudioFormat: _TypeAlias = AudioFormat  # noqa: Y015
 
-@typing.final
-class ContentItemMetadata(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class ContentItemMetadata(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
     class _MediaType:
-        ValueType = typing.NewType("ValueType", builtins.int)
-        V: typing_extensions.TypeAlias = ValueType
+        ValueType = _typing.NewType("ValueType", _builtins.int)
+        V: _TypeAlias = ValueType  # noqa: Y015
 
-    class _MediaTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[ContentItemMetadata._MediaType.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    class _MediaTypeEnumTypeWrapper(_enum_type_wrapper._EnumTypeWrapper[ContentItemMetadata._MediaType.ValueType], _builtins.type):
+        DESCRIPTOR: _descriptor.EnumDescriptor
         UnknownMediaType: ContentItemMetadata._MediaType.ValueType  # 0
         Audio: ContentItemMetadata._MediaType.ValueType  # 1
         Video: ContentItemMetadata._MediaType.ValueType  # 2
@@ -325,11 +366,11 @@ class ContentItemMetadata(google.protobuf.message.Message):
     Video: ContentItemMetadata.MediaType.ValueType  # 2
 
     class _MediaSubType:
-        ValueType = typing.NewType("ValueType", builtins.int)
-        V: typing_extensions.TypeAlias = ValueType
+        ValueType = _typing.NewType("ValueType", _builtins.int)
+        V: _TypeAlias = ValueType  # noqa: Y015
 
-    class _MediaSubTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[ContentItemMetadata._MediaSubType.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    class _MediaSubTypeEnumTypeWrapper(_enum_type_wrapper._EnumTypeWrapper[ContentItemMetadata._MediaSubType.ValueType], _builtins.type):
+        DESCRIPTOR: _descriptor.EnumDescriptor
         UnknownMediaSubType: ContentItemMetadata._MediaSubType.ValueType  # 0
         Music: ContentItemMetadata._MediaSubType.ValueType  # 1
         Podcast: ContentItemMetadata._MediaSubType.ValueType  # 4
@@ -343,288 +384,291 @@ class ContentItemMetadata(google.protobuf.message.Message):
     AudioBook: ContentItemMetadata.MediaSubType.ValueType  # 5
     ITunesU: ContentItemMetadata.MediaSubType.ValueType  # 6
 
-    TITLE_FIELD_NUMBER: builtins.int
-    SUBTITLE_FIELD_NUMBER: builtins.int
-    ISCONTAINER_FIELD_NUMBER: builtins.int
-    ISPLAYABLE_FIELD_NUMBER: builtins.int
-    PLAYBACKPROGRESS_FIELD_NUMBER: builtins.int
-    ALBUMNAME_FIELD_NUMBER: builtins.int
-    TRACKARTISTNAME_FIELD_NUMBER: builtins.int
-    ALBUMARTISTNAME_FIELD_NUMBER: builtins.int
-    DIRECTORNAME_FIELD_NUMBER: builtins.int
-    SEASONNUMBER_FIELD_NUMBER: builtins.int
-    EPISODENUMBER_FIELD_NUMBER: builtins.int
-    RELEASEDATE_FIELD_NUMBER: builtins.int
-    PLAYCOUNT_FIELD_NUMBER: builtins.int
-    DURATION_FIELD_NUMBER: builtins.int
-    LOCALIZEDCONTENTRATING_FIELD_NUMBER: builtins.int
-    ISEXPLICITITEM_FIELD_NUMBER: builtins.int
-    PLAYLISTTYPE_FIELD_NUMBER: builtins.int
-    RADIOSTATIONTYPE_FIELD_NUMBER: builtins.int
-    ARTWORKAVAILABLE_FIELD_NUMBER: builtins.int
-    INFOAVAILABLE_FIELD_NUMBER: builtins.int
-    LANGUAGEOPTIONSAVAILABLE_FIELD_NUMBER: builtins.int
-    NUMBEROFSECTIONS_FIELD_NUMBER: builtins.int
-    LYRICSAVAILABLE_FIELD_NUMBER: builtins.int
-    EDITINGSTYLEFLAGS_FIELD_NUMBER: builtins.int
-    ISSTREAMINGCONTENT_FIELD_NUMBER: builtins.int
-    ISCURRENTLYPLAYING_FIELD_NUMBER: builtins.int
-    COLLECTIONIDENTIFIER_FIELD_NUMBER: builtins.int
-    PROFILEIDENTIFIER_FIELD_NUMBER: builtins.int
-    STARTTIME_FIELD_NUMBER: builtins.int
-    ARTWORKMIMETYPE_FIELD_NUMBER: builtins.int
-    ASSETURLSTRING_FIELD_NUMBER: builtins.int
-    COMPOSER_FIELD_NUMBER: builtins.int
-    DISCNUMBER_FIELD_NUMBER: builtins.int
-    ELAPSEDTIME_FIELD_NUMBER: builtins.int
-    GENRE_FIELD_NUMBER: builtins.int
-    ISALWAYSLIVE_FIELD_NUMBER: builtins.int
-    PLAYBACKRATE_FIELD_NUMBER: builtins.int
-    CHAPTERCOUNT_FIELD_NUMBER: builtins.int
-    TOTALDISCCOUNT_FIELD_NUMBER: builtins.int
-    TOTALTRACKCOUNT_FIELD_NUMBER: builtins.int
-    TRACKNUMBER_FIELD_NUMBER: builtins.int
-    CONTENTIDENTIFIER_FIELD_NUMBER: builtins.int
-    ISSHARABLE_FIELD_NUMBER: builtins.int
-    ISLIKED_FIELD_NUMBER: builtins.int
-    ISINWISHLIST_FIELD_NUMBER: builtins.int
-    RADIOSTATIONIDENTIFIER_FIELD_NUMBER: builtins.int
-    RADIOSTATIONNAME_FIELD_NUMBER: builtins.int
-    RADIOSTATIONSTRING_FIELD_NUMBER: builtins.int
-    ITUNESSTOREIDENTIFIER_FIELD_NUMBER: builtins.int
-    ITUNESSTORESUBSCRIPTIONIDENTIFIER_FIELD_NUMBER: builtins.int
-    ITUNESSTOREARTISTIDENTIFIER_FIELD_NUMBER: builtins.int
-    ITUNESSTOREALBUMIDENTIFIER_FIELD_NUMBER: builtins.int
-    PURCHASEINFODATA_FIELD_NUMBER: builtins.int
-    DEFAULTPLAYBACKRATE_FIELD_NUMBER: builtins.int
-    DOWNLOADSTATE_FIELD_NUMBER: builtins.int
-    DOWNLOADPROGRESS_FIELD_NUMBER: builtins.int
-    APPMETRICSDATA_FIELD_NUMBER: builtins.int
-    SERIESNAME_FIELD_NUMBER: builtins.int
-    MEDIATYPE_FIELD_NUMBER: builtins.int
-    MEDIASUBTYPE_FIELD_NUMBER: builtins.int
-    NOWPLAYINGINFODATA_FIELD_NUMBER: builtins.int
-    USERINFODATA_FIELD_NUMBER: builtins.int
-    ISSTEERABLE_FIELD_NUMBER: builtins.int
-    ARTWORKURL_FIELD_NUMBER: builtins.int
-    LYRICSURL_FIELD_NUMBER: builtins.int
-    DEVICESPECIFICUSERINFODATA_FIELD_NUMBER: builtins.int
-    COLLECTIONINFODATA_FIELD_NUMBER: builtins.int
-    ELAPSEDTIMETIMESTAMP_FIELD_NUMBER: builtins.int
-    INFERREDTIMESTAMP_FIELD_NUMBER: builtins.int
-    SERVICEIDENTIFIER_FIELD_NUMBER: builtins.int
-    ARTWORKDATAWIDTH_FIELD_NUMBER: builtins.int
-    ARTWORKDATAHEIGHT_FIELD_NUMBER: builtins.int
-    CURRENTPLAYBACKDATEDATA_FIELD_NUMBER: builtins.int
-    ARTWORKIDENTIFIER_FIELD_NUMBER: builtins.int
-    ISLOADING_FIELD_NUMBER: builtins.int
-    ARTWORKURLTEMPLATESDATA_FIELD_NUMBER: builtins.int
-    LEGACYUNIQUEIDENTIFIER_FIELD_NUMBER: builtins.int
-    EPISODETYPE_FIELD_NUMBER: builtins.int
-    ARTWORKFILEURL_FIELD_NUMBER: builtins.int
-    BRANDIDENTIFIER_FIELD_NUMBER: builtins.int
-    LOCALIZEDDURATIONSTRING_FIELD_NUMBER: builtins.int
-    ALBUMYEAR_FIELD_NUMBER: builtins.int
-    SONGTRAITS_FIELD_NUMBER: builtins.int
-    ALBUMTRAITS_FIELD_NUMBER: builtins.int
-    PLAYLISTTRAITS_FIELD_NUMBER: builtins.int
-    PREFERREDFORMAT_FIELD_NUMBER: builtins.int
-    ACTIVEFORMAT_FIELD_NUMBER: builtins.int
-    ACTIVEFORMATJUSTIFICATION_FIELD_NUMBER: builtins.int
-    FORMATTIERPREFERENCE_FIELD_NUMBER: builtins.int
-    AUDIOROUTE_FIELD_NUMBER: builtins.int
-    ALTERNATIVEFORMATS_FIELD_NUMBER: builtins.int
-    title: builtins.str
-    subtitle: builtins.str
-    isContainer: builtins.bool
-    isPlayable: builtins.bool
-    playbackProgress: builtins.float
-    albumName: builtins.str
-    trackArtistName: builtins.str
-    albumArtistName: builtins.str
-    directorName: builtins.str
-    seasonNumber: builtins.int
-    episodeNumber: builtins.int
-    releaseDate: builtins.float
-    playCount: builtins.int
-    duration: builtins.float
-    localizedContentRating: builtins.str
-    isExplicitItem: builtins.bool
-    playlistType: builtins.int
-    radioStationType: builtins.int
-    artworkAvailable: builtins.bool
-    infoAvailable: builtins.bool
-    languageOptionsAvailable: builtins.bool
-    numberOfSections: builtins.int
-    lyricsAvailable: builtins.bool
-    editingStyleFlags: builtins.int
-    isStreamingContent: builtins.bool
-    isCurrentlyPlaying: builtins.bool
-    collectionIdentifier: builtins.str
-    profileIdentifier: builtins.str
-    startTime: builtins.float
-    artworkMIMEType: builtins.str
-    assetURLString: builtins.str
-    composer: builtins.str
-    discNumber: builtins.int
-    elapsedTime: builtins.float
-    genre: builtins.str
-    isAlwaysLive: builtins.bool
-    playbackRate: builtins.float
-    chapterCount: builtins.int
-    totalDiscCount: builtins.int
-    totalTrackCount: builtins.int
-    trackNumber: builtins.int
-    contentIdentifier: builtins.str
-    isSharable: builtins.bool
-    isLiked: builtins.bool
-    isInWishList: builtins.bool
-    radioStationIdentifier: builtins.int
-    radioStationName: builtins.str
-    radioStationString: builtins.str
-    iTunesStoreIdentifier: builtins.int
-    iTunesStoreSubscriptionIdentifier: builtins.int
-    iTunesStoreArtistIdentifier: builtins.int
-    iTunesStoreAlbumIdentifier: builtins.int
-    purchaseInfoData: builtins.bytes
-    defaultPlaybackRate: builtins.float
-    downloadState: builtins.int
-    downloadProgress: builtins.float
-    appMetricsData: builtins.bytes
-    seriesName: builtins.str
-    mediaType: global___ContentItemMetadata.MediaType.ValueType
-    mediaSubType: global___ContentItemMetadata.MediaSubType.ValueType
-    nowPlayingInfoData: builtins.bytes
-    userInfoData: builtins.bytes
-    isSteerable: builtins.bool
-    artworkURL: builtins.str
-    lyricsURL: builtins.str
-    deviceSpecificUserInfoData: builtins.bytes
-    collectionInfoData: builtins.bytes
-    elapsedTimeTimestamp: builtins.float
-    inferredTimestamp: builtins.float
-    serviceIdentifier: builtins.str
-    artworkDataWidth: builtins.int
-    artworkDataHeight: builtins.int
-    currentPlaybackDateData: builtins.bytes
-    artworkIdentifier: builtins.str
-    isLoading: builtins.bool
-    artworkURLTemplatesData: builtins.bytes
-    legacyUniqueIdentifier: builtins.int
-    episodeType: builtins.int
-    artworkFileURL: builtins.str
-    brandIdentifier: builtins.str
-    localizedDurationString: builtins.str
-    albumYear: builtins.str
-    songTraits: global___SongTraits.Enum.ValueType
-    albumTraits: global___AlbumTraits.Enum.ValueType
-    playlistTraits: global___PlaylistTraits.Enum.ValueType
-    activeFormatJustification: global___ActiveFormatJustification.Enum.ValueType
-    formatTierPreference: global___FormatTier.Enum.ValueType
-    @property
-    def preferredFormat(self) -> global___AudioFormat: ...
-    @property
-    def activeFormat(self) -> global___AudioFormat: ...
-    @property
-    def audioRoute(self) -> global___AudioRoute: ...
-    @property
-    def alternativeFormats(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___AudioFormat]: ...
+    TITLE_FIELD_NUMBER: _builtins.int
+    SUBTITLE_FIELD_NUMBER: _builtins.int
+    ISCONTAINER_FIELD_NUMBER: _builtins.int
+    ISPLAYABLE_FIELD_NUMBER: _builtins.int
+    PLAYBACKPROGRESS_FIELD_NUMBER: _builtins.int
+    ALBUMNAME_FIELD_NUMBER: _builtins.int
+    TRACKARTISTNAME_FIELD_NUMBER: _builtins.int
+    ALBUMARTISTNAME_FIELD_NUMBER: _builtins.int
+    DIRECTORNAME_FIELD_NUMBER: _builtins.int
+    SEASONNUMBER_FIELD_NUMBER: _builtins.int
+    EPISODENUMBER_FIELD_NUMBER: _builtins.int
+    RELEASEDATE_FIELD_NUMBER: _builtins.int
+    PLAYCOUNT_FIELD_NUMBER: _builtins.int
+    DURATION_FIELD_NUMBER: _builtins.int
+    LOCALIZEDCONTENTRATING_FIELD_NUMBER: _builtins.int
+    ISEXPLICITITEM_FIELD_NUMBER: _builtins.int
+    PLAYLISTTYPE_FIELD_NUMBER: _builtins.int
+    RADIOSTATIONTYPE_FIELD_NUMBER: _builtins.int
+    ARTWORKAVAILABLE_FIELD_NUMBER: _builtins.int
+    INFOAVAILABLE_FIELD_NUMBER: _builtins.int
+    LANGUAGEOPTIONSAVAILABLE_FIELD_NUMBER: _builtins.int
+    NUMBEROFSECTIONS_FIELD_NUMBER: _builtins.int
+    LYRICSAVAILABLE_FIELD_NUMBER: _builtins.int
+    EDITINGSTYLEFLAGS_FIELD_NUMBER: _builtins.int
+    ISSTREAMINGCONTENT_FIELD_NUMBER: _builtins.int
+    ISCURRENTLYPLAYING_FIELD_NUMBER: _builtins.int
+    COLLECTIONIDENTIFIER_FIELD_NUMBER: _builtins.int
+    PROFILEIDENTIFIER_FIELD_NUMBER: _builtins.int
+    STARTTIME_FIELD_NUMBER: _builtins.int
+    ARTWORKMIMETYPE_FIELD_NUMBER: _builtins.int
+    ASSETURLSTRING_FIELD_NUMBER: _builtins.int
+    COMPOSER_FIELD_NUMBER: _builtins.int
+    DISCNUMBER_FIELD_NUMBER: _builtins.int
+    ELAPSEDTIME_FIELD_NUMBER: _builtins.int
+    GENRE_FIELD_NUMBER: _builtins.int
+    ISALWAYSLIVE_FIELD_NUMBER: _builtins.int
+    PLAYBACKRATE_FIELD_NUMBER: _builtins.int
+    CHAPTERCOUNT_FIELD_NUMBER: _builtins.int
+    TOTALDISCCOUNT_FIELD_NUMBER: _builtins.int
+    TOTALTRACKCOUNT_FIELD_NUMBER: _builtins.int
+    TRACKNUMBER_FIELD_NUMBER: _builtins.int
+    CONTENTIDENTIFIER_FIELD_NUMBER: _builtins.int
+    ISSHARABLE_FIELD_NUMBER: _builtins.int
+    ISLIKED_FIELD_NUMBER: _builtins.int
+    ISINWISHLIST_FIELD_NUMBER: _builtins.int
+    RADIOSTATIONIDENTIFIER_FIELD_NUMBER: _builtins.int
+    RADIOSTATIONNAME_FIELD_NUMBER: _builtins.int
+    RADIOSTATIONSTRING_FIELD_NUMBER: _builtins.int
+    ITUNESSTOREIDENTIFIER_FIELD_NUMBER: _builtins.int
+    ITUNESSTORESUBSCRIPTIONIDENTIFIER_FIELD_NUMBER: _builtins.int
+    ITUNESSTOREARTISTIDENTIFIER_FIELD_NUMBER: _builtins.int
+    ITUNESSTOREALBUMIDENTIFIER_FIELD_NUMBER: _builtins.int
+    PURCHASEINFODATA_FIELD_NUMBER: _builtins.int
+    DEFAULTPLAYBACKRATE_FIELD_NUMBER: _builtins.int
+    DOWNLOADSTATE_FIELD_NUMBER: _builtins.int
+    DOWNLOADPROGRESS_FIELD_NUMBER: _builtins.int
+    APPMETRICSDATA_FIELD_NUMBER: _builtins.int
+    SERIESNAME_FIELD_NUMBER: _builtins.int
+    MEDIATYPE_FIELD_NUMBER: _builtins.int
+    MEDIASUBTYPE_FIELD_NUMBER: _builtins.int
+    NOWPLAYINGINFODATA_FIELD_NUMBER: _builtins.int
+    USERINFODATA_FIELD_NUMBER: _builtins.int
+    ISSTEERABLE_FIELD_NUMBER: _builtins.int
+    ARTWORKURL_FIELD_NUMBER: _builtins.int
+    LYRICSURL_FIELD_NUMBER: _builtins.int
+    DEVICESPECIFICUSERINFODATA_FIELD_NUMBER: _builtins.int
+    COLLECTIONINFODATA_FIELD_NUMBER: _builtins.int
+    ELAPSEDTIMETIMESTAMP_FIELD_NUMBER: _builtins.int
+    INFERREDTIMESTAMP_FIELD_NUMBER: _builtins.int
+    SERVICEIDENTIFIER_FIELD_NUMBER: _builtins.int
+    ARTWORKDATAWIDTH_FIELD_NUMBER: _builtins.int
+    ARTWORKDATAHEIGHT_FIELD_NUMBER: _builtins.int
+    CURRENTPLAYBACKDATEDATA_FIELD_NUMBER: _builtins.int
+    ARTWORKIDENTIFIER_FIELD_NUMBER: _builtins.int
+    ISLOADING_FIELD_NUMBER: _builtins.int
+    ARTWORKURLTEMPLATESDATA_FIELD_NUMBER: _builtins.int
+    LEGACYUNIQUEIDENTIFIER_FIELD_NUMBER: _builtins.int
+    EPISODETYPE_FIELD_NUMBER: _builtins.int
+    ARTWORKFILEURL_FIELD_NUMBER: _builtins.int
+    BRANDIDENTIFIER_FIELD_NUMBER: _builtins.int
+    LOCALIZEDDURATIONSTRING_FIELD_NUMBER: _builtins.int
+    ALBUMYEAR_FIELD_NUMBER: _builtins.int
+    SONGTRAITS_FIELD_NUMBER: _builtins.int
+    ALBUMTRAITS_FIELD_NUMBER: _builtins.int
+    PLAYLISTTRAITS_FIELD_NUMBER: _builtins.int
+    PREFERREDFORMAT_FIELD_NUMBER: _builtins.int
+    ACTIVEFORMAT_FIELD_NUMBER: _builtins.int
+    ACTIVEFORMATJUSTIFICATION_FIELD_NUMBER: _builtins.int
+    FORMATTIERPREFERENCE_FIELD_NUMBER: _builtins.int
+    AUDIOROUTE_FIELD_NUMBER: _builtins.int
+    ALTERNATIVEFORMATS_FIELD_NUMBER: _builtins.int
+    title: _builtins.str
+    subtitle: _builtins.str
+    isContainer: _builtins.bool
+    isPlayable: _builtins.bool
+    playbackProgress: _builtins.float
+    albumName: _builtins.str
+    trackArtistName: _builtins.str
+    albumArtistName: _builtins.str
+    directorName: _builtins.str
+    seasonNumber: _builtins.int
+    episodeNumber: _builtins.int
+    releaseDate: _builtins.float
+    playCount: _builtins.int
+    duration: _builtins.float
+    localizedContentRating: _builtins.str
+    isExplicitItem: _builtins.bool
+    playlistType: _builtins.int
+    radioStationType: _builtins.int
+    artworkAvailable: _builtins.bool
+    infoAvailable: _builtins.bool
+    languageOptionsAvailable: _builtins.bool
+    numberOfSections: _builtins.int
+    lyricsAvailable: _builtins.bool
+    editingStyleFlags: _builtins.int
+    isStreamingContent: _builtins.bool
+    isCurrentlyPlaying: _builtins.bool
+    collectionIdentifier: _builtins.str
+    profileIdentifier: _builtins.str
+    startTime: _builtins.float
+    artworkMIMEType: _builtins.str
+    assetURLString: _builtins.str
+    composer: _builtins.str
+    discNumber: _builtins.int
+    elapsedTime: _builtins.float
+    genre: _builtins.str
+    isAlwaysLive: _builtins.bool
+    playbackRate: _builtins.float
+    chapterCount: _builtins.int
+    totalDiscCount: _builtins.int
+    totalTrackCount: _builtins.int
+    trackNumber: _builtins.int
+    contentIdentifier: _builtins.str
+    isSharable: _builtins.bool
+    isLiked: _builtins.bool
+    isInWishList: _builtins.bool
+    radioStationIdentifier: _builtins.int
+    radioStationName: _builtins.str
+    radioStationString: _builtins.str
+    iTunesStoreIdentifier: _builtins.int
+    iTunesStoreSubscriptionIdentifier: _builtins.int
+    iTunesStoreArtistIdentifier: _builtins.int
+    iTunesStoreAlbumIdentifier: _builtins.int
+    purchaseInfoData: _builtins.bytes
+    defaultPlaybackRate: _builtins.float
+    downloadState: _builtins.int
+    downloadProgress: _builtins.float
+    appMetricsData: _builtins.bytes
+    seriesName: _builtins.str
+    mediaType: Global___ContentItemMetadata.MediaType.ValueType
+    mediaSubType: Global___ContentItemMetadata.MediaSubType.ValueType
+    nowPlayingInfoData: _builtins.bytes
+    userInfoData: _builtins.bytes
+    isSteerable: _builtins.bool
+    artworkURL: _builtins.str
+    lyricsURL: _builtins.str
+    deviceSpecificUserInfoData: _builtins.bytes
+    collectionInfoData: _builtins.bytes
+    elapsedTimeTimestamp: _builtins.float
+    inferredTimestamp: _builtins.float
+    serviceIdentifier: _builtins.str
+    artworkDataWidth: _builtins.int
+    artworkDataHeight: _builtins.int
+    currentPlaybackDateData: _builtins.bytes
+    artworkIdentifier: _builtins.str
+    isLoading: _builtins.bool
+    artworkURLTemplatesData: _builtins.bytes
+    legacyUniqueIdentifier: _builtins.int
+    episodeType: _builtins.int
+    artworkFileURL: _builtins.str
+    brandIdentifier: _builtins.str
+    localizedDurationString: _builtins.str
+    albumYear: _builtins.str
+    songTraits: Global___SongTraits.Enum.ValueType
+    albumTraits: Global___AlbumTraits.Enum.ValueType
+    playlistTraits: Global___PlaylistTraits.Enum.ValueType
+    activeFormatJustification: Global___ActiveFormatJustification.Enum.ValueType
+    formatTierPreference: Global___FormatTier.Enum.ValueType
+    @_builtins.property
+    def preferredFormat(self) -> Global___AudioFormat: ...
+    @_builtins.property
+    def activeFormat(self) -> Global___AudioFormat: ...
+    @_builtins.property
+    def audioRoute(self) -> Global___AudioRoute: ...
+    @_builtins.property
+    def alternativeFormats(self) -> _containers.RepeatedCompositeFieldContainer[Global___AudioFormat]: ...
     def __init__(
         self,
         *,
-        title: builtins.str | None = ...,
-        subtitle: builtins.str | None = ...,
-        isContainer: builtins.bool | None = ...,
-        isPlayable: builtins.bool | None = ...,
-        playbackProgress: builtins.float | None = ...,
-        albumName: builtins.str | None = ...,
-        trackArtistName: builtins.str | None = ...,
-        albumArtistName: builtins.str | None = ...,
-        directorName: builtins.str | None = ...,
-        seasonNumber: builtins.int | None = ...,
-        episodeNumber: builtins.int | None = ...,
-        releaseDate: builtins.float | None = ...,
-        playCount: builtins.int | None = ...,
-        duration: builtins.float | None = ...,
-        localizedContentRating: builtins.str | None = ...,
-        isExplicitItem: builtins.bool | None = ...,
-        playlistType: builtins.int | None = ...,
-        radioStationType: builtins.int | None = ...,
-        artworkAvailable: builtins.bool | None = ...,
-        infoAvailable: builtins.bool | None = ...,
-        languageOptionsAvailable: builtins.bool | None = ...,
-        numberOfSections: builtins.int | None = ...,
-        lyricsAvailable: builtins.bool | None = ...,
-        editingStyleFlags: builtins.int | None = ...,
-        isStreamingContent: builtins.bool | None = ...,
-        isCurrentlyPlaying: builtins.bool | None = ...,
-        collectionIdentifier: builtins.str | None = ...,
-        profileIdentifier: builtins.str | None = ...,
-        startTime: builtins.float | None = ...,
-        artworkMIMEType: builtins.str | None = ...,
-        assetURLString: builtins.str | None = ...,
-        composer: builtins.str | None = ...,
-        discNumber: builtins.int | None = ...,
-        elapsedTime: builtins.float | None = ...,
-        genre: builtins.str | None = ...,
-        isAlwaysLive: builtins.bool | None = ...,
-        playbackRate: builtins.float | None = ...,
-        chapterCount: builtins.int | None = ...,
-        totalDiscCount: builtins.int | None = ...,
-        totalTrackCount: builtins.int | None = ...,
-        trackNumber: builtins.int | None = ...,
-        contentIdentifier: builtins.str | None = ...,
-        isSharable: builtins.bool | None = ...,
-        isLiked: builtins.bool | None = ...,
-        isInWishList: builtins.bool | None = ...,
-        radioStationIdentifier: builtins.int | None = ...,
-        radioStationName: builtins.str | None = ...,
-        radioStationString: builtins.str | None = ...,
-        iTunesStoreIdentifier: builtins.int | None = ...,
-        iTunesStoreSubscriptionIdentifier: builtins.int | None = ...,
-        iTunesStoreArtistIdentifier: builtins.int | None = ...,
-        iTunesStoreAlbumIdentifier: builtins.int | None = ...,
-        purchaseInfoData: builtins.bytes | None = ...,
-        defaultPlaybackRate: builtins.float | None = ...,
-        downloadState: builtins.int | None = ...,
-        downloadProgress: builtins.float | None = ...,
-        appMetricsData: builtins.bytes | None = ...,
-        seriesName: builtins.str | None = ...,
-        mediaType: global___ContentItemMetadata.MediaType.ValueType | None = ...,
-        mediaSubType: global___ContentItemMetadata.MediaSubType.ValueType | None = ...,
-        nowPlayingInfoData: builtins.bytes | None = ...,
-        userInfoData: builtins.bytes | None = ...,
-        isSteerable: builtins.bool | None = ...,
-        artworkURL: builtins.str | None = ...,
-        lyricsURL: builtins.str | None = ...,
-        deviceSpecificUserInfoData: builtins.bytes | None = ...,
-        collectionInfoData: builtins.bytes | None = ...,
-        elapsedTimeTimestamp: builtins.float | None = ...,
-        inferredTimestamp: builtins.float | None = ...,
-        serviceIdentifier: builtins.str | None = ...,
-        artworkDataWidth: builtins.int | None = ...,
-        artworkDataHeight: builtins.int | None = ...,
-        currentPlaybackDateData: builtins.bytes | None = ...,
-        artworkIdentifier: builtins.str | None = ...,
-        isLoading: builtins.bool | None = ...,
-        artworkURLTemplatesData: builtins.bytes | None = ...,
-        legacyUniqueIdentifier: builtins.int | None = ...,
-        episodeType: builtins.int | None = ...,
-        artworkFileURL: builtins.str | None = ...,
-        brandIdentifier: builtins.str | None = ...,
-        localizedDurationString: builtins.str | None = ...,
-        albumYear: builtins.str | None = ...,
-        songTraits: global___SongTraits.Enum.ValueType | None = ...,
-        albumTraits: global___AlbumTraits.Enum.ValueType | None = ...,
-        playlistTraits: global___PlaylistTraits.Enum.ValueType | None = ...,
-        preferredFormat: global___AudioFormat | None = ...,
-        activeFormat: global___AudioFormat | None = ...,
-        activeFormatJustification: global___ActiveFormatJustification.Enum.ValueType | None = ...,
-        formatTierPreference: global___FormatTier.Enum.ValueType | None = ...,
-        audioRoute: global___AudioRoute | None = ...,
-        alternativeFormats: collections.abc.Iterable[global___AudioFormat] | None = ...,
+        title: _builtins.str | None = ...,
+        subtitle: _builtins.str | None = ...,
+        isContainer: _builtins.bool | None = ...,
+        isPlayable: _builtins.bool | None = ...,
+        playbackProgress: _builtins.float | None = ...,
+        albumName: _builtins.str | None = ...,
+        trackArtistName: _builtins.str | None = ...,
+        albumArtistName: _builtins.str | None = ...,
+        directorName: _builtins.str | None = ...,
+        seasonNumber: _builtins.int | None = ...,
+        episodeNumber: _builtins.int | None = ...,
+        releaseDate: _builtins.float | None = ...,
+        playCount: _builtins.int | None = ...,
+        duration: _builtins.float | None = ...,
+        localizedContentRating: _builtins.str | None = ...,
+        isExplicitItem: _builtins.bool | None = ...,
+        playlistType: _builtins.int | None = ...,
+        radioStationType: _builtins.int | None = ...,
+        artworkAvailable: _builtins.bool | None = ...,
+        infoAvailable: _builtins.bool | None = ...,
+        languageOptionsAvailable: _builtins.bool | None = ...,
+        numberOfSections: _builtins.int | None = ...,
+        lyricsAvailable: _builtins.bool | None = ...,
+        editingStyleFlags: _builtins.int | None = ...,
+        isStreamingContent: _builtins.bool | None = ...,
+        isCurrentlyPlaying: _builtins.bool | None = ...,
+        collectionIdentifier: _builtins.str | None = ...,
+        profileIdentifier: _builtins.str | None = ...,
+        startTime: _builtins.float | None = ...,
+        artworkMIMEType: _builtins.str | None = ...,
+        assetURLString: _builtins.str | None = ...,
+        composer: _builtins.str | None = ...,
+        discNumber: _builtins.int | None = ...,
+        elapsedTime: _builtins.float | None = ...,
+        genre: _builtins.str | None = ...,
+        isAlwaysLive: _builtins.bool | None = ...,
+        playbackRate: _builtins.float | None = ...,
+        chapterCount: _builtins.int | None = ...,
+        totalDiscCount: _builtins.int | None = ...,
+        totalTrackCount: _builtins.int | None = ...,
+        trackNumber: _builtins.int | None = ...,
+        contentIdentifier: _builtins.str | None = ...,
+        isSharable: _builtins.bool | None = ...,
+        isLiked: _builtins.bool | None = ...,
+        isInWishList: _builtins.bool | None = ...,
+        radioStationIdentifier: _builtins.int | None = ...,
+        radioStationName: _builtins.str | None = ...,
+        radioStationString: _builtins.str | None = ...,
+        iTunesStoreIdentifier: _builtins.int | None = ...,
+        iTunesStoreSubscriptionIdentifier: _builtins.int | None = ...,
+        iTunesStoreArtistIdentifier: _builtins.int | None = ...,
+        iTunesStoreAlbumIdentifier: _builtins.int | None = ...,
+        purchaseInfoData: _builtins.bytes | None = ...,
+        defaultPlaybackRate: _builtins.float | None = ...,
+        downloadState: _builtins.int | None = ...,
+        downloadProgress: _builtins.float | None = ...,
+        appMetricsData: _builtins.bytes | None = ...,
+        seriesName: _builtins.str | None = ...,
+        mediaType: Global___ContentItemMetadata.MediaType.ValueType | None = ...,
+        mediaSubType: Global___ContentItemMetadata.MediaSubType.ValueType | None = ...,
+        nowPlayingInfoData: _builtins.bytes | None = ...,
+        userInfoData: _builtins.bytes | None = ...,
+        isSteerable: _builtins.bool | None = ...,
+        artworkURL: _builtins.str | None = ...,
+        lyricsURL: _builtins.str | None = ...,
+        deviceSpecificUserInfoData: _builtins.bytes | None = ...,
+        collectionInfoData: _builtins.bytes | None = ...,
+        elapsedTimeTimestamp: _builtins.float | None = ...,
+        inferredTimestamp: _builtins.float | None = ...,
+        serviceIdentifier: _builtins.str | None = ...,
+        artworkDataWidth: _builtins.int | None = ...,
+        artworkDataHeight: _builtins.int | None = ...,
+        currentPlaybackDateData: _builtins.bytes | None = ...,
+        artworkIdentifier: _builtins.str | None = ...,
+        isLoading: _builtins.bool | None = ...,
+        artworkURLTemplatesData: _builtins.bytes | None = ...,
+        legacyUniqueIdentifier: _builtins.int | None = ...,
+        episodeType: _builtins.int | None = ...,
+        artworkFileURL: _builtins.str | None = ...,
+        brandIdentifier: _builtins.str | None = ...,
+        localizedDurationString: _builtins.str | None = ...,
+        albumYear: _builtins.str | None = ...,
+        songTraits: Global___SongTraits.Enum.ValueType | None = ...,
+        albumTraits: Global___AlbumTraits.Enum.ValueType | None = ...,
+        playlistTraits: Global___PlaylistTraits.Enum.ValueType | None = ...,
+        preferredFormat: Global___AudioFormat | None = ...,
+        activeFormat: Global___AudioFormat | None = ...,
+        activeFormatJustification: Global___ActiveFormatJustification.Enum.ValueType | None = ...,
+        formatTierPreference: Global___FormatTier.Enum.ValueType | None = ...,
+        audioRoute: Global___AudioRoute | None = ...,
+        alternativeFormats: _abc.Iterable[Global___AudioFormat] | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["activeFormat", b"activeFormat", "activeFormatJustification", b"activeFormatJustification", "albumArtistName", b"albumArtistName", "albumName", b"albumName", "albumTraits", b"albumTraits", "albumYear", b"albumYear", "appMetricsData", b"appMetricsData", "artworkAvailable", b"artworkAvailable", "artworkDataHeight", b"artworkDataHeight", "artworkDataWidth", b"artworkDataWidth", "artworkFileURL", b"artworkFileURL", "artworkIdentifier", b"artworkIdentifier", "artworkMIMEType", b"artworkMIMEType", "artworkURL", b"artworkURL", "artworkURLTemplatesData", b"artworkURLTemplatesData", "assetURLString", b"assetURLString", "audioRoute", b"audioRoute", "brandIdentifier", b"brandIdentifier", "chapterCount", b"chapterCount", "collectionIdentifier", b"collectionIdentifier", "collectionInfoData", b"collectionInfoData", "composer", b"composer", "contentIdentifier", b"contentIdentifier", "currentPlaybackDateData", b"currentPlaybackDateData", "defaultPlaybackRate", b"defaultPlaybackRate", "deviceSpecificUserInfoData", b"deviceSpecificUserInfoData", "directorName", b"directorName", "discNumber", b"discNumber", "downloadProgress", b"downloadProgress", "downloadState", b"downloadState", "duration", b"duration", "editingStyleFlags", b"editingStyleFlags", "elapsedTime", b"elapsedTime", "elapsedTimeTimestamp", b"elapsedTimeTimestamp", "episodeNumber", b"episodeNumber", "episodeType", b"episodeType", "formatTierPreference", b"formatTierPreference", "genre", b"genre", "iTunesStoreAlbumIdentifier", b"iTunesStoreAlbumIdentifier", "iTunesStoreArtistIdentifier", b"iTunesStoreArtistIdentifier", "iTunesStoreIdentifier", b"iTunesStoreIdentifier", "iTunesStoreSubscriptionIdentifier", b"iTunesStoreSubscriptionIdentifier", "inferredTimestamp", b"inferredTimestamp", "infoAvailable", b"infoAvailable", "isAlwaysLive", b"isAlwaysLive", "isContainer", b"isContainer", "isCurrentlyPlaying", b"isCurrentlyPlaying", "isExplicitItem", b"isExplicitItem", "isInWishList", b"isInWishList", "isLiked", b"isLiked", "isLoading", b"isLoading", "isPlayable", b"isPlayable", "isSharable", b"isSharable", "isSteerable", b"isSteerable", "isStreamingContent", b"isStreamingContent", "languageOptionsAvailable", b"languageOptionsAvailable", "legacyUniqueIdentifier", b"legacyUniqueIdentifier", "localizedContentRating", b"localizedContentRating", "localizedDurationString", b"localizedDurationString", "lyricsAvailable", b"lyricsAvailable", "lyricsURL", b"lyricsURL", "mediaSubType", b"mediaSubType", "mediaType", b"mediaType", "nowPlayingInfoData", b"nowPlayingInfoData", "numberOfSections", b"numberOfSections", "playCount", b"playCount", "playbackProgress", b"playbackProgress", "playbackRate", b"playbackRate", "playlistTraits", b"playlistTraits", "playlistType", b"playlistType", "preferredFormat", b"preferredFormat", "profileIdentifier", b"profileIdentifier", "purchaseInfoData", b"purchaseInfoData", "radioStationIdentifier", b"radioStationIdentifier", "radioStationName", b"radioStationName", "radioStationString", b"radioStationString", "radioStationType", b"radioStationType", "releaseDate", b"releaseDate", "seasonNumber", b"seasonNumber", "seriesName", b"seriesName", "serviceIdentifier", b"serviceIdentifier", "songTraits", b"songTraits", "startTime", b"startTime", "subtitle", b"subtitle", "title", b"title", "totalDiscCount", b"totalDiscCount", "totalTrackCount", b"totalTrackCount", "trackArtistName", b"trackArtistName", "trackNumber", b"trackNumber", "userInfoData", b"userInfoData"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["activeFormat", b"activeFormat", "activeFormatJustification", b"activeFormatJustification", "albumArtistName", b"albumArtistName", "albumName", b"albumName", "albumTraits", b"albumTraits", "albumYear", b"albumYear", "alternativeFormats", b"alternativeFormats", "appMetricsData", b"appMetricsData", "artworkAvailable", b"artworkAvailable", "artworkDataHeight", b"artworkDataHeight", "artworkDataWidth", b"artworkDataWidth", "artworkFileURL", b"artworkFileURL", "artworkIdentifier", b"artworkIdentifier", "artworkMIMEType", b"artworkMIMEType", "artworkURL", b"artworkURL", "artworkURLTemplatesData", b"artworkURLTemplatesData", "assetURLString", b"assetURLString", "audioRoute", b"audioRoute", "brandIdentifier", b"brandIdentifier", "chapterCount", b"chapterCount", "collectionIdentifier", b"collectionIdentifier", "collectionInfoData", b"collectionInfoData", "composer", b"composer", "contentIdentifier", b"contentIdentifier", "currentPlaybackDateData", b"currentPlaybackDateData", "defaultPlaybackRate", b"defaultPlaybackRate", "deviceSpecificUserInfoData", b"deviceSpecificUserInfoData", "directorName", b"directorName", "discNumber", b"discNumber", "downloadProgress", b"downloadProgress", "downloadState", b"downloadState", "duration", b"duration", "editingStyleFlags", b"editingStyleFlags", "elapsedTime", b"elapsedTime", "elapsedTimeTimestamp", b"elapsedTimeTimestamp", "episodeNumber", b"episodeNumber", "episodeType", b"episodeType", "formatTierPreference", b"formatTierPreference", "genre", b"genre", "iTunesStoreAlbumIdentifier", b"iTunesStoreAlbumIdentifier", "iTunesStoreArtistIdentifier", b"iTunesStoreArtistIdentifier", "iTunesStoreIdentifier", b"iTunesStoreIdentifier", "iTunesStoreSubscriptionIdentifier", b"iTunesStoreSubscriptionIdentifier", "inferredTimestamp", b"inferredTimestamp", "infoAvailable", b"infoAvailable", "isAlwaysLive", b"isAlwaysLive", "isContainer", b"isContainer", "isCurrentlyPlaying", b"isCurrentlyPlaying", "isExplicitItem", b"isExplicitItem", "isInWishList", b"isInWishList", "isLiked", b"isLiked", "isLoading", b"isLoading", "isPlayable", b"isPlayable", "isSharable", b"isSharable", "isSteerable", b"isSteerable", "isStreamingContent", b"isStreamingContent", "languageOptionsAvailable", b"languageOptionsAvailable", "legacyUniqueIdentifier", b"legacyUniqueIdentifier", "localizedContentRating", b"localizedContentRating", "localizedDurationString", b"localizedDurationString", "lyricsAvailable", b"lyricsAvailable", "lyricsURL", b"lyricsURL", "mediaSubType", b"mediaSubType", "mediaType", b"mediaType", "nowPlayingInfoData", b"nowPlayingInfoData", "numberOfSections", b"numberOfSections", "playCount", b"playCount", "playbackProgress", b"playbackProgress", "playbackRate", b"playbackRate", "playlistTraits", b"playlistTraits", "playlistType", b"playlistType", "preferredFormat", b"preferredFormat", "profileIdentifier", b"profileIdentifier", "purchaseInfoData", b"purchaseInfoData", "radioStationIdentifier", b"radioStationIdentifier", "radioStationName", b"radioStationName", "radioStationString", b"radioStationString", "radioStationType", b"radioStationType", "releaseDate", b"releaseDate", "seasonNumber", b"seasonNumber", "seriesName", b"seriesName", "serviceIdentifier", b"serviceIdentifier", "songTraits", b"songTraits", "startTime", b"startTime", "subtitle", b"subtitle", "title", b"title", "totalDiscCount", b"totalDiscCount", "totalTrackCount", b"totalTrackCount", "trackArtistName", b"trackArtistName", "trackNumber", b"trackNumber", "userInfoData", b"userInfoData"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["activeFormat", b"activeFormat", "activeFormatJustification", b"activeFormatJustification", "albumArtistName", b"albumArtistName", "albumName", b"albumName", "albumTraits", b"albumTraits", "albumYear", b"albumYear", "appMetricsData", b"appMetricsData", "artworkAvailable", b"artworkAvailable", "artworkDataHeight", b"artworkDataHeight", "artworkDataWidth", b"artworkDataWidth", "artworkFileURL", b"artworkFileURL", "artworkIdentifier", b"artworkIdentifier", "artworkMIMEType", b"artworkMIMEType", "artworkURL", b"artworkURL", "artworkURLTemplatesData", b"artworkURLTemplatesData", "assetURLString", b"assetURLString", "audioRoute", b"audioRoute", "brandIdentifier", b"brandIdentifier", "chapterCount", b"chapterCount", "collectionIdentifier", b"collectionIdentifier", "collectionInfoData", b"collectionInfoData", "composer", b"composer", "contentIdentifier", b"contentIdentifier", "currentPlaybackDateData", b"currentPlaybackDateData", "defaultPlaybackRate", b"defaultPlaybackRate", "deviceSpecificUserInfoData", b"deviceSpecificUserInfoData", "directorName", b"directorName", "discNumber", b"discNumber", "downloadProgress", b"downloadProgress", "downloadState", b"downloadState", "duration", b"duration", "editingStyleFlags", b"editingStyleFlags", "elapsedTime", b"elapsedTime", "elapsedTimeTimestamp", b"elapsedTimeTimestamp", "episodeNumber", b"episodeNumber", "episodeType", b"episodeType", "formatTierPreference", b"formatTierPreference", "genre", b"genre", "iTunesStoreAlbumIdentifier", b"iTunesStoreAlbumIdentifier", "iTunesStoreArtistIdentifier", b"iTunesStoreArtistIdentifier", "iTunesStoreIdentifier", b"iTunesStoreIdentifier", "iTunesStoreSubscriptionIdentifier", b"iTunesStoreSubscriptionIdentifier", "inferredTimestamp", b"inferredTimestamp", "infoAvailable", b"infoAvailable", "isAlwaysLive", b"isAlwaysLive", "isContainer", b"isContainer", "isCurrentlyPlaying", b"isCurrentlyPlaying", "isExplicitItem", b"isExplicitItem", "isInWishList", b"isInWishList", "isLiked", b"isLiked", "isLoading", b"isLoading", "isPlayable", b"isPlayable", "isSharable", b"isSharable", "isSteerable", b"isSteerable", "isStreamingContent", b"isStreamingContent", "languageOptionsAvailable", b"languageOptionsAvailable", "legacyUniqueIdentifier", b"legacyUniqueIdentifier", "localizedContentRating", b"localizedContentRating", "localizedDurationString", b"localizedDurationString", "lyricsAvailable", b"lyricsAvailable", "lyricsURL", b"lyricsURL", "mediaSubType", b"mediaSubType", "mediaType", b"mediaType", "nowPlayingInfoData", b"nowPlayingInfoData", "numberOfSections", b"numberOfSections", "playCount", b"playCount", "playbackProgress", b"playbackProgress", "playbackRate", b"playbackRate", "playlistTraits", b"playlistTraits", "playlistType", b"playlistType", "preferredFormat", b"preferredFormat", "profileIdentifier", b"profileIdentifier", "purchaseInfoData", b"purchaseInfoData", "radioStationIdentifier", b"radioStationIdentifier", "radioStationName", b"radioStationName", "radioStationString", b"radioStationString", "radioStationType", b"radioStationType", "releaseDate", b"releaseDate", "seasonNumber", b"seasonNumber", "seriesName", b"seriesName", "serviceIdentifier", b"serviceIdentifier", "songTraits", b"songTraits", "startTime", b"startTime", "subtitle", b"subtitle", "title", b"title", "totalDiscCount", b"totalDiscCount", "totalTrackCount", b"totalTrackCount", "trackArtistName", b"trackArtistName", "trackNumber", b"trackNumber", "userInfoData", b"userInfoData"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["activeFormat", b"activeFormat", "activeFormatJustification", b"activeFormatJustification", "albumArtistName", b"albumArtistName", "albumName", b"albumName", "albumTraits", b"albumTraits", "albumYear", b"albumYear", "alternativeFormats", b"alternativeFormats", "appMetricsData", b"appMetricsData", "artworkAvailable", b"artworkAvailable", "artworkDataHeight", b"artworkDataHeight", "artworkDataWidth", b"artworkDataWidth", "artworkFileURL", b"artworkFileURL", "artworkIdentifier", b"artworkIdentifier", "artworkMIMEType", b"artworkMIMEType", "artworkURL", b"artworkURL", "artworkURLTemplatesData", b"artworkURLTemplatesData", "assetURLString", b"assetURLString", "audioRoute", b"audioRoute", "brandIdentifier", b"brandIdentifier", "chapterCount", b"chapterCount", "collectionIdentifier", b"collectionIdentifier", "collectionInfoData", b"collectionInfoData", "composer", b"composer", "contentIdentifier", b"contentIdentifier", "currentPlaybackDateData", b"currentPlaybackDateData", "defaultPlaybackRate", b"defaultPlaybackRate", "deviceSpecificUserInfoData", b"deviceSpecificUserInfoData", "directorName", b"directorName", "discNumber", b"discNumber", "downloadProgress", b"downloadProgress", "downloadState", b"downloadState", "duration", b"duration", "editingStyleFlags", b"editingStyleFlags", "elapsedTime", b"elapsedTime", "elapsedTimeTimestamp", b"elapsedTimeTimestamp", "episodeNumber", b"episodeNumber", "episodeType", b"episodeType", "formatTierPreference", b"formatTierPreference", "genre", b"genre", "iTunesStoreAlbumIdentifier", b"iTunesStoreAlbumIdentifier", "iTunesStoreArtistIdentifier", b"iTunesStoreArtistIdentifier", "iTunesStoreIdentifier", b"iTunesStoreIdentifier", "iTunesStoreSubscriptionIdentifier", b"iTunesStoreSubscriptionIdentifier", "inferredTimestamp", b"inferredTimestamp", "infoAvailable", b"infoAvailable", "isAlwaysLive", b"isAlwaysLive", "isContainer", b"isContainer", "isCurrentlyPlaying", b"isCurrentlyPlaying", "isExplicitItem", b"isExplicitItem", "isInWishList", b"isInWishList", "isLiked", b"isLiked", "isLoading", b"isLoading", "isPlayable", b"isPlayable", "isSharable", b"isSharable", "isSteerable", b"isSteerable", "isStreamingContent", b"isStreamingContent", "languageOptionsAvailable", b"languageOptionsAvailable", "legacyUniqueIdentifier", b"legacyUniqueIdentifier", "localizedContentRating", b"localizedContentRating", "localizedDurationString", b"localizedDurationString", "lyricsAvailable", b"lyricsAvailable", "lyricsURL", b"lyricsURL", "mediaSubType", b"mediaSubType", "mediaType", b"mediaType", "nowPlayingInfoData", b"nowPlayingInfoData", "numberOfSections", b"numberOfSections", "playCount", b"playCount", "playbackProgress", b"playbackProgress", "playbackRate", b"playbackRate", "playlistTraits", b"playlistTraits", "playlistType", b"playlistType", "preferredFormat", b"preferredFormat", "profileIdentifier", b"profileIdentifier", "purchaseInfoData", b"purchaseInfoData", "radioStationIdentifier", b"radioStationIdentifier", "radioStationName", b"radioStationName", "radioStationString", b"radioStationString", "radioStationType", b"radioStationType", "releaseDate", b"releaseDate", "seasonNumber", b"seasonNumber", "seriesName", b"seriesName", "serviceIdentifier", b"serviceIdentifier", "songTraits", b"songTraits", "startTime", b"startTime", "subtitle", b"subtitle", "title", b"title", "totalDiscCount", b"totalDiscCount", "totalTrackCount", b"totalTrackCount", "trackArtistName", b"trackArtistName", "trackNumber", b"trackNumber", "userInfoData", b"userInfoData"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___ContentItemMetadata = ContentItemMetadata
+Global___ContentItemMetadata: _TypeAlias = ContentItemMetadata  # noqa: Y015

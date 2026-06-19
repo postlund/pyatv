@@ -3,35 +3,35 @@
 isort:skip_file
 """
 
-import builtins
-import collections.abc
-import google.protobuf.descriptor
-import google.protobuf.internal.containers
-import google.protobuf.internal.enum_type_wrapper
-import google.protobuf.internal.extension_dict
-import google.protobuf.message
-import pyatv.protocols.mrp.protobuf.Common_pb2
-import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
+from collections import abc as _abc
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import containers as _containers
+from google.protobuf.internal import enum_type_wrapper as _enum_type_wrapper
+from google.protobuf.internal import extension_dict as _extension_dict
+from pyatv.protocols.mrp.protobuf import Common_pb2 as _Common_pb2
+from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as _ProtocolMessage_pb2
+import builtins as _builtins
 import sys
-import typing
+import typing as _typing
 
-if sys.version_info >= (3, 10):
-    import typing as typing_extensions
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
 else:
-    import typing_extensions
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-@typing.final
-class PreferredEncoding(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class PreferredEncoding(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
     class _Enum:
-        ValueType = typing.NewType("ValueType", builtins.int)
-        V: typing_extensions.TypeAlias = ValueType
+        ValueType = _typing.NewType("ValueType", _builtins.int)
+        V: _TypeAlias = ValueType  # noqa: Y015
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[PreferredEncoding._Enum.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    class _EnumEnumTypeWrapper(_enum_type_wrapper._EnumTypeWrapper[PreferredEncoding._Enum.ValueType], _builtins.type):
+        DESCRIPTOR: _descriptor.EnumDescriptor
         Default: PreferredEncoding._Enum.ValueType  # 0
         JSON: PreferredEncoding._Enum.ValueType  # 1
 
@@ -42,185 +42,193 @@ class PreferredEncoding(google.protobuf.message.Message):
     def __init__(
         self,
     ) -> None: ...
+    _HasFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___PreferredEncoding = PreferredEncoding
+Global___PreferredEncoding: _TypeAlias = PreferredEncoding  # noqa: Y015
 
-@typing.final
-class DeviceInfoMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class DeviceInfoMessage(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
-    UNIQUEIDENTIFIER_FIELD_NUMBER: builtins.int
-    NAME_FIELD_NUMBER: builtins.int
-    LOCALIZEDMODELNAME_FIELD_NUMBER: builtins.int
-    SYSTEMBUILDVERSION_FIELD_NUMBER: builtins.int
-    APPLICATIONBUNDLEIDENTIFIER_FIELD_NUMBER: builtins.int
-    APPLICATIONBUNDLEVERSION_FIELD_NUMBER: builtins.int
-    PROTOCOLVERSION_FIELD_NUMBER: builtins.int
-    LASTSUPPORTEDMESSAGETYPE_FIELD_NUMBER: builtins.int
-    SUPPORTSSYSTEMPAIRING_FIELD_NUMBER: builtins.int
-    ALLOWSPAIRING_FIELD_NUMBER: builtins.int
-    CONNECTED_FIELD_NUMBER: builtins.int
-    SYSTEMMEDIAAPPLICATION_FIELD_NUMBER: builtins.int
-    SUPPORTSACL_FIELD_NUMBER: builtins.int
-    SUPPORTSSHAREDQUEUE_FIELD_NUMBER: builtins.int
-    SUPPORTSEXTENDEDMOTION_FIELD_NUMBER: builtins.int
-    BLUETOOTHADDRESS_FIELD_NUMBER: builtins.int
-    SHAREDQUEUEVERSION_FIELD_NUMBER: builtins.int
-    DEVICEUID_FIELD_NUMBER: builtins.int
-    MANAGEDCONFIGDEVICEID_FIELD_NUMBER: builtins.int
-    DEVICECLASS_FIELD_NUMBER: builtins.int
-    LOGICALDEVICECOUNT_FIELD_NUMBER: builtins.int
-    TIGHTLYSYNCEDGROUP_FIELD_NUMBER: builtins.int
-    ISPROXYGROUPPLAYER_FIELD_NUMBER: builtins.int
-    TIGHTSYNCUID_FIELD_NUMBER: builtins.int
-    GROUPUID_FIELD_NUMBER: builtins.int
-    GROUPNAME_FIELD_NUMBER: builtins.int
-    GROUPEDDEVICES_FIELD_NUMBER: builtins.int
-    ISGROUPLEADER_FIELD_NUMBER: builtins.int
-    ISAIRPLAYACTIVE_FIELD_NUMBER: builtins.int
-    SYSTEMPODCASTAPPLICATION_FIELD_NUMBER: builtins.int
-    SENDERDEFAULTGROUPUID_FIELD_NUMBER: builtins.int
-    AIRPLAYRECEIVERS_FIELD_NUMBER: builtins.int
-    LINKAGENT_FIELD_NUMBER: builtins.int
-    CLUSTERID_FIELD_NUMBER: builtins.int
-    CLUSTERLEADERID_FIELD_NUMBER: builtins.int
-    CLUSTERTYPE_FIELD_NUMBER: builtins.int
-    ISCLUSTERAWARE_FIELD_NUMBER: builtins.int
-    MODELID_FIELD_NUMBER: builtins.int
-    SUPPORTSMULTIPLAYER_FIELD_NUMBER: builtins.int
-    ROUTINGCONTEXTID_FIELD_NUMBER: builtins.int
-    AIRPLAYGROUPID_FIELD_NUMBER: builtins.int
-    SYSTEMBOOKSAPPLICATION_FIELD_NUMBER: builtins.int
-    CLUSTEREDDEVICES_FIELD_NUMBER: builtins.int
-    PARENTGROUPCONTAINSDISCOVERABLEGROUPLEADER_FIELD_NUMBER: builtins.int
-    GROUPCONTAINSDISCOVERABLEGROUPLEADER_FIELD_NUMBER: builtins.int
-    LASTKNOWNCLUSTERTYPE_FIELD_NUMBER: builtins.int
-    SUPPORTSOUTPUTCONTEXTSYNC_FIELD_NUMBER: builtins.int
-    COMPUTERNAME_FIELD_NUMBER: builtins.int
-    CONFIGUREDCLUSTERSIZE_FIELD_NUMBER: builtins.int
-    PREFERREDENCODING_FIELD_NUMBER: builtins.int
-    uniqueIdentifier: builtins.str
+    UNIQUEIDENTIFIER_FIELD_NUMBER: _builtins.int
+    NAME_FIELD_NUMBER: _builtins.int
+    LOCALIZEDMODELNAME_FIELD_NUMBER: _builtins.int
+    SYSTEMBUILDVERSION_FIELD_NUMBER: _builtins.int
+    APPLICATIONBUNDLEIDENTIFIER_FIELD_NUMBER: _builtins.int
+    APPLICATIONBUNDLEVERSION_FIELD_NUMBER: _builtins.int
+    PROTOCOLVERSION_FIELD_NUMBER: _builtins.int
+    LASTSUPPORTEDMESSAGETYPE_FIELD_NUMBER: _builtins.int
+    SUPPORTSSYSTEMPAIRING_FIELD_NUMBER: _builtins.int
+    ALLOWSPAIRING_FIELD_NUMBER: _builtins.int
+    CONNECTED_FIELD_NUMBER: _builtins.int
+    SYSTEMMEDIAAPPLICATION_FIELD_NUMBER: _builtins.int
+    SUPPORTSACL_FIELD_NUMBER: _builtins.int
+    SUPPORTSSHAREDQUEUE_FIELD_NUMBER: _builtins.int
+    SUPPORTSEXTENDEDMOTION_FIELD_NUMBER: _builtins.int
+    BLUETOOTHADDRESS_FIELD_NUMBER: _builtins.int
+    SHAREDQUEUEVERSION_FIELD_NUMBER: _builtins.int
+    DEVICEUID_FIELD_NUMBER: _builtins.int
+    MANAGEDCONFIGDEVICEID_FIELD_NUMBER: _builtins.int
+    DEVICECLASS_FIELD_NUMBER: _builtins.int
+    LOGICALDEVICECOUNT_FIELD_NUMBER: _builtins.int
+    TIGHTLYSYNCEDGROUP_FIELD_NUMBER: _builtins.int
+    ISPROXYGROUPPLAYER_FIELD_NUMBER: _builtins.int
+    TIGHTSYNCUID_FIELD_NUMBER: _builtins.int
+    GROUPUID_FIELD_NUMBER: _builtins.int
+    GROUPNAME_FIELD_NUMBER: _builtins.int
+    GROUPEDDEVICES_FIELD_NUMBER: _builtins.int
+    ISGROUPLEADER_FIELD_NUMBER: _builtins.int
+    ISAIRPLAYACTIVE_FIELD_NUMBER: _builtins.int
+    SYSTEMPODCASTAPPLICATION_FIELD_NUMBER: _builtins.int
+    SENDERDEFAULTGROUPUID_FIELD_NUMBER: _builtins.int
+    AIRPLAYRECEIVERS_FIELD_NUMBER: _builtins.int
+    LINKAGENT_FIELD_NUMBER: _builtins.int
+    CLUSTERID_FIELD_NUMBER: _builtins.int
+    CLUSTERLEADERID_FIELD_NUMBER: _builtins.int
+    CLUSTERTYPE_FIELD_NUMBER: _builtins.int
+    ISCLUSTERAWARE_FIELD_NUMBER: _builtins.int
+    MODELID_FIELD_NUMBER: _builtins.int
+    SUPPORTSMULTIPLAYER_FIELD_NUMBER: _builtins.int
+    ROUTINGCONTEXTID_FIELD_NUMBER: _builtins.int
+    AIRPLAYGROUPID_FIELD_NUMBER: _builtins.int
+    SYSTEMBOOKSAPPLICATION_FIELD_NUMBER: _builtins.int
+    CLUSTEREDDEVICES_FIELD_NUMBER: _builtins.int
+    PARENTGROUPCONTAINSDISCOVERABLEGROUPLEADER_FIELD_NUMBER: _builtins.int
+    GROUPCONTAINSDISCOVERABLEGROUPLEADER_FIELD_NUMBER: _builtins.int
+    LASTKNOWNCLUSTERTYPE_FIELD_NUMBER: _builtins.int
+    SUPPORTSOUTPUTCONTEXTSYNC_FIELD_NUMBER: _builtins.int
+    COMPUTERNAME_FIELD_NUMBER: _builtins.int
+    CONFIGUREDCLUSTERSIZE_FIELD_NUMBER: _builtins.int
+    PREFERREDENCODING_FIELD_NUMBER: _builtins.int
+    uniqueIdentifier: _builtins.str
     """Example: B8D8678C-9DA9-4D29-9338-5D6B827B8063"""
-    name: builtins.str
+    name: _builtins.str
     """Example: Jean's iPhone"""
-    localizedModelName: builtins.str
+    localizedModelName: _builtins.str
     """Example: iPhone"""
-    systemBuildVersion: builtins.str
+    systemBuildVersion: _builtins.str
     """Example: 13F69"""
-    applicationBundleIdentifier: builtins.str
+    applicationBundleIdentifier: _builtins.str
     """Example: com.example.myremote"""
-    applicationBundleVersion: builtins.str
+    applicationBundleVersion: _builtins.str
     """Example: 107"""
-    protocolVersion: builtins.int
+    protocolVersion: _builtins.int
     """Example: 1"""
-    lastSupportedMessageType: builtins.int
-    supportsSystemPairing: builtins.bool
-    allowsPairing: builtins.bool
-    connected: builtins.bool
-    systemMediaApplication: builtins.str
-    supportsACL: builtins.bool
-    supportsSharedQueue: builtins.bool
-    supportsExtendedMotion: builtins.bool
-    bluetoothAddress: builtins.bytes
-    sharedQueueVersion: builtins.int
-    deviceUID: builtins.str
-    managedConfigDeviceID: builtins.str
-    deviceClass: pyatv.protocols.mrp.protobuf.Common_pb2.DeviceClass.Enum.ValueType
-    logicalDeviceCount: builtins.int
-    tightlySyncedGroup: builtins.bool
-    isProxyGroupPlayer: builtins.bool
-    tightSyncUID: builtins.str
-    groupUID: builtins.str
-    groupName: builtins.str
-    isGroupLeader: builtins.bool
-    isAirplayActive: builtins.bool
-    systemPodcastApplication: builtins.str
-    senderDefaultGroupUID: builtins.str
-    linkAgent: builtins.str
-    clusterID: builtins.str
-    clusterLeaderID: builtins.str
-    clusterType: builtins.int
-    isClusterAware: builtins.bool
-    modelID: builtins.str
-    supportsMultiplayer: builtins.bool
-    routingContextID: builtins.str
+    lastSupportedMessageType: _builtins.int
+    supportsSystemPairing: _builtins.bool
+    allowsPairing: _builtins.bool
+    connected: _builtins.bool
+    systemMediaApplication: _builtins.str
+    supportsACL: _builtins.bool
+    supportsSharedQueue: _builtins.bool
+    supportsExtendedMotion: _builtins.bool
+    bluetoothAddress: _builtins.bytes
+    sharedQueueVersion: _builtins.int
+    deviceUID: _builtins.str
+    managedConfigDeviceID: _builtins.str
+    deviceClass: _Common_pb2.DeviceClass.Enum.ValueType
+    logicalDeviceCount: _builtins.int
+    tightlySyncedGroup: _builtins.bool
+    isProxyGroupPlayer: _builtins.bool
+    tightSyncUID: _builtins.str
+    groupUID: _builtins.str
+    groupName: _builtins.str
+    isGroupLeader: _builtins.bool
+    isAirplayActive: _builtins.bool
+    systemPodcastApplication: _builtins.str
+    senderDefaultGroupUID: _builtins.str
+    linkAgent: _builtins.str
+    clusterID: _builtins.str
+    clusterLeaderID: _builtins.str
+    clusterType: _builtins.int
+    isClusterAware: _builtins.bool
+    modelID: _builtins.str
+    supportsMultiplayer: _builtins.bool
+    routingContextID: _builtins.str
     """Example: 577E1BCA-2D9B-41C2-A8F8-C515CE8072D4"""
-    airPlayGroupID: builtins.str
+    airPlayGroupID: _builtins.str
     """Example: 6E0ED14E-0BA4-4A84-AF30-9EB080E7AA73"""
-    systemBooksApplication: builtins.str
+    systemBooksApplication: _builtins.str
     """Example: com.apple.iBooks"""
-    parentGroupContainsDiscoverableGroupLeader: builtins.int
-    groupContainsDiscoverableGroupLeader: builtins.int
-    lastKnownClusterType: builtins.int
-    supportsOutputContextSync: builtins.bool
+    parentGroupContainsDiscoverableGroupLeader: _builtins.int
+    groupContainsDiscoverableGroupLeader: _builtins.int
+    lastKnownClusterType: _builtins.int
+    supportsOutputContextSync: _builtins.bool
     """repeated ... allClusteredDevices = 48;"""
-    computerName: builtins.str
-    configuredClusterSize: builtins.int
-    preferredEncoding: global___PreferredEncoding.Enum.ValueType
-    @property
-    def groupedDevices(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___DeviceInfoMessage]: ...
-    @property
-    def airplayReceivers(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]: ...
-    @property
-    def clusteredDevices(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___DeviceInfoMessage]: ...
+    computerName: _builtins.str
+    configuredClusterSize: _builtins.int
+    preferredEncoding: Global___PreferredEncoding.Enum.ValueType
+    @_builtins.property
+    def groupedDevices(self) -> _containers.RepeatedCompositeFieldContainer[Global___DeviceInfoMessage]: ...
+    @_builtins.property
+    def airplayReceivers(self) -> _containers.RepeatedScalarFieldContainer[_builtins.str]: ...
+    @_builtins.property
+    def clusteredDevices(self) -> _containers.RepeatedCompositeFieldContainer[Global___DeviceInfoMessage]: ...
     def __init__(
         self,
         *,
-        uniqueIdentifier: builtins.str | None = ...,
-        name: builtins.str | None = ...,
-        localizedModelName: builtins.str | None = ...,
-        systemBuildVersion: builtins.str | None = ...,
-        applicationBundleIdentifier: builtins.str | None = ...,
-        applicationBundleVersion: builtins.str | None = ...,
-        protocolVersion: builtins.int | None = ...,
-        lastSupportedMessageType: builtins.int | None = ...,
-        supportsSystemPairing: builtins.bool | None = ...,
-        allowsPairing: builtins.bool | None = ...,
-        connected: builtins.bool | None = ...,
-        systemMediaApplication: builtins.str | None = ...,
-        supportsACL: builtins.bool | None = ...,
-        supportsSharedQueue: builtins.bool | None = ...,
-        supportsExtendedMotion: builtins.bool | None = ...,
-        bluetoothAddress: builtins.bytes | None = ...,
-        sharedQueueVersion: builtins.int | None = ...,
-        deviceUID: builtins.str | None = ...,
-        managedConfigDeviceID: builtins.str | None = ...,
-        deviceClass: pyatv.protocols.mrp.protobuf.Common_pb2.DeviceClass.Enum.ValueType | None = ...,
-        logicalDeviceCount: builtins.int | None = ...,
-        tightlySyncedGroup: builtins.bool | None = ...,
-        isProxyGroupPlayer: builtins.bool | None = ...,
-        tightSyncUID: builtins.str | None = ...,
-        groupUID: builtins.str | None = ...,
-        groupName: builtins.str | None = ...,
-        groupedDevices: collections.abc.Iterable[global___DeviceInfoMessage] | None = ...,
-        isGroupLeader: builtins.bool | None = ...,
-        isAirplayActive: builtins.bool | None = ...,
-        systemPodcastApplication: builtins.str | None = ...,
-        senderDefaultGroupUID: builtins.str | None = ...,
-        airplayReceivers: collections.abc.Iterable[builtins.str] | None = ...,
-        linkAgent: builtins.str | None = ...,
-        clusterID: builtins.str | None = ...,
-        clusterLeaderID: builtins.str | None = ...,
-        clusterType: builtins.int | None = ...,
-        isClusterAware: builtins.bool | None = ...,
-        modelID: builtins.str | None = ...,
-        supportsMultiplayer: builtins.bool | None = ...,
-        routingContextID: builtins.str | None = ...,
-        airPlayGroupID: builtins.str | None = ...,
-        systemBooksApplication: builtins.str | None = ...,
-        clusteredDevices: collections.abc.Iterable[global___DeviceInfoMessage] | None = ...,
-        parentGroupContainsDiscoverableGroupLeader: builtins.int | None = ...,
-        groupContainsDiscoverableGroupLeader: builtins.int | None = ...,
-        lastKnownClusterType: builtins.int | None = ...,
-        supportsOutputContextSync: builtins.bool | None = ...,
-        computerName: builtins.str | None = ...,
-        configuredClusterSize: builtins.int | None = ...,
-        preferredEncoding: global___PreferredEncoding.Enum.ValueType | None = ...,
+        uniqueIdentifier: _builtins.str | None = ...,
+        name: _builtins.str | None = ...,
+        localizedModelName: _builtins.str | None = ...,
+        systemBuildVersion: _builtins.str | None = ...,
+        applicationBundleIdentifier: _builtins.str | None = ...,
+        applicationBundleVersion: _builtins.str | None = ...,
+        protocolVersion: _builtins.int | None = ...,
+        lastSupportedMessageType: _builtins.int | None = ...,
+        supportsSystemPairing: _builtins.bool | None = ...,
+        allowsPairing: _builtins.bool | None = ...,
+        connected: _builtins.bool | None = ...,
+        systemMediaApplication: _builtins.str | None = ...,
+        supportsACL: _builtins.bool | None = ...,
+        supportsSharedQueue: _builtins.bool | None = ...,
+        supportsExtendedMotion: _builtins.bool | None = ...,
+        bluetoothAddress: _builtins.bytes | None = ...,
+        sharedQueueVersion: _builtins.int | None = ...,
+        deviceUID: _builtins.str | None = ...,
+        managedConfigDeviceID: _builtins.str | None = ...,
+        deviceClass: _Common_pb2.DeviceClass.Enum.ValueType | None = ...,
+        logicalDeviceCount: _builtins.int | None = ...,
+        tightlySyncedGroup: _builtins.bool | None = ...,
+        isProxyGroupPlayer: _builtins.bool | None = ...,
+        tightSyncUID: _builtins.str | None = ...,
+        groupUID: _builtins.str | None = ...,
+        groupName: _builtins.str | None = ...,
+        groupedDevices: _abc.Iterable[Global___DeviceInfoMessage] | None = ...,
+        isGroupLeader: _builtins.bool | None = ...,
+        isAirplayActive: _builtins.bool | None = ...,
+        systemPodcastApplication: _builtins.str | None = ...,
+        senderDefaultGroupUID: _builtins.str | None = ...,
+        airplayReceivers: _abc.Iterable[_builtins.str] | None = ...,
+        linkAgent: _builtins.str | None = ...,
+        clusterID: _builtins.str | None = ...,
+        clusterLeaderID: _builtins.str | None = ...,
+        clusterType: _builtins.int | None = ...,
+        isClusterAware: _builtins.bool | None = ...,
+        modelID: _builtins.str | None = ...,
+        supportsMultiplayer: _builtins.bool | None = ...,
+        routingContextID: _builtins.str | None = ...,
+        airPlayGroupID: _builtins.str | None = ...,
+        systemBooksApplication: _builtins.str | None = ...,
+        clusteredDevices: _abc.Iterable[Global___DeviceInfoMessage] | None = ...,
+        parentGroupContainsDiscoverableGroupLeader: _builtins.int | None = ...,
+        groupContainsDiscoverableGroupLeader: _builtins.int | None = ...,
+        lastKnownClusterType: _builtins.int | None = ...,
+        supportsOutputContextSync: _builtins.bool | None = ...,
+        computerName: _builtins.str | None = ...,
+        configuredClusterSize: _builtins.int | None = ...,
+        preferredEncoding: Global___PreferredEncoding.Enum.ValueType | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["airPlayGroupID", b"airPlayGroupID", "allowsPairing", b"allowsPairing", "applicationBundleIdentifier", b"applicationBundleIdentifier", "applicationBundleVersion", b"applicationBundleVersion", "bluetoothAddress", b"bluetoothAddress", "clusterID", b"clusterID", "clusterLeaderID", b"clusterLeaderID", "clusterType", b"clusterType", "computerName", b"computerName", "configuredClusterSize", b"configuredClusterSize", "connected", b"connected", "deviceClass", b"deviceClass", "deviceUID", b"deviceUID", "groupContainsDiscoverableGroupLeader", b"groupContainsDiscoverableGroupLeader", "groupName", b"groupName", "groupUID", b"groupUID", "isAirplayActive", b"isAirplayActive", "isClusterAware", b"isClusterAware", "isGroupLeader", b"isGroupLeader", "isProxyGroupPlayer", b"isProxyGroupPlayer", "lastKnownClusterType", b"lastKnownClusterType", "lastSupportedMessageType", b"lastSupportedMessageType", "linkAgent", b"linkAgent", "localizedModelName", b"localizedModelName", "logicalDeviceCount", b"logicalDeviceCount", "managedConfigDeviceID", b"managedConfigDeviceID", "modelID", b"modelID", "name", b"name", "parentGroupContainsDiscoverableGroupLeader", b"parentGroupContainsDiscoverableGroupLeader", "preferredEncoding", b"preferredEncoding", "protocolVersion", b"protocolVersion", "routingContextID", b"routingContextID", "senderDefaultGroupUID", b"senderDefaultGroupUID", "sharedQueueVersion", b"sharedQueueVersion", "supportsACL", b"supportsACL", "supportsExtendedMotion", b"supportsExtendedMotion", "supportsMultiplayer", b"supportsMultiplayer", "supportsOutputContextSync", b"supportsOutputContextSync", "supportsSharedQueue", b"supportsSharedQueue", "supportsSystemPairing", b"supportsSystemPairing", "systemBooksApplication", b"systemBooksApplication", "systemBuildVersion", b"systemBuildVersion", "systemMediaApplication", b"systemMediaApplication", "systemPodcastApplication", b"systemPodcastApplication", "tightSyncUID", b"tightSyncUID", "tightlySyncedGroup", b"tightlySyncedGroup", "uniqueIdentifier", b"uniqueIdentifier"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["airPlayGroupID", b"airPlayGroupID", "airplayReceivers", b"airplayReceivers", "allowsPairing", b"allowsPairing", "applicationBundleIdentifier", b"applicationBundleIdentifier", "applicationBundleVersion", b"applicationBundleVersion", "bluetoothAddress", b"bluetoothAddress", "clusterID", b"clusterID", "clusterLeaderID", b"clusterLeaderID", "clusterType", b"clusterType", "clusteredDevices", b"clusteredDevices", "computerName", b"computerName", "configuredClusterSize", b"configuredClusterSize", "connected", b"connected", "deviceClass", b"deviceClass", "deviceUID", b"deviceUID", "groupContainsDiscoverableGroupLeader", b"groupContainsDiscoverableGroupLeader", "groupName", b"groupName", "groupUID", b"groupUID", "groupedDevices", b"groupedDevices", "isAirplayActive", b"isAirplayActive", "isClusterAware", b"isClusterAware", "isGroupLeader", b"isGroupLeader", "isProxyGroupPlayer", b"isProxyGroupPlayer", "lastKnownClusterType", b"lastKnownClusterType", "lastSupportedMessageType", b"lastSupportedMessageType", "linkAgent", b"linkAgent", "localizedModelName", b"localizedModelName", "logicalDeviceCount", b"logicalDeviceCount", "managedConfigDeviceID", b"managedConfigDeviceID", "modelID", b"modelID", "name", b"name", "parentGroupContainsDiscoverableGroupLeader", b"parentGroupContainsDiscoverableGroupLeader", "preferredEncoding", b"preferredEncoding", "protocolVersion", b"protocolVersion", "routingContextID", b"routingContextID", "senderDefaultGroupUID", b"senderDefaultGroupUID", "sharedQueueVersion", b"sharedQueueVersion", "supportsACL", b"supportsACL", "supportsExtendedMotion", b"supportsExtendedMotion", "supportsMultiplayer", b"supportsMultiplayer", "supportsOutputContextSync", b"supportsOutputContextSync", "supportsSharedQueue", b"supportsSharedQueue", "supportsSystemPairing", b"supportsSystemPairing", "systemBooksApplication", b"systemBooksApplication", "systemBuildVersion", b"systemBuildVersion", "systemMediaApplication", b"systemMediaApplication", "systemPodcastApplication", b"systemPodcastApplication", "tightSyncUID", b"tightSyncUID", "tightlySyncedGroup", b"tightlySyncedGroup", "uniqueIdentifier", b"uniqueIdentifier"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["airPlayGroupID", b"airPlayGroupID", "allowsPairing", b"allowsPairing", "applicationBundleIdentifier", b"applicationBundleIdentifier", "applicationBundleVersion", b"applicationBundleVersion", "bluetoothAddress", b"bluetoothAddress", "clusterID", b"clusterID", "clusterLeaderID", b"clusterLeaderID", "clusterType", b"clusterType", "computerName", b"computerName", "configuredClusterSize", b"configuredClusterSize", "connected", b"connected", "deviceClass", b"deviceClass", "deviceUID", b"deviceUID", "groupContainsDiscoverableGroupLeader", b"groupContainsDiscoverableGroupLeader", "groupName", b"groupName", "groupUID", b"groupUID", "isAirplayActive", b"isAirplayActive", "isClusterAware", b"isClusterAware", "isGroupLeader", b"isGroupLeader", "isProxyGroupPlayer", b"isProxyGroupPlayer", "lastKnownClusterType", b"lastKnownClusterType", "lastSupportedMessageType", b"lastSupportedMessageType", "linkAgent", b"linkAgent", "localizedModelName", b"localizedModelName", "logicalDeviceCount", b"logicalDeviceCount", "managedConfigDeviceID", b"managedConfigDeviceID", "modelID", b"modelID", "name", b"name", "parentGroupContainsDiscoverableGroupLeader", b"parentGroupContainsDiscoverableGroupLeader", "preferredEncoding", b"preferredEncoding", "protocolVersion", b"protocolVersion", "routingContextID", b"routingContextID", "senderDefaultGroupUID", b"senderDefaultGroupUID", "sharedQueueVersion", b"sharedQueueVersion", "supportsACL", b"supportsACL", "supportsExtendedMotion", b"supportsExtendedMotion", "supportsMultiplayer", b"supportsMultiplayer", "supportsOutputContextSync", b"supportsOutputContextSync", "supportsSharedQueue", b"supportsSharedQueue", "supportsSystemPairing", b"supportsSystemPairing", "systemBooksApplication", b"systemBooksApplication", "systemBuildVersion", b"systemBuildVersion", "systemMediaApplication", b"systemMediaApplication", "systemPodcastApplication", b"systemPodcastApplication", "tightSyncUID", b"tightSyncUID", "tightlySyncedGroup", b"tightlySyncedGroup", "uniqueIdentifier", b"uniqueIdentifier"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["airPlayGroupID", b"airPlayGroupID", "airplayReceivers", b"airplayReceivers", "allowsPairing", b"allowsPairing", "applicationBundleIdentifier", b"applicationBundleIdentifier", "applicationBundleVersion", b"applicationBundleVersion", "bluetoothAddress", b"bluetoothAddress", "clusterID", b"clusterID", "clusterLeaderID", b"clusterLeaderID", "clusterType", b"clusterType", "clusteredDevices", b"clusteredDevices", "computerName", b"computerName", "configuredClusterSize", b"configuredClusterSize", "connected", b"connected", "deviceClass", b"deviceClass", "deviceUID", b"deviceUID", "groupContainsDiscoverableGroupLeader", b"groupContainsDiscoverableGroupLeader", "groupName", b"groupName", "groupUID", b"groupUID", "groupedDevices", b"groupedDevices", "isAirplayActive", b"isAirplayActive", "isClusterAware", b"isClusterAware", "isGroupLeader", b"isGroupLeader", "isProxyGroupPlayer", b"isProxyGroupPlayer", "lastKnownClusterType", b"lastKnownClusterType", "lastSupportedMessageType", b"lastSupportedMessageType", "linkAgent", b"linkAgent", "localizedModelName", b"localizedModelName", "logicalDeviceCount", b"logicalDeviceCount", "managedConfigDeviceID", b"managedConfigDeviceID", "modelID", b"modelID", "name", b"name", "parentGroupContainsDiscoverableGroupLeader", b"parentGroupContainsDiscoverableGroupLeader", "preferredEncoding", b"preferredEncoding", "protocolVersion", b"protocolVersion", "routingContextID", b"routingContextID", "senderDefaultGroupUID", b"senderDefaultGroupUID", "sharedQueueVersion", b"sharedQueueVersion", "supportsACL", b"supportsACL", "supportsExtendedMotion", b"supportsExtendedMotion", "supportsMultiplayer", b"supportsMultiplayer", "supportsOutputContextSync", b"supportsOutputContextSync", "supportsSharedQueue", b"supportsSharedQueue", "supportsSystemPairing", b"supportsSystemPairing", "systemBooksApplication", b"systemBooksApplication", "systemBuildVersion", b"systemBuildVersion", "systemMediaApplication", b"systemMediaApplication", "systemPodcastApplication", b"systemPodcastApplication", "tightSyncUID", b"tightSyncUID", "tightlySyncedGroup", b"tightlySyncedGroup", "uniqueIdentifier", b"uniqueIdentifier"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___DeviceInfoMessage = DeviceInfoMessage
+Global___DeviceInfoMessage: _TypeAlias = DeviceInfoMessage  # noqa: Y015
 
-DEVICEINFOMESSAGE_FIELD_NUMBER: builtins.int
-deviceInfoMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___DeviceInfoMessage]
+DEVICEINFOMESSAGE_FIELD_NUMBER: _builtins.int
+deviceInfoMessage: _extension_dict._ExtensionFieldDescriptor[_ProtocolMessage_pb2.ProtocolMessage, Global___DeviceInfoMessage]

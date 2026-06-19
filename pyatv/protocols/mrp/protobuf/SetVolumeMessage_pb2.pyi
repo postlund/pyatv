@@ -3,33 +3,42 @@
 isort:skip_file
 """
 
-import builtins
-import google.protobuf.descriptor
-import google.protobuf.internal.extension_dict
-import google.protobuf.message
-import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import typing
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import extension_dict as _extension_dict
+from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as _ProtocolMessage_pb2
+import builtins as _builtins
+import sys
+import typing as _typing
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
+else:
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-@typing.final
-class SetVolumeMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-    VOLUME_FIELD_NUMBER: builtins.int
-    OUTPUTDEVICEUID_FIELD_NUMBER: builtins.int
-    volume: builtins.float
-    outputDeviceUID: builtins.str
+@_typing.final
+class SetVolumeMessage(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    VOLUME_FIELD_NUMBER: _builtins.int
+    OUTPUTDEVICEUID_FIELD_NUMBER: _builtins.int
+    volume: _builtins.float
+    outputDeviceUID: _builtins.str
     def __init__(
         self,
         *,
-        volume: builtins.float | None = ...,
-        outputDeviceUID: builtins.str | None = ...,
+        volume: _builtins.float | None = ...,
+        outputDeviceUID: _builtins.str | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["outputDeviceUID", b"outputDeviceUID", "volume", b"volume"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["outputDeviceUID", b"outputDeviceUID", "volume", b"volume"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["outputDeviceUID", b"outputDeviceUID", "volume", b"volume"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["outputDeviceUID", b"outputDeviceUID", "volume", b"volume"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___SetVolumeMessage = SetVolumeMessage
+Global___SetVolumeMessage: _TypeAlias = SetVolumeMessage  # noqa: Y015
 
-SETVOLUMEMESSAGE_FIELD_NUMBER: builtins.int
-setVolumeMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___SetVolumeMessage]
+SETVOLUMEMESSAGE_FIELD_NUMBER: _builtins.int
+setVolumeMessage: _extension_dict._ExtensionFieldDescriptor[_ProtocolMessage_pb2.ProtocolMessage, Global___SetVolumeMessage]

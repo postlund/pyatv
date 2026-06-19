@@ -3,42 +3,51 @@
 isort:skip_file
 """
 
-import builtins
-import google.protobuf.descriptor
-import google.protobuf.internal.extension_dict
-import google.protobuf.message
-import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import typing
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import extension_dict as _extension_dict
+from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as _ProtocolMessage_pb2
+import builtins as _builtins
+import sys
+import typing as _typing
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
+else:
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-@typing.final
-class ClientUpdatesConfigMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-    ARTWORKUPDATES_FIELD_NUMBER: builtins.int
-    NOWPLAYINGUPDATES_FIELD_NUMBER: builtins.int
-    VOLUMEUPDATES_FIELD_NUMBER: builtins.int
-    KEYBOARDUPDATES_FIELD_NUMBER: builtins.int
-    OUTPUTDEVICEUPDATES_FIELD_NUMBER: builtins.int
-    artworkUpdates: builtins.bool
-    nowPlayingUpdates: builtins.bool
-    volumeUpdates: builtins.bool
-    keyboardUpdates: builtins.bool
-    outputDeviceUpdates: builtins.bool
+@_typing.final
+class ClientUpdatesConfigMessage(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    ARTWORKUPDATES_FIELD_NUMBER: _builtins.int
+    NOWPLAYINGUPDATES_FIELD_NUMBER: _builtins.int
+    VOLUMEUPDATES_FIELD_NUMBER: _builtins.int
+    KEYBOARDUPDATES_FIELD_NUMBER: _builtins.int
+    OUTPUTDEVICEUPDATES_FIELD_NUMBER: _builtins.int
+    artworkUpdates: _builtins.bool
+    nowPlayingUpdates: _builtins.bool
+    volumeUpdates: _builtins.bool
+    keyboardUpdates: _builtins.bool
+    outputDeviceUpdates: _builtins.bool
     def __init__(
         self,
         *,
-        artworkUpdates: builtins.bool | None = ...,
-        nowPlayingUpdates: builtins.bool | None = ...,
-        volumeUpdates: builtins.bool | None = ...,
-        keyboardUpdates: builtins.bool | None = ...,
-        outputDeviceUpdates: builtins.bool | None = ...,
+        artworkUpdates: _builtins.bool | None = ...,
+        nowPlayingUpdates: _builtins.bool | None = ...,
+        volumeUpdates: _builtins.bool | None = ...,
+        keyboardUpdates: _builtins.bool | None = ...,
+        outputDeviceUpdates: _builtins.bool | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["artworkUpdates", b"artworkUpdates", "keyboardUpdates", b"keyboardUpdates", "nowPlayingUpdates", b"nowPlayingUpdates", "outputDeviceUpdates", b"outputDeviceUpdates", "volumeUpdates", b"volumeUpdates"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["artworkUpdates", b"artworkUpdates", "keyboardUpdates", b"keyboardUpdates", "nowPlayingUpdates", b"nowPlayingUpdates", "outputDeviceUpdates", b"outputDeviceUpdates", "volumeUpdates", b"volumeUpdates"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["artworkUpdates", b"artworkUpdates", "keyboardUpdates", b"keyboardUpdates", "nowPlayingUpdates", b"nowPlayingUpdates", "outputDeviceUpdates", b"outputDeviceUpdates", "volumeUpdates", b"volumeUpdates"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["artworkUpdates", b"artworkUpdates", "keyboardUpdates", b"keyboardUpdates", "nowPlayingUpdates", b"nowPlayingUpdates", "outputDeviceUpdates", b"outputDeviceUpdates", "volumeUpdates", b"volumeUpdates"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___ClientUpdatesConfigMessage = ClientUpdatesConfigMessage
+Global___ClientUpdatesConfigMessage: _TypeAlias = ClientUpdatesConfigMessage  # noqa: Y015
 
-CLIENTUPDATESCONFIGMESSAGE_FIELD_NUMBER: builtins.int
-clientUpdatesConfigMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___ClientUpdatesConfigMessage]
+CLIENTUPDATESCONFIGMESSAGE_FIELD_NUMBER: _builtins.int
+clientUpdatesConfigMessage: _extension_dict._ExtensionFieldDescriptor[_ProtocolMessage_pb2.ProtocolMessage, Global___ClientUpdatesConfigMessage]

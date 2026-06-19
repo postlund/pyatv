@@ -3,32 +3,32 @@
 isort:skip_file
 """
 
-import builtins
-import google.protobuf.descriptor
-import google.protobuf.internal.enum_type_wrapper
-import google.protobuf.internal.extension_dict
-import google.protobuf.message
-import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import enum_type_wrapper as _enum_type_wrapper
+from google.protobuf.internal import extension_dict as _extension_dict
+from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as _ProtocolMessage_pb2
+import builtins as _builtins
 import sys
-import typing
+import typing as _typing
 
-if sys.version_info >= (3, 10):
-    import typing as typing_extensions
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
 else:
-    import typing_extensions
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-@typing.final
-class ActionType(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class ActionType(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
     class _Enum:
-        ValueType = typing.NewType("ValueType", builtins.int)
-        V: typing_extensions.TypeAlias = ValueType
+        ValueType = _typing.NewType("ValueType", _builtins.int)
+        V: _TypeAlias = ValueType  # noqa: Y015
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[ActionType._Enum.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    class _EnumEnumTypeWrapper(_enum_type_wrapper._EnumTypeWrapper[ActionType._Enum.ValueType], _builtins.type):
+        DESCRIPTOR: _descriptor.EnumDescriptor
         Unknown: ActionType._Enum.ValueType  # 0
         Insert: ActionType._Enum.ValueType  # 1
         Set: ActionType._Enum.ValueType  # 2
@@ -47,30 +47,38 @@ class ActionType(google.protobuf.message.Message):
     def __init__(
         self,
     ) -> None: ...
+    _HasFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___ActionType = ActionType
+Global___ActionType: _TypeAlias = ActionType  # noqa: Y015
 
-@typing.final
-class TextInputMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class TextInputMessage(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
-    TIMESTAMP_FIELD_NUMBER: builtins.int
-    TEXT_FIELD_NUMBER: builtins.int
-    ACTIONTYPE_FIELD_NUMBER: builtins.int
-    timestamp: builtins.float
-    text: builtins.str
-    actionType: global___ActionType.Enum.ValueType
+    TIMESTAMP_FIELD_NUMBER: _builtins.int
+    TEXT_FIELD_NUMBER: _builtins.int
+    ACTIONTYPE_FIELD_NUMBER: _builtins.int
+    timestamp: _builtins.float
+    text: _builtins.str
+    actionType: Global___ActionType.Enum.ValueType
     def __init__(
         self,
         *,
-        timestamp: builtins.float | None = ...,
-        text: builtins.str | None = ...,
-        actionType: global___ActionType.Enum.ValueType | None = ...,
+        timestamp: _builtins.float | None = ...,
+        text: _builtins.str | None = ...,
+        actionType: Global___ActionType.Enum.ValueType | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["actionType", b"actionType", "text", b"text", "timestamp", b"timestamp"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["actionType", b"actionType", "text", b"text", "timestamp", b"timestamp"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["actionType", b"actionType", "text", b"text", "timestamp", b"timestamp"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["actionType", b"actionType", "text", b"text", "timestamp", b"timestamp"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___TextInputMessage = TextInputMessage
+Global___TextInputMessage: _TypeAlias = TextInputMessage  # noqa: Y015
 
-TEXTINPUTMESSAGE_FIELD_NUMBER: builtins.int
-textInputMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___TextInputMessage]
+TEXTINPUTMESSAGE_FIELD_NUMBER: _builtins.int
+textInputMessage: _extension_dict._ExtensionFieldDescriptor[_ProtocolMessage_pb2.ProtocolMessage, Global___TextInputMessage]

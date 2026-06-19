@@ -10,14 +10,14 @@ from pyatv.auth.hap_pairing import (
     PairVerifyProcedure,
 )
 from pyatv.auth.hap_tlv8 import TlvValue, read_tlv, stringify
-from pyatv.protocols.mrp import messages
+from pyatv.protocols.mrp import messages, protobuf
 from pyatv.support import log_binary
 
 _LOGGER = logging.getLogger(__name__)
 
 
 def _get_pairing_data(resp):
-    tlv = read_tlv(resp.inner().pairingData)
+    tlv = read_tlv(protobuf.extract_inner(resp).pairingData)
     if TlvValue.Error in tlv:
         raise exceptions.AuthenticationError(stringify(tlv))
     return tlv

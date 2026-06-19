@@ -3,85 +3,94 @@
 isort:skip_file
 """
 
-import builtins
-import collections.abc
-import google.protobuf.descriptor
-import google.protobuf.internal.containers
-import google.protobuf.internal.extension_dict
-import google.protobuf.message
-import pyatv.protocols.mrp.protobuf.PlaybackQueueContext_pb2
-import pyatv.protocols.mrp.protobuf.PlayerPath_pb2
-import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import typing
+from collections import abc as _abc
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import containers as _containers
+from google.protobuf.internal import extension_dict as _extension_dict
+from pyatv.protocols.mrp.protobuf import PlaybackQueueContext_pb2 as _PlaybackQueueContext_pb2
+from pyatv.protocols.mrp.protobuf import PlayerPath_pb2 as _PlayerPath_pb2
+from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as _ProtocolMessage_pb2
+import builtins as _builtins
+import sys
+import typing as _typing
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
+else:
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-@typing.final
-class PlaybackQueueRequestMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-    LOCATION_FIELD_NUMBER: builtins.int
-    LENGTH_FIELD_NUMBER: builtins.int
-    INCLUDEMETADATA_FIELD_NUMBER: builtins.int
-    ARTWORKWIDTH_FIELD_NUMBER: builtins.int
-    ARTWORKHEIGHT_FIELD_NUMBER: builtins.int
-    INCLUDELYRICS_FIELD_NUMBER: builtins.int
-    INCLUDESECTIONS_FIELD_NUMBER: builtins.int
-    INCLUDEINFO_FIELD_NUMBER: builtins.int
-    INCLUDELANGUAGEOPTIONS_FIELD_NUMBER: builtins.int
-    CONTEXT_FIELD_NUMBER: builtins.int
-    REQUESTID_FIELD_NUMBER: builtins.int
-    CONTENTITEMIDENTIFIERS_FIELD_NUMBER: builtins.int
-    RETURNCONTENTITEMASSETSINUSERCOMPLETION_FIELD_NUMBER: builtins.int
-    PLAYERPATH_FIELD_NUMBER: builtins.int
-    CACHINGPOLICY_FIELD_NUMBER: builtins.int
-    LABEL_FIELD_NUMBER: builtins.int
-    ISLEGACYNOWPLAYINGINFOREQUEST_FIELD_NUMBER: builtins.int
-    location: builtins.int
-    length: builtins.int
-    includeMetadata: builtins.bool
-    artworkWidth: builtins.float
-    artworkHeight: builtins.float
-    includeLyrics: builtins.bool
-    includeSections: builtins.bool
-    includeInfo: builtins.bool
-    includeLanguageOptions: builtins.bool
-    requestID: builtins.str
-    returnContentItemAssetsInUserCompletion: builtins.bool
-    cachingPolicy: builtins.int
-    label: builtins.str
-    isLegacyNowPlayingInfoRequest: builtins.bool
-    @property
-    def context(self) -> pyatv.protocols.mrp.protobuf.PlaybackQueueContext_pb2.PlaybackQueueContext: ...
-    @property
-    def contentItemIdentifiers(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]: ...
-    @property
-    def playerPath(self) -> pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath: ...
+@_typing.final
+class PlaybackQueueRequestMessage(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    LOCATION_FIELD_NUMBER: _builtins.int
+    LENGTH_FIELD_NUMBER: _builtins.int
+    INCLUDEMETADATA_FIELD_NUMBER: _builtins.int
+    ARTWORKWIDTH_FIELD_NUMBER: _builtins.int
+    ARTWORKHEIGHT_FIELD_NUMBER: _builtins.int
+    INCLUDELYRICS_FIELD_NUMBER: _builtins.int
+    INCLUDESECTIONS_FIELD_NUMBER: _builtins.int
+    INCLUDEINFO_FIELD_NUMBER: _builtins.int
+    INCLUDELANGUAGEOPTIONS_FIELD_NUMBER: _builtins.int
+    CONTEXT_FIELD_NUMBER: _builtins.int
+    REQUESTID_FIELD_NUMBER: _builtins.int
+    CONTENTITEMIDENTIFIERS_FIELD_NUMBER: _builtins.int
+    RETURNCONTENTITEMASSETSINUSERCOMPLETION_FIELD_NUMBER: _builtins.int
+    PLAYERPATH_FIELD_NUMBER: _builtins.int
+    CACHINGPOLICY_FIELD_NUMBER: _builtins.int
+    LABEL_FIELD_NUMBER: _builtins.int
+    ISLEGACYNOWPLAYINGINFOREQUEST_FIELD_NUMBER: _builtins.int
+    location: _builtins.int
+    length: _builtins.int
+    includeMetadata: _builtins.bool
+    artworkWidth: _builtins.float
+    artworkHeight: _builtins.float
+    includeLyrics: _builtins.bool
+    includeSections: _builtins.bool
+    includeInfo: _builtins.bool
+    includeLanguageOptions: _builtins.bool
+    requestID: _builtins.str
+    returnContentItemAssetsInUserCompletion: _builtins.bool
+    cachingPolicy: _builtins.int
+    label: _builtins.str
+    isLegacyNowPlayingInfoRequest: _builtins.bool
+    @_builtins.property
+    def context(self) -> _PlaybackQueueContext_pb2.PlaybackQueueContext: ...
+    @_builtins.property
+    def contentItemIdentifiers(self) -> _containers.RepeatedScalarFieldContainer[_builtins.str]: ...
+    @_builtins.property
+    def playerPath(self) -> _PlayerPath_pb2.PlayerPath: ...
     def __init__(
         self,
         *,
-        location: builtins.int | None = ...,
-        length: builtins.int | None = ...,
-        includeMetadata: builtins.bool | None = ...,
-        artworkWidth: builtins.float | None = ...,
-        artworkHeight: builtins.float | None = ...,
-        includeLyrics: builtins.bool | None = ...,
-        includeSections: builtins.bool | None = ...,
-        includeInfo: builtins.bool | None = ...,
-        includeLanguageOptions: builtins.bool | None = ...,
-        context: pyatv.protocols.mrp.protobuf.PlaybackQueueContext_pb2.PlaybackQueueContext | None = ...,
-        requestID: builtins.str | None = ...,
-        contentItemIdentifiers: collections.abc.Iterable[builtins.str] | None = ...,
-        returnContentItemAssetsInUserCompletion: builtins.bool | None = ...,
-        playerPath: pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath | None = ...,
-        cachingPolicy: builtins.int | None = ...,
-        label: builtins.str | None = ...,
-        isLegacyNowPlayingInfoRequest: builtins.bool | None = ...,
+        location: _builtins.int | None = ...,
+        length: _builtins.int | None = ...,
+        includeMetadata: _builtins.bool | None = ...,
+        artworkWidth: _builtins.float | None = ...,
+        artworkHeight: _builtins.float | None = ...,
+        includeLyrics: _builtins.bool | None = ...,
+        includeSections: _builtins.bool | None = ...,
+        includeInfo: _builtins.bool | None = ...,
+        includeLanguageOptions: _builtins.bool | None = ...,
+        context: _PlaybackQueueContext_pb2.PlaybackQueueContext | None = ...,
+        requestID: _builtins.str | None = ...,
+        contentItemIdentifiers: _abc.Iterable[_builtins.str] | None = ...,
+        returnContentItemAssetsInUserCompletion: _builtins.bool | None = ...,
+        playerPath: _PlayerPath_pb2.PlayerPath | None = ...,
+        cachingPolicy: _builtins.int | None = ...,
+        label: _builtins.str | None = ...,
+        isLegacyNowPlayingInfoRequest: _builtins.bool | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["artworkHeight", b"artworkHeight", "artworkWidth", b"artworkWidth", "cachingPolicy", b"cachingPolicy", "context", b"context", "includeInfo", b"includeInfo", "includeLanguageOptions", b"includeLanguageOptions", "includeLyrics", b"includeLyrics", "includeMetadata", b"includeMetadata", "includeSections", b"includeSections", "isLegacyNowPlayingInfoRequest", b"isLegacyNowPlayingInfoRequest", "label", b"label", "length", b"length", "location", b"location", "playerPath", b"playerPath", "requestID", b"requestID", "returnContentItemAssetsInUserCompletion", b"returnContentItemAssetsInUserCompletion"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["artworkHeight", b"artworkHeight", "artworkWidth", b"artworkWidth", "cachingPolicy", b"cachingPolicy", "contentItemIdentifiers", b"contentItemIdentifiers", "context", b"context", "includeInfo", b"includeInfo", "includeLanguageOptions", b"includeLanguageOptions", "includeLyrics", b"includeLyrics", "includeMetadata", b"includeMetadata", "includeSections", b"includeSections", "isLegacyNowPlayingInfoRequest", b"isLegacyNowPlayingInfoRequest", "label", b"label", "length", b"length", "location", b"location", "playerPath", b"playerPath", "requestID", b"requestID", "returnContentItemAssetsInUserCompletion", b"returnContentItemAssetsInUserCompletion"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["artworkHeight", b"artworkHeight", "artworkWidth", b"artworkWidth", "cachingPolicy", b"cachingPolicy", "context", b"context", "includeInfo", b"includeInfo", "includeLanguageOptions", b"includeLanguageOptions", "includeLyrics", b"includeLyrics", "includeMetadata", b"includeMetadata", "includeSections", b"includeSections", "isLegacyNowPlayingInfoRequest", b"isLegacyNowPlayingInfoRequest", "label", b"label", "length", b"length", "location", b"location", "playerPath", b"playerPath", "requestID", b"requestID", "returnContentItemAssetsInUserCompletion", b"returnContentItemAssetsInUserCompletion"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["artworkHeight", b"artworkHeight", "artworkWidth", b"artworkWidth", "cachingPolicy", b"cachingPolicy", "contentItemIdentifiers", b"contentItemIdentifiers", "context", b"context", "includeInfo", b"includeInfo", "includeLanguageOptions", b"includeLanguageOptions", "includeLyrics", b"includeLyrics", "includeMetadata", b"includeMetadata", "includeSections", b"includeSections", "isLegacyNowPlayingInfoRequest", b"isLegacyNowPlayingInfoRequest", "label", b"label", "length", b"length", "location", b"location", "playerPath", b"playerPath", "requestID", b"requestID", "returnContentItemAssetsInUserCompletion", b"returnContentItemAssetsInUserCompletion"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___PlaybackQueueRequestMessage = PlaybackQueueRequestMessage
+Global___PlaybackQueueRequestMessage: _TypeAlias = PlaybackQueueRequestMessage  # noqa: Y015
 
-PLAYBACKQUEUEREQUESTMESSAGE_FIELD_NUMBER: builtins.int
-playbackQueueRequestMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___PlaybackQueueRequestMessage]
+PLAYBACKQUEUEREQUESTMESSAGE_FIELD_NUMBER: _builtins.int
+playbackQueueRequestMessage: _extension_dict._ExtensionFieldDescriptor[_ProtocolMessage_pb2.ProtocolMessage, Global___PlaybackQueueRequestMessage]

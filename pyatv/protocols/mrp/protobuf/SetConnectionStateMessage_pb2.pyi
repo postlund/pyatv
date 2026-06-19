@@ -3,32 +3,32 @@
 isort:skip_file
 """
 
-import builtins
-import google.protobuf.descriptor
-import google.protobuf.internal.enum_type_wrapper
-import google.protobuf.internal.extension_dict
-import google.protobuf.message
-import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import enum_type_wrapper as _enum_type_wrapper
+from google.protobuf.internal import extension_dict as _extension_dict
+from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as _ProtocolMessage_pb2
+import builtins as _builtins
 import sys
-import typing
+import typing as _typing
 
-if sys.version_info >= (3, 10):
-    import typing as typing_extensions
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
 else:
-    import typing_extensions
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-@typing.final
-class SetConnectionStateMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class SetConnectionStateMessage(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
     class _ConnectionState:
-        ValueType = typing.NewType("ValueType", builtins.int)
-        V: typing_extensions.TypeAlias = ValueType
+        ValueType = _typing.NewType("ValueType", _builtins.int)
+        V: _TypeAlias = ValueType  # noqa: Y015
 
-    class _ConnectionStateEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[SetConnectionStateMessage._ConnectionState.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    class _ConnectionStateEnumTypeWrapper(_enum_type_wrapper._EnumTypeWrapper[SetConnectionStateMessage._ConnectionState.ValueType], _builtins.type):
+        DESCRIPTOR: _descriptor.EnumDescriptor
         Connecting: SetConnectionStateMessage._ConnectionState.ValueType  # 1
         Connected: SetConnectionStateMessage._ConnectionState.ValueType  # 2
         Disconnected: SetConnectionStateMessage._ConnectionState.ValueType  # 3
@@ -38,17 +38,20 @@ class SetConnectionStateMessage(google.protobuf.message.Message):
     Connected: SetConnectionStateMessage.ConnectionState.ValueType  # 2
     Disconnected: SetConnectionStateMessage.ConnectionState.ValueType  # 3
 
-    STATE_FIELD_NUMBER: builtins.int
-    state: global___SetConnectionStateMessage.ConnectionState.ValueType
+    STATE_FIELD_NUMBER: _builtins.int
+    state: Global___SetConnectionStateMessage.ConnectionState.ValueType
     def __init__(
         self,
         *,
-        state: global___SetConnectionStateMessage.ConnectionState.ValueType | None = ...,
+        state: Global___SetConnectionStateMessage.ConnectionState.ValueType | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["state", b"state"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["state", b"state"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["state", b"state"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["state", b"state"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___SetConnectionStateMessage = SetConnectionStateMessage
+Global___SetConnectionStateMessage: _TypeAlias = SetConnectionStateMessage  # noqa: Y015
 
-SETCONNECTIONSTATEMESSAGE_FIELD_NUMBER: builtins.int
-setConnectionStateMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___SetConnectionStateMessage]
+SETCONNECTIONSTATEMESSAGE_FIELD_NUMBER: _builtins.int
+setConnectionStateMessage: _extension_dict._ExtensionFieldDescriptor[_ProtocolMessage_pb2.ProtocolMessage, Global___SetConnectionStateMessage]
