@@ -3,41 +3,50 @@
 isort:skip_file
 """
 
-import builtins
-import google.protobuf.descriptor
-import google.protobuf.internal.extension_dict
-import google.protobuf.message
-import pyatv.protocols.mrp.protobuf.CommandInfo_pb2
-import pyatv.protocols.mrp.protobuf.CommandOptions_pb2
-import pyatv.protocols.mrp.protobuf.PlayerPath_pb2
-import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import typing
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import extension_dict as _extension_dict
+from pyatv.protocols.mrp.protobuf import CommandInfo_pb2 as _CommandInfo_pb2
+from pyatv.protocols.mrp.protobuf import CommandOptions_pb2 as _CommandOptions_pb2
+from pyatv.protocols.mrp.protobuf import PlayerPath_pb2 as _PlayerPath_pb2
+from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as _ProtocolMessage_pb2
+import builtins as _builtins
+import sys
+import typing as _typing
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
+else:
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-@typing.final
-class SendCommandMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-    COMMAND_FIELD_NUMBER: builtins.int
-    OPTIONS_FIELD_NUMBER: builtins.int
-    PLAYERPATH_FIELD_NUMBER: builtins.int
-    command: pyatv.protocols.mrp.protobuf.CommandInfo_pb2.Command.ValueType
-    @property
-    def options(self) -> pyatv.protocols.mrp.protobuf.CommandOptions_pb2.CommandOptions: ...
-    @property
-    def playerPath(self) -> pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath: ...
+@_typing.final
+class SendCommandMessage(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    COMMAND_FIELD_NUMBER: _builtins.int
+    OPTIONS_FIELD_NUMBER: _builtins.int
+    PLAYERPATH_FIELD_NUMBER: _builtins.int
+    command: _CommandInfo_pb2.Command.ValueType
+    @_builtins.property
+    def options(self) -> _CommandOptions_pb2.CommandOptions: ...
+    @_builtins.property
+    def playerPath(self) -> _PlayerPath_pb2.PlayerPath: ...
     def __init__(
         self,
         *,
-        command: pyatv.protocols.mrp.protobuf.CommandInfo_pb2.Command.ValueType | None = ...,
-        options: pyatv.protocols.mrp.protobuf.CommandOptions_pb2.CommandOptions | None = ...,
-        playerPath: pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath | None = ...,
+        command: _CommandInfo_pb2.Command.ValueType | None = ...,
+        options: _CommandOptions_pb2.CommandOptions | None = ...,
+        playerPath: _PlayerPath_pb2.PlayerPath | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["command", b"command", "options", b"options", "playerPath", b"playerPath"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["command", b"command", "options", b"options", "playerPath", b"playerPath"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["command", b"command", "options", b"options", "playerPath", b"playerPath"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["command", b"command", "options", b"options", "playerPath", b"playerPath"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___SendCommandMessage = SendCommandMessage
+Global___SendCommandMessage: _TypeAlias = SendCommandMessage  # noqa: Y015
 
-SENDCOMMANDMESSAGE_FIELD_NUMBER: builtins.int
-sendCommandMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___SendCommandMessage]
+SENDCOMMANDMESSAGE_FIELD_NUMBER: _builtins.int
+sendCommandMessage: _extension_dict._ExtensionFieldDescriptor[_ProtocolMessage_pb2.ProtocolMessage, Global___SendCommandMessage]

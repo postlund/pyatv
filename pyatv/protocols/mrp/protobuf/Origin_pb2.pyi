@@ -3,31 +3,31 @@
 isort:skip_file
 """
 
-import builtins
-import google.protobuf.descriptor
-import google.protobuf.internal.enum_type_wrapper
-import google.protobuf.message
-import pyatv.protocols.mrp.protobuf.DeviceInfoMessage_pb2
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import enum_type_wrapper as _enum_type_wrapper
+from pyatv.protocols.mrp.protobuf import DeviceInfoMessage_pb2 as _DeviceInfoMessage_pb2
+import builtins as _builtins
 import sys
-import typing
+import typing as _typing
 
-if sys.version_info >= (3, 10):
-    import typing as typing_extensions
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
 else:
-    import typing_extensions
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-@typing.final
-class Origin(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class Origin(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
     class _Type:
-        ValueType = typing.NewType("ValueType", builtins.int)
-        V: typing_extensions.TypeAlias = ValueType
+        ValueType = _typing.NewType("ValueType", _builtins.int)
+        V: _TypeAlias = ValueType  # noqa: Y015
 
-    class _TypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[Origin._Type.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    class _TypeEnumTypeWrapper(_enum_type_wrapper._EnumTypeWrapper[Origin._Type.ValueType], _builtins.type):
+        DESCRIPTOR: _descriptor.EnumDescriptor
         Unknown: Origin._Type.ValueType  # 0
         Local: Origin._Type.ValueType  # 1
         Custom: Origin._Type.ValueType  # 2
@@ -37,27 +37,30 @@ class Origin(google.protobuf.message.Message):
     Local: Origin.Type.ValueType  # 1
     Custom: Origin.Type.ValueType  # 2
 
-    TYPE_FIELD_NUMBER: builtins.int
-    DISPLAYNAME_FIELD_NUMBER: builtins.int
-    IDENTIFIER_FIELD_NUMBER: builtins.int
-    DEVICEINFO_FIELD_NUMBER: builtins.int
-    ISLOCALLYHOSTED_FIELD_NUMBER: builtins.int
-    type: global___Origin.Type.ValueType
-    displayName: builtins.str
-    identifier: builtins.int
-    isLocallyHosted: builtins.bool
-    @property
-    def deviceInfo(self) -> pyatv.protocols.mrp.protobuf.DeviceInfoMessage_pb2.DeviceInfoMessage: ...
+    TYPE_FIELD_NUMBER: _builtins.int
+    DISPLAYNAME_FIELD_NUMBER: _builtins.int
+    IDENTIFIER_FIELD_NUMBER: _builtins.int
+    DEVICEINFO_FIELD_NUMBER: _builtins.int
+    ISLOCALLYHOSTED_FIELD_NUMBER: _builtins.int
+    type: Global___Origin.Type.ValueType
+    displayName: _builtins.str
+    identifier: _builtins.int
+    isLocallyHosted: _builtins.bool
+    @_builtins.property
+    def deviceInfo(self) -> _DeviceInfoMessage_pb2.DeviceInfoMessage: ...
     def __init__(
         self,
         *,
-        type: global___Origin.Type.ValueType | None = ...,
-        displayName: builtins.str | None = ...,
-        identifier: builtins.int | None = ...,
-        deviceInfo: pyatv.protocols.mrp.protobuf.DeviceInfoMessage_pb2.DeviceInfoMessage | None = ...,
-        isLocallyHosted: builtins.bool | None = ...,
+        type: Global___Origin.Type.ValueType | None = ...,
+        displayName: _builtins.str | None = ...,
+        identifier: _builtins.int | None = ...,
+        deviceInfo: _DeviceInfoMessage_pb2.DeviceInfoMessage | None = ...,
+        isLocallyHosted: _builtins.bool | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["deviceInfo", b"deviceInfo", "displayName", b"displayName", "identifier", b"identifier", "isLocallyHosted", b"isLocallyHosted", "type", b"type"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["deviceInfo", b"deviceInfo", "displayName", b"displayName", "identifier", b"identifier", "isLocallyHosted", b"isLocallyHosted", "type", b"type"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["deviceInfo", b"deviceInfo", "displayName", b"displayName", "identifier", b"identifier", "isLocallyHosted", b"isLocallyHosted", "type", b"type"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["deviceInfo", b"deviceInfo", "displayName", b"displayName", "identifier", b"identifier", "isLocallyHosted", b"isLocallyHosted", "type", b"type"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___Origin = Origin
+Global___Origin: _TypeAlias = Origin  # noqa: Y015

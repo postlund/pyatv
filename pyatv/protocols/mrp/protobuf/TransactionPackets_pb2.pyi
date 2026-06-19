@@ -3,28 +3,38 @@
 isort:skip_file
 """
 
-import builtins
-import collections.abc
-import google.protobuf.descriptor
-import google.protobuf.internal.containers
-import google.protobuf.message
-import pyatv.protocols.mrp.protobuf.TransactionPacket_pb2
-import typing
+from collections import abc as _abc
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import containers as _containers
+from pyatv.protocols.mrp.protobuf import TransactionPacket_pb2 as _TransactionPacket_pb2
+import builtins as _builtins
+import sys
+import typing as _typing
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
+else:
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-@typing.final
-class TransactionPackets(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-    PACKETS_FIELD_NUMBER: builtins.int
-    @property
-    def packets(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[pyatv.protocols.mrp.protobuf.TransactionPacket_pb2.TransactionPacket]: ...
+@_typing.final
+class TransactionPackets(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    PACKETS_FIELD_NUMBER: _builtins.int
+    @_builtins.property
+    def packets(self) -> _containers.RepeatedCompositeFieldContainer[_TransactionPacket_pb2.TransactionPacket]: ...
     def __init__(
         self,
         *,
-        packets: collections.abc.Iterable[pyatv.protocols.mrp.protobuf.TransactionPacket_pb2.TransactionPacket] | None = ...,
+        packets: _abc.Iterable[_TransactionPacket_pb2.TransactionPacket] | None = ...,
     ) -> None: ...
-    def ClearField(self, field_name: typing.Literal["packets", b"packets"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["packets", b"packets"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___TransactionPackets = TransactionPackets
+Global___TransactionPackets: _TypeAlias = TransactionPackets  # noqa: Y015

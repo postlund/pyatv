@@ -3,33 +3,42 @@
 isort:skip_file
 """
 
-import builtins
-import google.protobuf.descriptor
-import google.protobuf.internal.extension_dict
-import google.protobuf.message
-import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import typing
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import extension_dict as _extension_dict
+from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as _ProtocolMessage_pb2
+import builtins as _builtins
+import sys
+import typing as _typing
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
+else:
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-@typing.final
-class RegisterVoiceInputDeviceResponseMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-    DEVICEID_FIELD_NUMBER: builtins.int
-    ERRORCODE_FIELD_NUMBER: builtins.int
-    deviceID: builtins.int
-    errorCode: builtins.int
+@_typing.final
+class RegisterVoiceInputDeviceResponseMessage(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    DEVICEID_FIELD_NUMBER: _builtins.int
+    ERRORCODE_FIELD_NUMBER: _builtins.int
+    deviceID: _builtins.int
+    errorCode: _builtins.int
     def __init__(
         self,
         *,
-        deviceID: builtins.int | None = ...,
-        errorCode: builtins.int | None = ...,
+        deviceID: _builtins.int | None = ...,
+        errorCode: _builtins.int | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["deviceID", b"deviceID", "errorCode", b"errorCode"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["deviceID", b"deviceID", "errorCode", b"errorCode"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["deviceID", b"deviceID", "errorCode", b"errorCode"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["deviceID", b"deviceID", "errorCode", b"errorCode"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___RegisterVoiceInputDeviceResponseMessage = RegisterVoiceInputDeviceResponseMessage
+Global___RegisterVoiceInputDeviceResponseMessage: _TypeAlias = RegisterVoiceInputDeviceResponseMessage  # noqa: Y015
 
-REGISTERVOICEINPUTDEVICERESPONSEMESSAGE_FIELD_NUMBER: builtins.int
-registerVoiceInputDeviceResponseMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___RegisterVoiceInputDeviceResponseMessage]
+REGISTERVOICEINPUTDEVICERESPONSEMESSAGE_FIELD_NUMBER: _builtins.int
+registerVoiceInputDeviceResponseMessage: _extension_dict._ExtensionFieldDescriptor[_ProtocolMessage_pb2.ProtocolMessage, Global___RegisterVoiceInputDeviceResponseMessage]
