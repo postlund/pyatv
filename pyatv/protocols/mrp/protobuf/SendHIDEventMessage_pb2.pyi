@@ -3,21 +3,27 @@
 isort:skip_file
 """
 
-import builtins
-import google.protobuf.descriptor
-import google.protobuf.internal.extension_dict
-import google.protobuf.message
-import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import typing
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import extension_dict as _extension_dict
+from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as _ProtocolMessage_pb2
+import builtins as _builtins
+import sys
+import typing as _typing
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
+else:
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-@typing.final
-class SendHIDEventMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-    HIDEVENTDATA_FIELD_NUMBER: builtins.int
-    hidEventData: builtins.bytes
+@_typing.final
+class SendHIDEventMessage(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    HIDEVENTDATA_FIELD_NUMBER: _builtins.int
+    hidEventData: _builtins.bytes
     """This data corresponds to a "keyboardEvent" in IOHIDEvent.h encoded as raw
     data. Here is one source:
 
@@ -52,12 +58,15 @@ class SendHIDEventMessage(google.protobuf.message.Message):
     def __init__(
         self,
         *,
-        hidEventData: builtins.bytes | None = ...,
+        hidEventData: _builtins.bytes | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["hidEventData", b"hidEventData"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["hidEventData", b"hidEventData"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["hidEventData", b"hidEventData"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["hidEventData", b"hidEventData"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___SendHIDEventMessage = SendHIDEventMessage
+Global___SendHIDEventMessage: _TypeAlias = SendHIDEventMessage  # noqa: Y015
 
-SENDHIDEVENTMESSAGE_FIELD_NUMBER: builtins.int
-sendHIDEventMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___SendHIDEventMessage]
+SENDHIDEVENTMESSAGE_FIELD_NUMBER: _builtins.int
+sendHIDEventMessage: _extension_dict._ExtensionFieldDescriptor[_ProtocolMessage_pb2.ProtocolMessage, Global___SendHIDEventMessage]

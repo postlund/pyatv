@@ -23,14 +23,15 @@ pytestmark = pytest.mark.asyncio
 
 async def volume_controls_changed(protocol, device_uid, controls_available):
     message = messages.create(protobuf.VOLUME_CONTROL_CAPABILITIES_DID_CHANGE_MESSAGE)
-    message.inner().outputDeviceUID = device_uid
-    message.inner().capabilities.volumeControlAvailable = controls_available
+    inner = protobuf.extract_inner(message)
+    inner.outputDeviceUID = device_uid
+    inner.capabilities.volumeControlAvailable = controls_available
     await protocol.inject(message)
 
 
 async def grouped_devices_changed(protocol, is_leader, is_proxy, grouped_devices):
     message = messages.create(protobuf.DEVICE_INFO_UPDATE_MESSAGE)
-    inner = message.inner()
+    inner = protobuf.extract_inner(message)
     inner.name = DEVICE_NAME
     inner.uniqueIdentifier = DEVICE_UID
     inner.isGroupLeader = True
@@ -53,7 +54,7 @@ def audio_fixture(protocol_mock, mrp_state_dispatcher):
     info.name = "test"
 
     device_info = messages.device_information(info, "id")
-    device_info.inner().deviceUID = DEVICE_UID
+    protobuf.extract_inner(device_info).deviceUID = DEVICE_UID
     protocol_mock.device_info = device_info
     yield MrpAudio(protocol_mock, mrp_state_dispatcher)
 
@@ -99,8 +100,9 @@ async def test_audio_volume_did_change(
     assert math.isclose(audio.volume, 0.0)
 
     message = messages.create(protobuf.VOLUME_DID_CHANGE_MESSAGE)
-    message.inner().outputDeviceUID = device_uid
-    message.inner().volume = volume
+    inner = protobuf.extract_inner(message)
+    inner.outputDeviceUID = device_uid
+    inner.volume = volume
     await protocol_mock.inject(message)
 
     assert math.isclose(audio.volume, expected_volume)
@@ -131,8 +133,9 @@ async def test_audio_volume_did_change_dispatches(
     mrp_state_dispatcher.listen_to(UpdatedState.Volume, callback)
 
     message = messages.create(protobuf.VOLUME_DID_CHANGE_MESSAGE)
-    message.inner().outputDeviceUID = device_uid
-    message.inner().volume = volume
+    inner = protobuf.extract_inner(message)
+    inner.outputDeviceUID = device_uid
+    inner.volume = volume
     await protocol_mock.inject(message)
 
     assert callback.called == expect_called
@@ -151,8 +154,9 @@ async def test_audio_set_volume(protocol_mock, audio):
 
     message = protocol_mock.sent_messages.pop()
     assert message.type == protobuf.SET_VOLUME_MESSAGE
-    assert message.inner().outputDeviceUID == DEVICE_UID
-    assert math.isclose(message.inner().volume, 0.0, rel_tol=1e-02)
+    inner = protobuf.extract_inner(message)
+    assert inner.outputDeviceUID == DEVICE_UID
+    assert math.isclose(inner.volume, 0.0, rel_tol=1e-02)
 
 
 async def test_audio_set_volume_no_output_device(protocol_mock, audio):
@@ -270,18 +274,19 @@ async def test_audio_add_output_devices(protocol_mock, audio):
 
     message = protocol_mock.sent_messages.pop()
     assert message.type == protobuf.MODIFY_OUTPUT_CONTEXT_REQUEST_MESSAGE
-    assert message.inner().addingDevices == [
+    inner = protobuf.extract_inner(message)
+    assert inner.addingDevices == [
         "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE",
         "FF:GG:HH:II:JJ:KK",
     ]
-    assert message.inner().removingDevices == []
-    assert message.inner().settingDevices == []
-    assert message.inner().clusterAwareAddingDevices == [
+    assert inner.removingDevices == []
+    assert inner.settingDevices == []
+    assert inner.clusterAwareAddingDevices == [
         "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE",
         "FF:GG:HH:II:JJ:KK",
     ]
-    assert message.inner().clusterAwareRemovingDevices == []
-    assert message.inner().clusterAwareSettingDevices == []
+    assert inner.clusterAwareRemovingDevices == []
+    assert inner.clusterAwareSettingDevices == []
 
 
 async def test_audio_remove_output_devices(protocol_mock, audio):
@@ -295,18 +300,19 @@ async def test_audio_remove_output_devices(protocol_mock, audio):
 
     message = protocol_mock.sent_messages.pop()
     assert message.type == protobuf.MODIFY_OUTPUT_CONTEXT_REQUEST_MESSAGE
-    assert message.inner().addingDevices == []
-    assert message.inner().removingDevices == [
+    inner = protobuf.extract_inner(message)
+    assert inner.addingDevices == []
+    assert inner.removingDevices == [
         "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE",
         "FF:GG:HH:II:JJ:KK",
     ]
-    assert message.inner().settingDevices == []
-    assert message.inner().clusterAwareAddingDevices == []
-    assert message.inner().clusterAwareRemovingDevices == [
+    assert inner.settingDevices == []
+    assert inner.clusterAwareAddingDevices == []
+    assert inner.clusterAwareRemovingDevices == [
         "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE",
         "FF:GG:HH:II:JJ:KK",
     ]
-    assert message.inner().clusterAwareSettingDevices == []
+    assert inner.clusterAwareSettingDevices == []
 
 
 async def test_audio_set_output_devices(protocol_mock, audio):
@@ -320,15 +326,16 @@ async def test_audio_set_output_devices(protocol_mock, audio):
 
     message = protocol_mock.sent_messages.pop()
     assert message.type == protobuf.MODIFY_OUTPUT_CONTEXT_REQUEST_MESSAGE
-    assert message.inner().addingDevices == []
-    assert message.inner().removingDevices == []
-    assert message.inner().settingDevices == [
+    inner = protobuf.extract_inner(message)
+    assert inner.addingDevices == []
+    assert inner.removingDevices == []
+    assert inner.settingDevices == [
         "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE",
         "FF:GG:HH:II:JJ:KK",
     ]
-    assert message.inner().clusterAwareAddingDevices == []
-    assert message.inner().clusterAwareRemovingDevices == []
-    assert message.inner().clusterAwareSettingDevices == [
+    assert inner.clusterAwareAddingDevices == []
+    assert inner.clusterAwareRemovingDevices == []
+    assert inner.clusterAwareSettingDevices == [
         "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE",
         "FF:GG:HH:II:JJ:KK",
     ]

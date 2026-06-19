@@ -3,34 +3,34 @@
 isort:skip_file
 """
 
-import builtins
-import collections.abc
-import google.protobuf.descriptor
-import google.protobuf.internal.containers
-import google.protobuf.internal.enum_type_wrapper
-import google.protobuf.internal.extension_dict
-import google.protobuf.message
-import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
+from collections import abc as _abc
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import containers as _containers
+from google.protobuf.internal import enum_type_wrapper as _enum_type_wrapper
+from google.protobuf.internal import extension_dict as _extension_dict
+from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as _ProtocolMessage_pb2
+import builtins as _builtins
 import sys
-import typing
+import typing as _typing
 
-if sys.version_info >= (3, 10):
-    import typing as typing_extensions
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
 else:
-    import typing_extensions
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-@typing.final
-class ModifyOutputContextRequestType(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class ModifyOutputContextRequestType(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
     class _Enum:
-        ValueType = typing.NewType("ValueType", builtins.int)
-        V: typing_extensions.TypeAlias = ValueType
+        ValueType = _typing.NewType("ValueType", _builtins.int)
+        V: _TypeAlias = ValueType  # noqa: Y015
 
-    class _EnumEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[ModifyOutputContextRequestType._Enum.ValueType], builtins.type):
-        DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    class _EnumEnumTypeWrapper(_enum_type_wrapper._EnumTypeWrapper[ModifyOutputContextRequestType._Enum.ValueType], _builtins.type):
+        DESCRIPTOR: _descriptor.EnumDescriptor
         SharedAudioPresentation: ModifyOutputContextRequestType._Enum.ValueType  # 1
 
     class Enum(_Enum, metaclass=_EnumEnumTypeWrapper): ...
@@ -39,48 +39,56 @@ class ModifyOutputContextRequestType(google.protobuf.message.Message):
     def __init__(
         self,
     ) -> None: ...
+    _HasFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _Never  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___ModifyOutputContextRequestType = ModifyOutputContextRequestType
+Global___ModifyOutputContextRequestType: _TypeAlias = ModifyOutputContextRequestType  # noqa: Y015
 
-@typing.final
-class ModifyOutputContextRequestMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+@_typing.final
+class ModifyOutputContextRequestMessage(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
 
-    TYPE_FIELD_NUMBER: builtins.int
-    ADDINGDEVICES_FIELD_NUMBER: builtins.int
-    REMOVINGDEVICES_FIELD_NUMBER: builtins.int
-    SETTINGDEVICES_FIELD_NUMBER: builtins.int
-    CLUSTERAWAREADDINGDEVICES_FIELD_NUMBER: builtins.int
-    CLUSTERAWAREREMOVINGDEVICES_FIELD_NUMBER: builtins.int
-    CLUSTERAWARESETTINGDEVICES_FIELD_NUMBER: builtins.int
-    type: global___ModifyOutputContextRequestType.Enum.ValueType
-    @property
-    def addingDevices(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]: ...
-    @property
-    def removingDevices(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]: ...
-    @property
-    def settingDevices(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]: ...
-    @property
-    def clusterAwareAddingDevices(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]: ...
-    @property
-    def clusterAwareRemovingDevices(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]: ...
-    @property
-    def clusterAwareSettingDevices(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]: ...
+    TYPE_FIELD_NUMBER: _builtins.int
+    ADDINGDEVICES_FIELD_NUMBER: _builtins.int
+    REMOVINGDEVICES_FIELD_NUMBER: _builtins.int
+    SETTINGDEVICES_FIELD_NUMBER: _builtins.int
+    CLUSTERAWAREADDINGDEVICES_FIELD_NUMBER: _builtins.int
+    CLUSTERAWAREREMOVINGDEVICES_FIELD_NUMBER: _builtins.int
+    CLUSTERAWARESETTINGDEVICES_FIELD_NUMBER: _builtins.int
+    type: Global___ModifyOutputContextRequestType.Enum.ValueType
+    @_builtins.property
+    def addingDevices(self) -> _containers.RepeatedScalarFieldContainer[_builtins.str]: ...
+    @_builtins.property
+    def removingDevices(self) -> _containers.RepeatedScalarFieldContainer[_builtins.str]: ...
+    @_builtins.property
+    def settingDevices(self) -> _containers.RepeatedScalarFieldContainer[_builtins.str]: ...
+    @_builtins.property
+    def clusterAwareAddingDevices(self) -> _containers.RepeatedScalarFieldContainer[_builtins.str]: ...
+    @_builtins.property
+    def clusterAwareRemovingDevices(self) -> _containers.RepeatedScalarFieldContainer[_builtins.str]: ...
+    @_builtins.property
+    def clusterAwareSettingDevices(self) -> _containers.RepeatedScalarFieldContainer[_builtins.str]: ...
     def __init__(
         self,
         *,
-        type: global___ModifyOutputContextRequestType.Enum.ValueType | None = ...,
-        addingDevices: collections.abc.Iterable[builtins.str] | None = ...,
-        removingDevices: collections.abc.Iterable[builtins.str] | None = ...,
-        settingDevices: collections.abc.Iterable[builtins.str] | None = ...,
-        clusterAwareAddingDevices: collections.abc.Iterable[builtins.str] | None = ...,
-        clusterAwareRemovingDevices: collections.abc.Iterable[builtins.str] | None = ...,
-        clusterAwareSettingDevices: collections.abc.Iterable[builtins.str] | None = ...,
+        type: Global___ModifyOutputContextRequestType.Enum.ValueType | None = ...,
+        addingDevices: _abc.Iterable[_builtins.str] | None = ...,
+        removingDevices: _abc.Iterable[_builtins.str] | None = ...,
+        settingDevices: _abc.Iterable[_builtins.str] | None = ...,
+        clusterAwareAddingDevices: _abc.Iterable[_builtins.str] | None = ...,
+        clusterAwareRemovingDevices: _abc.Iterable[_builtins.str] | None = ...,
+        clusterAwareSettingDevices: _abc.Iterable[_builtins.str] | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["type", b"type"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["addingDevices", b"addingDevices", "clusterAwareAddingDevices", b"clusterAwareAddingDevices", "clusterAwareRemovingDevices", b"clusterAwareRemovingDevices", "clusterAwareSettingDevices", b"clusterAwareSettingDevices", "removingDevices", b"removingDevices", "settingDevices", b"settingDevices", "type", b"type"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["type", b"type"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["addingDevices", b"addingDevices", "clusterAwareAddingDevices", b"clusterAwareAddingDevices", "clusterAwareRemovingDevices", b"clusterAwareRemovingDevices", "clusterAwareSettingDevices", b"clusterAwareSettingDevices", "removingDevices", b"removingDevices", "settingDevices", b"settingDevices", "type", b"type"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___ModifyOutputContextRequestMessage = ModifyOutputContextRequestMessage
+Global___ModifyOutputContextRequestMessage: _TypeAlias = ModifyOutputContextRequestMessage  # noqa: Y015
 
-MODIFYOUTPUTCONTEXTREQUESTMESSAGE_FIELD_NUMBER: builtins.int
-modifyOutputContextRequestMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___ModifyOutputContextRequestMessage]
+MODIFYOUTPUTCONTEXTREQUESTMESSAGE_FIELD_NUMBER: _builtins.int
+modifyOutputContextRequestMessage: _extension_dict._ExtensionFieldDescriptor[_ProtocolMessage_pb2.ProtocolMessage, Global___ModifyOutputContextRequestMessage]

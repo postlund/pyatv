@@ -205,9 +205,9 @@ class MrpAppleTVProxy(MrpServerAuth, asyncio.Protocol):
 
             try:
                 if message.type == protobuf.DEVICE_INFO_MESSAGE:
-                    self.handle_device_info(message, message.inner())
+                    self.handle_device_info(message, protobuf.extract_inner(message))
                 elif message.type == protobuf.CRYPTO_PAIRING_MESSAGE:
-                    self.handle_crypto_pairing(message, message.inner())
+                    self.handle_crypto_pairing(message, protobuf.extract_inner(message))
                 else:
                     self.connection.send_raw(data)
             except Exception:  # pylint: disable=broad-except
@@ -793,7 +793,7 @@ class AirPlayDataStreamChannelAppleTVProxy(
         self, message: protobuf.ProtocolMessage
     ) -> Optional[protobuf.ProtocolMessage]:
         if message.type == protobuf.DEVICE_INFO_MESSAGE:
-            inner = cast(protobuf.DeviceInfoMessage, message.inner())
+            inner = cast(protobuf.DeviceInfoMessage, protobuf.extract_inner(message))
             inner.uniqueIdentifier = shift_hex_identifier(inner.uniqueIdentifier)
             if inner.deviceUID:
                 inner.deviceUID = shift_hex_identifier(inner.deviceUID)
@@ -814,16 +814,18 @@ class AirPlayDataStreamChannelAppleTVProxy(
             return message
 
         if message.type == protobuf.SET_VOLUME_MESSAGE:
-            inner = cast(protobuf.SetVolumeMessage, message.inner())
-            if inner.outputDeviceUID == SERVER_IDENTIFIER:
-                inner.outputDeviceUID = self.target_identifier
+            svm = cast(protobuf.SetVolumeMessage, protobuf.extract_inner(message))
+            if svm.outputDeviceUID == SERVER_IDENTIFIER:
+                svm.outputDeviceUID = self.target_identifier
                 return message
 
         if message.type == protobuf.CONFIGURE_CONNECTION_MESSAGE:
             # iOS doesn't like the rewritten airplay group id and sends this
             # message, but sending it on causes issues with the connection.
-            inner = cast(protobuf.ConfigureConnectionMessage, message.inner())
-            if inner.groupID:
+            ccm = cast(
+                protobuf.ConfigureConnectionMessage, protobuf.extract_inner(message)
+            )
+            if ccm.groupID:
                 raise self.IgnoreMessage
 
         return None
@@ -836,7 +838,7 @@ class AirPlayDataStreamChannelAppleTVProxy(
             protobuf.DEVICE_INFO_MESSAGE,
             protobuf.DEVICE_INFO_UPDATE_MESSAGE,
         }:
-            inner = cast(protobuf.DeviceInfoMessage, message.inner())
+            inner = cast(protobuf.DeviceInfoMessage, protobuf.extract_inner(message))
             inner.uniqueIdentifier = SERVER_IDENTIFIER
             inner.name = DEVICE_NAME
             if inner.deviceUID:
@@ -866,56 +868,71 @@ class AirPlayDataStreamChannelAppleTVProxy(
             return message
 
         if message.type == protobuf.UPDATE_OUTPUT_DEVICE_MESSAGE:
-            inner = cast(protobuf.UpdateOutputDeviceMessage, message.inner())
-            for device in list(inner.outputDevices) + list(
-                inner.clusterAwareOutputDevices
+            uodm = cast(
+                protobuf.UpdateOutputDeviceMessage, protobuf.extract_inner(message)
+            )
+            for ouput_device in list(uodm.outputDevices) + list(
+                uodm.clusterAwareOutputDevices
             ):
-                if device.uniqueIdentifier == self.target_identifier:
-                    device.uniqueIdentifier = SERVER_IDENTIFIER
-                    device.name = DEVICE_NAME
-                    if device.bluetoothID and device.bluetoothID != "00:00:00:00:00:00":
-                        device.bluetoothID = BLUETOOTH_ADDRESS
-                    if device.primaryUID:
-                        device.primaryUID = SERVER_IDENTIFIER
-                    if device.sourceInfo and device.sourceInfo.routingContextUID:
-                        device.sourceInfo.routingContextUID = shift_hex_identifier(
-                            device.sourceInfo.routingContextUID
+                if ouput_device.uniqueIdentifier == self.target_identifier:
+                    ouput_device.uniqueIdentifier = SERVER_IDENTIFIER
+                    ouput_device.name = DEVICE_NAME
+                    if (
+                        ouput_device.bluetoothID
+                        and ouput_device.bluetoothID != "00:00:00:00:00:00"
+                    ):
+                        ouput_device.bluetoothID = BLUETOOTH_ADDRESS
+                    if ouput_device.primaryUID:
+                        ouput_device.primaryUID = SERVER_IDENTIFIER
+                    if (
+                        ouput_device.sourceInfo
+                        and ouput_device.sourceInfo.routingContextUID
+                    ):
+                        ouput_device.sourceInfo.routingContextUID = (
+                            shift_hex_identifier(
+                                ouput_device.sourceInfo.routingContextUID
+                            )
                         )
-                if device.groupID and device.groupID == self.target_group:
-                    device.groupID = shift_hex_identifier(device.groupID)
+                if ouput_device.groupID and ouput_device.groupID == self.target_group:
+                    ouput_device.groupID = shift_hex_identifier(ouput_device.groupID)
                 if (
-                    device.parentGroupIdentifier
-                    and device.parentGroupIdentifier == self.target_group
+                    ouput_device.parentGroupIdentifier
+                    and ouput_device.parentGroupIdentifier == self.target_group
                 ):
-                    device.parentGroupIdentifier = shift_hex_identifier(
-                        device.parentGroupIdentifier
+                    ouput_device.parentGroupIdentifier = shift_hex_identifier(
+                        ouput_device.parentGroupIdentifier
                     )
-                if device.airPlayGroupID and device.airPlayGroupID == self.target_group:
-                    device.airPlayGroupID = shift_hex_identifier(device.airPlayGroupID)
+                if (
+                    ouput_device.airPlayGroupID
+                    and ouput_device.airPlayGroupID == self.target_group
+                ):
+                    ouput_device.airPlayGroupID = shift_hex_identifier(
+                        ouput_device.airPlayGroupID
+                    )
             return message
 
         if message.type == protobuf.VOLUME_CONTROL_CAPABILITIES_DID_CHANGE_MESSAGE:
-            inner = cast(
-                protobuf.VolumeControlCapabilitiesDidChangeMessage, message.inner()
+            vccdcm = cast(
+                protobuf.VolumeControlCapabilitiesDidChangeMessage,
+                protobuf.extract_inner(message),
             )
             if (
-                inner.outputDeviceUID
-                and inner.outputDeviceUID == self.target_identifier
+                vccdcm.outputDeviceUID
+                and vccdcm.outputDeviceUID == self.target_identifier
             ):
-                inner.outputDeviceUID = SERVER_IDENTIFIER
-            if inner.endpointUID and inner.endpointUID == self.target_group:
-                inner.endpointUID = shift_hex_identifier(inner.endpointUID)
+                vccdcm.outputDeviceUID = SERVER_IDENTIFIER
+            if vccdcm.endpointUID and vccdcm.endpointUID == self.target_group:
+                vccdcm.endpointUID = shift_hex_identifier(vccdcm.endpointUID)
             return message
 
         if message.type == protobuf.VOLUME_DID_CHANGE_MESSAGE:
-            inner = cast(protobuf.VolumeDidChangeMessage, message.inner())
-            if (
-                inner.outputDeviceUID
-                and inner.outputDeviceUID == self.target_identifier
-            ):
-                inner.outputDeviceUID = SERVER_IDENTIFIER
-            if inner.endpointUID and inner.endpointUID == self.target_group:
-                inner.endpointUID = shift_hex_identifier(inner.endpointUID)
+            vdcm = cast(
+                protobuf.VolumeDidChangeMessage, protobuf.extract_inner(message)
+            )
+            if vdcm.outputDeviceUID and vdcm.outputDeviceUID == self.target_identifier:
+                vdcm.outputDeviceUID = SERVER_IDENTIFIER
+            if vdcm.endpointUID and vdcm.endpointUID == self.target_group:
+                vdcm.endpointUID = shift_hex_identifier(vdcm.endpointUID)
             return message
 
         return None

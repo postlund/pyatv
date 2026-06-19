@@ -3,39 +3,48 @@
 isort:skip_file
 """
 
-import builtins
-import google.protobuf.descriptor
-import google.protobuf.message
-import pyatv.protocols.mrp.protobuf.TransactionKey_pb2
-import typing
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from pyatv.protocols.mrp.protobuf import TransactionKey_pb2 as _TransactionKey_pb2
+import builtins as _builtins
+import sys
+import typing as _typing
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
+else:
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-@typing.final
-class TransactionPacket(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-    KEY_FIELD_NUMBER: builtins.int
-    PACKETDATA_FIELD_NUMBER: builtins.int
-    IDENTIFIER_FIELD_NUMBER: builtins.int
-    TOTALLENGTH_FIELD_NUMBER: builtins.int
-    TOTALWRITEPOSITION_FIELD_NUMBER: builtins.int
-    packetData: builtins.bytes
-    identifier: builtins.str
-    totalLength: builtins.int
-    totalWritePosition: builtins.int
-    @property
-    def key(self) -> pyatv.protocols.mrp.protobuf.TransactionKey_pb2.TransactionKey: ...
+@_typing.final
+class TransactionPacket(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    KEY_FIELD_NUMBER: _builtins.int
+    PACKETDATA_FIELD_NUMBER: _builtins.int
+    IDENTIFIER_FIELD_NUMBER: _builtins.int
+    TOTALLENGTH_FIELD_NUMBER: _builtins.int
+    TOTALWRITEPOSITION_FIELD_NUMBER: _builtins.int
+    packetData: _builtins.bytes
+    identifier: _builtins.str
+    totalLength: _builtins.int
+    totalWritePosition: _builtins.int
+    @_builtins.property
+    def key(self) -> _TransactionKey_pb2.TransactionKey: ...
     def __init__(
         self,
         *,
-        key: pyatv.protocols.mrp.protobuf.TransactionKey_pb2.TransactionKey | None = ...,
-        packetData: builtins.bytes | None = ...,
-        identifier: builtins.str | None = ...,
-        totalLength: builtins.int | None = ...,
-        totalWritePosition: builtins.int | None = ...,
+        key: _TransactionKey_pb2.TransactionKey | None = ...,
+        packetData: _builtins.bytes | None = ...,
+        identifier: _builtins.str | None = ...,
+        totalLength: _builtins.int | None = ...,
+        totalWritePosition: _builtins.int | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["identifier", b"identifier", "key", b"key", "packetData", b"packetData", "totalLength", b"totalLength", "totalWritePosition", b"totalWritePosition"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["identifier", b"identifier", "key", b"key", "packetData", b"packetData", "totalLength", b"totalLength", "totalWritePosition", b"totalWritePosition"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["identifier", b"identifier", "key", b"key", "packetData", b"packetData", "totalLength", b"totalLength", "totalWritePosition", b"totalWritePosition"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["identifier", b"identifier", "key", b"key", "packetData", b"packetData", "totalLength", b"totalLength", "totalWritePosition", b"totalWritePosition"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___TransactionPacket = TransactionPacket
+Global___TransactionPacket: _TypeAlias = TransactionPacket  # noqa: Y015

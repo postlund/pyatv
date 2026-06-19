@@ -3,43 +3,52 @@
 isort:skip_file
 """
 
-import builtins
-import google.protobuf.descriptor
-import google.protobuf.message
-import typing
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+import builtins as _builtins
+import sys
+import typing as _typing
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
+else:
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-@typing.final
-class NowPlayingPlayer(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-    IDENTIFIER_FIELD_NUMBER: builtins.int
-    DISPLAYNAME_FIELD_NUMBER: builtins.int
-    ISDEFAULTPLAYER_FIELD_NUMBER: builtins.int
-    AUDIOSESSIONTYPE_FIELD_NUMBER: builtins.int
-    MXSESSIONIDS_FIELD_NUMBER: builtins.int
-    AUDIOSESSIONID_FIELD_NUMBER: builtins.int
-    ICONURL_FIELD_NUMBER: builtins.int
-    identifier: builtins.str
-    displayName: builtins.str
-    isDefaultPlayer: builtins.bool
-    audioSessionType: builtins.int
-    mxSessionIDs: builtins.int
-    audioSessionID: builtins.int
-    iconURL: builtins.str
+@_typing.final
+class NowPlayingPlayer(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    IDENTIFIER_FIELD_NUMBER: _builtins.int
+    DISPLAYNAME_FIELD_NUMBER: _builtins.int
+    ISDEFAULTPLAYER_FIELD_NUMBER: _builtins.int
+    AUDIOSESSIONTYPE_FIELD_NUMBER: _builtins.int
+    MXSESSIONIDS_FIELD_NUMBER: _builtins.int
+    AUDIOSESSIONID_FIELD_NUMBER: _builtins.int
+    ICONURL_FIELD_NUMBER: _builtins.int
+    identifier: _builtins.str
+    displayName: _builtins.str
+    isDefaultPlayer: _builtins.bool
+    audioSessionType: _builtins.int
+    mxSessionIDs: _builtins.int
+    audioSessionID: _builtins.int
+    iconURL: _builtins.str
     def __init__(
         self,
         *,
-        identifier: builtins.str | None = ...,
-        displayName: builtins.str | None = ...,
-        isDefaultPlayer: builtins.bool | None = ...,
-        audioSessionType: builtins.int | None = ...,
-        mxSessionIDs: builtins.int | None = ...,
-        audioSessionID: builtins.int | None = ...,
-        iconURL: builtins.str | None = ...,
+        identifier: _builtins.str | None = ...,
+        displayName: _builtins.str | None = ...,
+        isDefaultPlayer: _builtins.bool | None = ...,
+        audioSessionType: _builtins.int | None = ...,
+        mxSessionIDs: _builtins.int | None = ...,
+        audioSessionID: _builtins.int | None = ...,
+        iconURL: _builtins.str | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["audioSessionID", b"audioSessionID", "audioSessionType", b"audioSessionType", "displayName", b"displayName", "iconURL", b"iconURL", "identifier", b"identifier", "isDefaultPlayer", b"isDefaultPlayer", "mxSessionIDs", b"mxSessionIDs"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["audioSessionID", b"audioSessionID", "audioSessionType", b"audioSessionType", "displayName", b"displayName", "iconURL", b"iconURL", "identifier", b"identifier", "isDefaultPlayer", b"isDefaultPlayer", "mxSessionIDs", b"mxSessionIDs"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["audioSessionID", b"audioSessionID", "audioSessionType", b"audioSessionType", "displayName", b"displayName", "iconURL", b"iconURL", "identifier", b"identifier", "isDefaultPlayer", b"isDefaultPlayer", "mxSessionIDs", b"mxSessionIDs"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["audioSessionID", b"audioSessionID", "audioSessionType", b"audioSessionType", "displayName", b"displayName", "iconURL", b"iconURL", "identifier", b"identifier", "isDefaultPlayer", b"isDefaultPlayer", "mxSessionIDs", b"mxSessionIDs"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___NowPlayingPlayer = NowPlayingPlayer
+Global___NowPlayingPlayer: _TypeAlias = NowPlayingPlayer  # noqa: Y015

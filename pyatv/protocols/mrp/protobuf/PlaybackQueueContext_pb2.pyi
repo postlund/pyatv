@@ -3,25 +3,34 @@
 isort:skip_file
 """
 
-import builtins
-import google.protobuf.descriptor
-import google.protobuf.message
-import typing
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+import builtins as _builtins
+import sys
+import typing as _typing
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
+else:
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-@typing.final
-class PlaybackQueueContext(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-    REVISION_FIELD_NUMBER: builtins.int
-    revision: builtins.str
+@_typing.final
+class PlaybackQueueContext(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    REVISION_FIELD_NUMBER: _builtins.int
+    revision: _builtins.str
     def __init__(
         self,
         *,
-        revision: builtins.str | None = ...,
+        revision: _builtins.str | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["revision", b"revision"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["revision", b"revision"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["revision", b"revision"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["revision", b"revision"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___PlaybackQueueContext = PlaybackQueueContext
+Global___PlaybackQueueContext: _TypeAlias = PlaybackQueueContext  # noqa: Y015

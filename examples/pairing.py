@@ -12,6 +12,7 @@ LOOP = asyncio.get_event_loop()
 # Method that is dispatched by the asyncio event loop
 async def pair_with_device(loop):
     """Make it possible to pair with device."""
+    loop = asyncio.get_running_loop()
     atvs = await scan(loop, timeout=5, protocol=Protocol.AirPlay)
 
     if not atvs:

@@ -3,6 +3,8 @@
 THIS CODE IS AUTO-GENERATED - DO NOT EDIT!!!
 """
 
+from typing import Any
+
 from .ProtocolMessage_pb2 import ProtocolMessage
 
 
@@ -181,7 +183,7 @@ from .VolumeDidChangeMessage_pb2 import VolumeDidChangeMessage
 from .WakeDeviceMessage_pb2 import WakeDeviceMessage
 
 
-_EXTENSION_LOOKUP = {
+_EXTENSION_LOOKUP: dict[int, Any] = {
     ProtocolMessage.AUDIO_FADE_MESSAGE: AudioFadeMessage_pb2.audioFadeMessage,
     ProtocolMessage.AUDIO_FADE_RESPONSE_MESSAGE: AudioFadeResponseMessage_pb2.audioFadeResponseMessage,
     ProtocolMessage.CLIENT_UPDATES_CONFIG_MESSAGE: ClientUpdatesConfigMessage_pb2.clientUpdatesConfigMessage,
@@ -297,12 +299,10 @@ VOLUME_DID_CHANGE_MESSAGE = ProtocolMessage.VOLUME_DID_CHANGE_MESSAGE
 WAKE_DEVICE_MESSAGE = ProtocolMessage.WAKE_DEVICE_MESSAGE
 
 
-def _inner_message(self):
-    extension = _EXTENSION_LOOKUP.get(self.type, None)
-    if extension:
-        return self.Extensions[extension]
+def extract_inner(message: ProtocolMessage):
+    """Extract inner message based on type."""
+    if extension := _EXTENSION_LOOKUP.get(message.type, None):
+        return message.Extensions[extension]
 
-    raise Exception('unknown type: ' + str(self.type))
+    raise Exception('unknown type: ' + str(message.type))
 
-
-ProtocolMessage.inner = _inner_message  # type: ignore

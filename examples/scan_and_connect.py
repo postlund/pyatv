@@ -11,6 +11,7 @@ LOOP = asyncio.get_event_loop()
 # Method that is dispatched by the asyncio event loop
 async def print_what_is_playing(loop):
     """Find a device and print what is playing."""
+    loop = asyncio.get_running_loop()
     print("Discovering devices on network...")
     atvs = await pyatv.scan(loop, timeout=5)
 

@@ -3,36 +3,45 @@
 isort:skip_file
 """
 
-import builtins
-import google.protobuf.descriptor
-import google.protobuf.internal.extension_dict
-import google.protobuf.message
-import pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2
-import typing
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import extension_dict as _extension_dict
+from pyatv.protocols.mrp.protobuf import ProtocolMessage_pb2 as _ProtocolMessage_pb2
+import builtins as _builtins
+import sys
+import typing as _typing
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
+else:
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-@typing.final
-class RemoteTextInputMessage(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-    TIMESTAMP_FIELD_NUMBER: builtins.int
-    VERSION_FIELD_NUMBER: builtins.int
-    DATA_FIELD_NUMBER: builtins.int
-    timestamp: builtins.float
-    version: builtins.int
-    data: builtins.bytes
+@_typing.final
+class RemoteTextInputMessage(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    TIMESTAMP_FIELD_NUMBER: _builtins.int
+    VERSION_FIELD_NUMBER: _builtins.int
+    DATA_FIELD_NUMBER: _builtins.int
+    timestamp: _builtins.float
+    version: _builtins.int
+    data: _builtins.bytes
     def __init__(
         self,
         *,
-        timestamp: builtins.float | None = ...,
-        version: builtins.int | None = ...,
-        data: builtins.bytes | None = ...,
+        timestamp: _builtins.float | None = ...,
+        version: _builtins.int | None = ...,
+        data: _builtins.bytes | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["data", b"data", "timestamp", b"timestamp", "version", b"version"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["data", b"data", "timestamp", b"timestamp", "version", b"version"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["data", b"data", "timestamp", b"timestamp", "version", b"version"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["data", b"data", "timestamp", b"timestamp", "version", b"version"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___RemoteTextInputMessage = RemoteTextInputMessage
+Global___RemoteTextInputMessage: _TypeAlias = RemoteTextInputMessage  # noqa: Y015
 
-REMOTETEXTINPUTMESSAGE_FIELD_NUMBER: builtins.int
-remoteTextInputMessage: google.protobuf.internal.extension_dict._ExtensionFieldDescriptor[pyatv.protocols.mrp.protobuf.ProtocolMessage_pb2.ProtocolMessage, global___RemoteTextInputMessage]
+REMOTETEXTINPUTMESSAGE_FIELD_NUMBER: _builtins.int
+remoteTextInputMessage: _extension_dict._ExtensionFieldDescriptor[_ProtocolMessage_pb2.ProtocolMessage, Global___RemoteTextInputMessage]

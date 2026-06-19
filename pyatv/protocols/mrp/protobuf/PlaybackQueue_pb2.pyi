@@ -3,51 +3,60 @@
 isort:skip_file
 """
 
-import builtins
-import collections.abc
-import google.protobuf.descriptor
-import google.protobuf.internal.containers
-import google.protobuf.message
-import pyatv.protocols.mrp.protobuf.ContentItem_pb2
-import pyatv.protocols.mrp.protobuf.PlaybackQueueContext_pb2
-import pyatv.protocols.mrp.protobuf.PlayerPath_pb2
-import typing
+from collections import abc as _abc
+from google.protobuf import descriptor as _descriptor
+from google.protobuf import message as _message
+from google.protobuf.internal import containers as _containers
+from pyatv.protocols.mrp.protobuf import ContentItem_pb2 as _ContentItem_pb2
+from pyatv.protocols.mrp.protobuf import PlaybackQueueContext_pb2 as _PlaybackQueueContext_pb2
+from pyatv.protocols.mrp.protobuf import PlayerPath_pb2 as _PlayerPath_pb2
+import builtins as _builtins
+import sys
+import typing as _typing
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+if sys.version_info >= (3, 11):
+    from typing import TypeAlias as _TypeAlias, Never as _Never
+else:
+    from typing_extensions import TypeAlias as _TypeAlias, Never as _Never
 
-@typing.final
-class PlaybackQueue(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+DESCRIPTOR: _descriptor.FileDescriptor
 
-    LOCATION_FIELD_NUMBER: builtins.int
-    CONTENTITEMS_FIELD_NUMBER: builtins.int
-    CONTEXT_FIELD_NUMBER: builtins.int
-    REQUESTID_FIELD_NUMBER: builtins.int
-    RESOLVEDPLAYERPATH_FIELD_NUMBER: builtins.int
-    SENDINGPLAYBACKQUEUETRANSACTION_FIELD_NUMBER: builtins.int
-    QUEUEIDENTIFIER_FIELD_NUMBER: builtins.int
-    location: builtins.int
-    requestId: builtins.str
-    sendingPlaybackQueueTransaction: builtins.bool
-    queueIdentifier: builtins.str
-    @property
-    def contentItems(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[pyatv.protocols.mrp.protobuf.ContentItem_pb2.ContentItem]: ...
-    @property
-    def context(self) -> pyatv.protocols.mrp.protobuf.PlaybackQueueContext_pb2.PlaybackQueueContext: ...
-    @property
-    def resolvedPlayerPath(self) -> pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath: ...
+@_typing.final
+class PlaybackQueue(_message.Message):
+    DESCRIPTOR: _descriptor.Descriptor
+
+    LOCATION_FIELD_NUMBER: _builtins.int
+    CONTENTITEMS_FIELD_NUMBER: _builtins.int
+    CONTEXT_FIELD_NUMBER: _builtins.int
+    REQUESTID_FIELD_NUMBER: _builtins.int
+    RESOLVEDPLAYERPATH_FIELD_NUMBER: _builtins.int
+    SENDINGPLAYBACKQUEUETRANSACTION_FIELD_NUMBER: _builtins.int
+    QUEUEIDENTIFIER_FIELD_NUMBER: _builtins.int
+    location: _builtins.int
+    requestId: _builtins.str
+    sendingPlaybackQueueTransaction: _builtins.bool
+    queueIdentifier: _builtins.str
+    @_builtins.property
+    def contentItems(self) -> _containers.RepeatedCompositeFieldContainer[_ContentItem_pb2.ContentItem]: ...
+    @_builtins.property
+    def context(self) -> _PlaybackQueueContext_pb2.PlaybackQueueContext: ...
+    @_builtins.property
+    def resolvedPlayerPath(self) -> _PlayerPath_pb2.PlayerPath: ...
     def __init__(
         self,
         *,
-        location: builtins.int | None = ...,
-        contentItems: collections.abc.Iterable[pyatv.protocols.mrp.protobuf.ContentItem_pb2.ContentItem] | None = ...,
-        context: pyatv.protocols.mrp.protobuf.PlaybackQueueContext_pb2.PlaybackQueueContext | None = ...,
-        requestId: builtins.str | None = ...,
-        resolvedPlayerPath: pyatv.protocols.mrp.protobuf.PlayerPath_pb2.PlayerPath | None = ...,
-        sendingPlaybackQueueTransaction: builtins.bool | None = ...,
-        queueIdentifier: builtins.str | None = ...,
+        location: _builtins.int | None = ...,
+        contentItems: _abc.Iterable[_ContentItem_pb2.ContentItem] | None = ...,
+        context: _PlaybackQueueContext_pb2.PlaybackQueueContext | None = ...,
+        requestId: _builtins.str | None = ...,
+        resolvedPlayerPath: _PlayerPath_pb2.PlayerPath | None = ...,
+        sendingPlaybackQueueTransaction: _builtins.bool | None = ...,
+        queueIdentifier: _builtins.str | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["context", b"context", "location", b"location", "queueIdentifier", b"queueIdentifier", "requestId", b"requestId", "resolvedPlayerPath", b"resolvedPlayerPath", "sendingPlaybackQueueTransaction", b"sendingPlaybackQueueTransaction"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["contentItems", b"contentItems", "context", b"context", "location", b"location", "queueIdentifier", b"queueIdentifier", "requestId", b"requestId", "resolvedPlayerPath", b"resolvedPlayerPath", "sendingPlaybackQueueTransaction", b"sendingPlaybackQueueTransaction"]) -> None: ...
+    _HasFieldArgType: _TypeAlias = _typing.Literal["context", b"context", "location", b"location", "queueIdentifier", b"queueIdentifier", "requestId", b"requestId", "resolvedPlayerPath", b"resolvedPlayerPath", "sendingPlaybackQueueTransaction", b"sendingPlaybackQueueTransaction"]  # noqa: Y015
+    def HasField(self, field_name: _HasFieldArgType) -> _builtins.bool: ...
+    _ClearFieldArgType: _TypeAlias = _typing.Literal["contentItems", b"contentItems", "context", b"context", "location", b"location", "queueIdentifier", b"queueIdentifier", "requestId", b"requestId", "resolvedPlayerPath", b"resolvedPlayerPath", "sendingPlaybackQueueTransaction", b"sendingPlaybackQueueTransaction"]  # noqa: Y015
+    def ClearField(self, field_name: _ClearFieldArgType) -> None: ...
+    def WhichOneof(self, oneof_group: _Never) -> None: ...
 
-global___PlaybackQueue = PlaybackQueue
+Global___PlaybackQueue: _TypeAlias = PlaybackQueue  # noqa: Y015
