@@ -1,5 +1,57 @@
 # CHANGES
 
+## 0.18.0 Willie (2026-06-19)
+
+This is an awaited release with some overdue changes needed
+for compatibility with newer versions of tvOS. More things
+will come, but this is a start.
+
+Due to my lack of free time, please feel free to send me PRs
+with bug fixes and improvements. I'm gonna try to be more
+prompt with reviews and getting things merged going forward!
+
+**Changes:**
+
+*Protocol: Companion:*
+
+```
+5ed97a39 companion: keep power-state subscription when initial fetch fails
+```
+
+*Other:*
+
+```
+82b72a57 Fix exception handling for DecodeError
+3e2da421 Update pyatv/protocols/raop/audio_source.py
+f7d35dbc Update pyatv/protocols/raop/audio_source.py
+94885940 Preserve underlying error when InternetSource fails to decode
+6458330c Fix various protobuf mypy issues
+3e992c7b Address review: restore required loop arg in examples, fix knock typing
+b4cea255 Change to Python 3.14 in Dockerfil
+```
+
+**All changes:**
+
+```
+5ed97a39 companion: keep power-state subscription when initial fetch fails
+82b72a57 Fix exception handling for DecodeError
+3e2da421 Update pyatv/protocols/raop/audio_source.py
+f7d35dbc Update pyatv/protocols/raop/audio_source.py
+94885940 Preserve underlying error when InternetSource fails to decode
+afd1161b build(deps): Bump cryptography from 48.0.1 to 49.0.0 in /requirements
+d856b36d build(deps): Bump cryptography from 48.0.0 to 48.0.1 in /requirements
+6458330c Fix various protobuf mypy issues
+3e992c7b Address review: restore required loop arg in examples, fix knock typing
+00b3820b build(deps): Bump python from 3.14.5-alpine to 3.14.6-alpine
+9177803d build(deps): Bump protobuf from 6.33.5 to 6.33.6 in /requirements
+099bb69a build(deps): Bump pytest-cov from 7.0.0 to 7.1.0 in /requirements (#2862)
+ee5fd56a build(deps): Bump pydantic from 2.12.5 to 2.13.4 in /requirements (#2864)
+3d7e7fc0 build(deps): Bump mypy-protobuf from 5.0.0 to 5.1.0 in /requirements (#2861)
+346c6940 build(deps): Bump aiohttp from 3.13.4 to 3.13.5 in /requirements (#2860)
+ed76e197 build(deps): Bump miniaudio from 1.61 to 1.71 in /requirements (#2859)
+b4cea255 Change to Python 3.14 in Dockerfil
+```
+
 ## 0.17.0 Velma (2026-01-21)
 
 Happy new year! This release brings support for Guide and Control Center

@@ -218,6 +218,11 @@ class CompanionPower(Power):
 
     async def initialize(self) -> None:
         """Initialize Power module."""
+        # Fetching the initial power state snapshot can fail on newer tvOS
+        # versions where FetchAttentionState is no longer handled (the device
+        # replies with "No request handler"). This must not prevent us from
+        # subscribing to live status updates, otherwise power_state stays
+        # Unknown forever and can never recover from pushed events.
         try:
             system_status = await self.api.fetch_attention_state()
 
@@ -225,17 +230,20 @@ class CompanionPower(Power):
                 system_status
             )
 
+            _LOGGER.debug("Initial power state is %s", self.power_state)
+        except Exception as ex:
+            _LOGGER.debug("Could not fetch initial SystemStatus (%s)", ex)
+
+        # Subscribe regardless, so power state can still be tracked via pushed
+        # SystemStatus/TVSystemStatus events even if the initial fetch failed.
+        try:
             self.api.listen_to("SystemStatus", self._handle_system_status_update)
             await self.api.subscribe_event("SystemStatus")
 
             self.api.listen_to("TVSystemStatus", self._handle_system_status_update)
             await self.api.subscribe_event("TVSystemStatus")
-
-            _LOGGER.debug("Initial power state is %s", self.power_state)
         except Exception as ex:
-            _LOGGER.exception(
-                "Could not fetch SystemStatus, power_state will not work (%s)", ex
-            )
+            _LOGGER.debug("Could not subscribe to SystemStatus updates (%s)", ex)
 
     @property
     def power_state(self) -> PowerState:
