@@ -1,0 +1,24 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+import "types/device/AVOutputDeviceDescriptor.proto";
+extend ProtocolMessage {
+  optional PresentRouteAuthorizationStatusMessage presentRouteAuthorizationStatusMessage = 65;
+}
+
+message PresentRouteAuthorizationStatusMessage {
+  enum PresentRouteAuthorizationStatus {
+    OK                       = 0;
+    AuthenticationRequired   = 1;
+    AuthenticationFailed     = 2;
+    Busy                     = 3;
+    OutOfRange               = 4;
+    UnknownError             = 5;
+    NotConnected             = 6;
+    IPAliasingNotSupported   = 7;
+    RelayFailed2GHzNetwork   = 8;
+    RelayFailedMultiDFSNetwork = 9;
+  }
+   optional AVOutputDeviceDescriptor route = 1;
+   optional PresentRouteAuthorizationStatus status = 2;
+}

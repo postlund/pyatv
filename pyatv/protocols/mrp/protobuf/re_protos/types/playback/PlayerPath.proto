@@ -1,0 +1,11 @@
+syntax = "proto2";
+
+import "types/session/Origin.proto";
+import "types/playback/NowPlayingClient.proto";
+import "types/playback/NowPlayingPlayer.proto";
+
+message PlayerPath {
+  optional Origin origin = 1;
+  optional NowPlayingClient client = 2;
+  optional NowPlayingPlayer player = 3;
+}

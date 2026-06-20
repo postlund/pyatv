@@ -1,0 +1,24 @@
+syntax = "proto2";
+
+message GameControllerButtons {
+  optional float dPadX = 1;
+  optional float dPadY = 2;
+
+  optional float a = 3;
+  optional float b = 4;
+  optional float x = 5;
+  optional float y = 6;
+
+  optional float leftShoulder = 7;
+  optional float rightShoulder = 8;
+
+  optional float leftThumbstickX = 9;
+  optional float leftThumbstickY = 10;
+  optional float rightThumbstickX = 11;
+  optional float rightThumbstickY = 12;
+
+  optional float leftTrigger = 13;
+  optional float rightTrigger = 14;
+
+  optional float pause = 15;
+}

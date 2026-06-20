@@ -1,0 +1,26 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+import "types/device/AVOutputDeviceDescriptor.proto";
+
+extend ProtocolMessage {
+  optional UpdateEndPointsMessage updateEndPointsMessage = 83;
+}
+
+message AVEndpointDescriptor {
+  optional string name = 1;
+  optional string uniqueIdentifier = 2;
+   repeated AVOutputDeviceDescriptor outputDevices = 3;
+   optional AVOutputDeviceDescriptor designatedGroupLeader = 4;
+  optional bool isLocalEndpoint = 5;
+  optional string instanceIdentifier = 6;
+  optional bool isProxyGroupPlayer = 7;
+  optional int32 connectionType = 8;
+  optional bool canModifyGroupMembership = 9;
+   repeated AVOutputDeviceDescriptor personalOutputDevices = 10;
+}
+
+message UpdateEndPointsMessage {
+  optional AVEndpointDescriptor endpoints = 1; // NOTE(RE): cardinality is "repeated" in RE proto
+  optional int32 endpointFeatures = 2;
+}

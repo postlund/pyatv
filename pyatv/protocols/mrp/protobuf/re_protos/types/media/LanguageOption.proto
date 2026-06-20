@@ -1,0 +1,37 @@
+syntax = "proto2";
+
+
+
+message LanguageOptionGroup{
+  optional bool allowEmptySelection = 1;
+  optional LanguageOption defaultLanguageOption = 2;
+  repeated LanguageOption languageOptions = 3;
+}
+
+
+
+message LanguageOption {
+
+  enum Type {
+    Audible = 0;
+    Legible = 1;
+  }
+
+  optional LanguageOption.Type type = 1;
+  optional string languageTag = 2;
+
+  // I think these are all the possible values for characteristics
+  //   "public.main-program-content"
+  //    "public.auxiliary-content"
+  //    "public.subtitles.forced-only"
+  //    "public.accessibility.transcribes-spoken-dialog"
+  //    "public.accessibility.describes-music-and-sound"
+  //    "public.accessibility.describes-video"
+  //    "public.easy-to-read"
+  //    "public.translation"
+  //    "public.translation.dubbed"
+  //    "public.translation.voice-over"
+  repeated string characteristics = 3;
+  optional string displayName = 4;
+  optional string identifier = 5;
+}

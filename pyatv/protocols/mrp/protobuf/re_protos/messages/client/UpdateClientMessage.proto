@@ -1,0 +1,12 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+import "types/playback/NowPlayingClient.proto";
+
+extend ProtocolMessage {
+  optional UpdateClientMessage updateClientMessage = 59;
+}
+
+message UpdateClientMessage {
+  optional NowPlayingClient client = 1;
+}

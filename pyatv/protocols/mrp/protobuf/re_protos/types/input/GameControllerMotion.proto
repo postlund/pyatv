@@ -1,0 +1,17 @@
+syntax = "proto2";
+
+message GameControllerAcceleration {
+  optional bytes data = 1;
+
+  optional float x = 2;
+  optional float y = 3;
+  optional float z = 4;
+  optional float w = 5;
+}
+
+message GameControllerMotion {
+  optional GameControllerAcceleration gravity = 1;
+  optional GameControllerAcceleration userAcceleration = 2;
+  optional GameControllerAcceleration attitude = 3;
+  optional GameControllerAcceleration rotation = 4;
+}

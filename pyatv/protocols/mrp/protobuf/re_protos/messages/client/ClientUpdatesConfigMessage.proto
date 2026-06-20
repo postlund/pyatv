@@ -1,0 +1,20 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+import "types/playback/PlayerPath.proto";
+
+extend ProtocolMessage {
+  optional ClientUpdatesConfigMessage clientUpdatesConfigMessage = 21;
+}
+
+message ClientUpdatesConfigMessage {
+  // NOTE: Fields 1 & 2 were swapped in previous HC version. Corrected per decompiled
+  // __MRClientUpdatesConfigurationProtobufReadFrom / writeTo__ (confirmed field numbers).
+  optional bool nowPlayingUpdates = 1;
+  optional bool artworkUpdates = 2;
+  optional bool volumeUpdates = 3;
+  optional bool keyboardUpdates = 4;
+  optional bool outputDeviceUpdates = 5;
+  optional bool systemEndpointUpdates = 6;
+  repeated PlayerPath subscribedPlayerPaths = 7;
+}

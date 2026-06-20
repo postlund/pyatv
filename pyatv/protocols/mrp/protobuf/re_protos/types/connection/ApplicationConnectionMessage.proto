@@ -1,0 +1,9 @@
+syntax = "proto2";
+import "protocol/ProtocolMessage.proto";
+
+
+// not fully implemented yet?
+message ApplicationConnectionMessage {
+  optional bytes header = 1;
+  optional bytes underlyingMessage = 2;
+}

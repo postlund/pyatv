@@ -1,0 +1,16 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+import "foundation/Common.proto";
+import "types/device/AVOutputDeviceDescriptor.proto";
+
+extend ProtocolMessage {
+  optional UpdateOutputDeviceMessage updateOutputDeviceMessage = 69;
+}
+
+
+message UpdateOutputDeviceMessage {
+  repeated AVOutputDeviceDescriptor outputDevices = 1;
+  optional string endpointUID = 2;
+  repeated AVOutputDeviceDescriptor clusterAwareOutputDevices = 3;
+}

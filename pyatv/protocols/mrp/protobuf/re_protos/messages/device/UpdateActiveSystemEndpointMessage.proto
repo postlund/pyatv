@@ -1,0 +1,11 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+import "types/device/UpdateActiveSystemEndpointRequest.proto";
+extend ProtocolMessage {
+  optional UpdateActiveSystemEndpointMessage updateActiveSystemEndpointMessage = 81;
+}
+
+message UpdateActiveSystemEndpointMessage {
+   optional UpdateActiveSystemEndpointRequest request = 1;
+}

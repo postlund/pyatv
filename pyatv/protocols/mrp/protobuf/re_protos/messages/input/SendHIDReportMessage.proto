@@ -1,0 +1,12 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+
+extend ProtocolMessage {
+  optional SendHIDReportMessage sendHIDReportMessage = 14;
+}
+
+message SendHIDReportMessage {
+  optional string virtualDeviceID = 1;
+  optional bytes report = 2;
+}

@@ -1,0 +1,15 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+import "types/device/AVOutputDeviceDescriptor.proto";
+import "types/device/DiscoverySessionConfiguration.proto";
+
+extend ProtocolMessage {
+  optional DiscoveryUpdateOutputDevicesMessage discoveryUpdateOutputDevicesMessage = 91;
+}
+
+// Discovery update for output devices
+message DiscoveryUpdateOutputDevicesMessage {
+  repeated AVOutputDeviceDescriptor outputDevices = 1;
+  optional DiscoverySessionConfiguration configuration = 2;
+}

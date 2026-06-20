@@ -1,0 +1,15 @@
+syntax = "proto2";
+
+import "messages/playback/SendCommandMessage.proto";
+
+message SendCommandResultHandlerDialog {
+  repeated SendCommandResultHandlerDialogAction actions = 1;
+  optional string localizedTitle = 2;
+  optional string localizedMessage = 3;
+}
+
+message SendCommandResultHandlerDialogAction {
+  optional int32 type = 1;
+  required string title = 2;
+  optional SendCommandMessage event = 3;
+}

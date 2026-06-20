@@ -1,0 +1,11 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+
+extend ProtocolMessage {
+  optional PromptForRouteAuthorizationResponseMessage promptForRouteAuthorizationResponseMessage = 64;
+}
+
+message PromptForRouteAuthorizationResponseMessage {
+  optional string response = 1;
+}

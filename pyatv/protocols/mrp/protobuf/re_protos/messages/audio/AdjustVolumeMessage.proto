@@ -1,0 +1,24 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+import "types/session/RequestDetails.proto";
+
+extend ProtocolMessage {
+  optional AdjustVolumeMessage adjustVolumeMessage = 97;
+}
+
+// Adjust volume by a relative amount
+message AdjustVolumeMessage {
+  // From StringAsAdjustment: function
+  enum Adjustment {
+    IncrementSmall = 1;   // cf_IncrementSmall
+    IncrementMedium = 2;  // cf_IncrementMedium
+    IncrementLarge = 3;   // cf_IncrementLarge
+    DecrementSmall = 4;   // cf_DecrementSmall
+    DecrementMedium = 5;  // cf_DecrementMedium
+    DecrementLarge = 6;   // cf_DecrementLarge
+  }
+  optional Adjustment adjustment = 1;
+  optional string outputDeviceUID = 2;
+  optional RequestDetails details = 3;
+}

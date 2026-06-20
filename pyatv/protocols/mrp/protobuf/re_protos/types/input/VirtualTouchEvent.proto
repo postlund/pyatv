@@ -1,0 +1,12 @@
+syntax = "proto2";
+
+
+
+import "foundation/Common.proto";
+
+message VirtualTouchEvent {
+  optional double x      = 1;
+  optional double y      = 2;
+  optional VirtualTouchPhase.Enum  phase  = 3;
+  optional int32  finger = 4;
+}

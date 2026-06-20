@@ -1,0 +1,25 @@
+syntax = "proto2";
+
+import "types/session/RequestDetails.proto";
+
+message GroupTopologyModificationRequest {
+
+  enum Type {
+    Unknown = 0;
+    Add = 1;
+    Remove = 2;
+    Set = 3;
+  }
+
+  optional RequestDetails details = 1;
+  optional Type type = 2;
+  repeated string outputDeviceUIDs = 3;
+  optional bool fadeAudio = 4;
+  optional string password = 5;
+  optional bool suppressErrorDialog = 6;
+  optional bool shouldNotPauseIfLastDeviceRemoved = 7;
+  optional bool muteUntilFinished = 8;
+  optional bool shouldModifyPredictedRoutes = 9;
+  optional bool shouldClearPredictedRoutes = 10;
+  optional bool shouldWaitForUpdatedOutputDevices = 11;
+}

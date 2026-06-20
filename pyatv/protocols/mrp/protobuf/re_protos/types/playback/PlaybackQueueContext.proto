@@ -1,0 +1,5 @@
+syntax = "proto2";
+
+message PlaybackQueueContext {
+  optional string revision = 1;
+}

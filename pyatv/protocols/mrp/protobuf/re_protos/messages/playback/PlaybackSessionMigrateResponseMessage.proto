@@ -1,0 +1,11 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+import "types/playback/PlaybackSessionMigrateRequest.proto";
+extend ProtocolMessage {
+  optional PlaybackSessionMigrateResponseMessage playbackSessionMigrateResponseMessage = 77;
+}
+
+message PlaybackSessionMigrateResponseMessage {
+   optional PlaybackSessionMigrateRequest request = 1;
+}

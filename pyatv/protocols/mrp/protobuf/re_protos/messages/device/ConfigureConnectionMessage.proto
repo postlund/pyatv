@@ -1,0 +1,15 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+
+extend ProtocolMessage {
+  optional ConfigureConnectionMessage configureConnectionMessage = 94;
+}
+
+message ConfigureConnectionMessage {
+  optional string groupID = 1;
+   optional string serviceName = 2;
+   optional string sourceOutputDeviceUID = 3;
+   optional string sourceOutputDeviceName = 4;
+   optional string destinationOutputDeviceUid = 5;
+}

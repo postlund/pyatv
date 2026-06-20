@@ -1,0 +1,35 @@
+syntax = "proto2";
+
+import "types/media/LyricItem.proto";
+import "types/media/LanguageOption.proto";
+import "types/media/ContentItemMetadata.proto";
+import "types/media/RemoteArtwork.proto";
+import "types/media/DataArtwork.proto";
+import "types/media/AnimatedArtwork.proto";
+import "types/media/TranscriptAlignment.proto";
+
+message ContentItem {
+  optional string identifier = 1;
+  optional ContentItemMetadata metadata = 2;
+  optional bytes artworkData = 3;
+  optional string info = 4;
+  repeated LanguageOptionGroup availableLanguageOptions = 5;
+  repeated LanguageOption currentLanguageOptions = 6;
+  optional LyricsItem lyrics = 7;
+  repeated ContentItem sections = 8;
+  optional string parentIdentifier = 9;
+  optional string ancestorIdentifier = 10;
+  optional string queueIdentifier = 11;
+  optional string requestIdentifier = 12;
+  optional int32 artworkDataWidth = 13;
+  optional int32 artworkDataHeight = 14;
+  optional string associatedParticipantIdentifier = 15;
+  repeated string availableArtworkFormats = 16;
+  repeated string availableRemoteArtworkFormats = 17;
+  repeated DataArtwork dataArtworks = 18;
+  repeated RemoteArtwork remoteArtworks = 19;
+  repeated TranscriptAlignment transcriptAlignments = 20;
+  repeated string availableAnimatedArtworkFormats = 21;
+  repeated DataArtwork animatedArtworkPreviewFrames = 22;
+  repeated AnimatedArtwork animatedArtworks = 23;
+}

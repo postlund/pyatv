@@ -1,0 +1,17 @@
+syntax = "proto2";
+
+import "messages/device/DeviceInfoMessage.proto";
+
+message Origin {
+  enum Type {
+    Unknown = 0;
+    Local = 1;
+    Custom = 2;
+  }
+
+  optional Type type = 1;
+  optional string displayName = 2;
+  optional int32 identifier = 3;
+  optional DeviceInfoMessage deviceInfo = 4; // named deviceInfoDeprecated in decompiled sources
+  optional bool isLocallyHosted = 5;
+}

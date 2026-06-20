@@ -1,0 +1,11 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+
+extend ProtocolMessage {
+  optional GetVolumeControlCapabilitiesMessage getVolumeControlCapabilitiesMessage = 66;
+}
+
+message GetVolumeControlCapabilitiesMessage {
+  optional string outputDeviceUID = 1;
+}

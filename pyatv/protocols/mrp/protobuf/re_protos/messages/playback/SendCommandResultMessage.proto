@@ -1,0 +1,110 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+import "types/playback/PlayerPath.proto";
+import "foundation/Error.proto";
+import "types/media/SendCommandResultHandlerDialog.proto";
+
+extend ProtocolMessage {
+  optional SendCommandResultMessage sendCommandResultMessage = 7;
+}
+
+message SendError {
+  enum Enum {
+    NoError = 0;
+    ApplicationNotFound = 1;
+    ConnectionFailed = 2;
+    Ignored = 3;
+    CouldNotLaunchApplication = 4;
+    TimedOut = 5;
+    OriginDoesNotExist = 6;
+    InvalidOptions = 7;
+    NoCommandHandlers = 8;
+    ApplicationNotInstalled = 9;
+    NotSupported = 10;
+  }
+}
+
+message HandlerReturnStatus {
+  enum Enum {
+    Success = 0;
+    NoSuchContent = 1;
+    CommandFailed = 2;
+    UIKitLegacy = 3;
+    NoActionableNowPlayingItem = 10;
+    DeviceNotFound = 20;
+    SkipAdProhibited = 100;
+    QueueIsUserCurated = 101;
+    UserModifiedQueueDisable = 102;
+    UserQueueModificationNotSupportedForCurrentItem = 103;
+    SubscriptionRequiredForSharedQueue = 104;
+    InsertionPositionNotSpecified = 105;
+    InvalidInsertionPosition = 106;
+    RequestParametersOutOfBounds = 107;
+    SkipLimitReached = 108; // 0x6C
+    CannotModifyQueueWithPlaybackTokenItems = 109;
+    AuthenticationFailure = 401;
+    UnsupportedCommand = 404;
+    MediaServicesUnavailable = 501;
+    Timeout = 555;
+  }
+}
+
+message SendCommandStatusCode {
+  enum Enum {
+    Success = 0;
+    NoSuchContent = 1;
+    CommandFailed = 2;
+    UIKitLegacy = 3;
+    NoActionableNowPlayingItem = 10;
+    DeviceNotFound = 20;
+    SkipAdProhibited = 100;
+    QueueIsUserCurated = 101;
+    UserModifiedQueueDisable = 102;
+    UserQueueModificationNotSupportedForCurrentItem = 103;
+    SubscriptionRequiredForSharedQueue = 104;
+    InsertionPositionNotSpecified = 105;
+    InvalidInsertionPosition = 106;
+    RequestParametersOutOfBounds = 107;
+    SkipLimitReached = 108; // 0x6C
+    CannotModifyQueueWithPlaybackTokenItems = 109;
+    AuthenticationFailure = 401;
+    UnsupportedCommand = 404;
+    MediaServicesUnavailable = 501;
+    Timeout = 555;
+  }
+}
+
+message SendCommandResultType {
+  enum Enum {
+    Dialog = 1;
+    Error = 2;
+    Custom = 999;
+  }
+}
+
+message SendCommandResultStatus {
+  optional SendCommandStatusCode.Enum statusCode = 1;
+  optional SendCommandResultType.Enum type = 2;
+  optional SendCommandResultHandlerDialog dialog = 3;
+  optional Error error = 4;
+  optional bytes customData = 5;
+  optional string customDataType = 6;
+}
+
+message SendCommandResult {
+  optional PlayerPath playerPath = 1;
+  optional SendError.Enum sendError = 2;
+  repeated SendCommandResultStatus statuses = 3;
+   optional string sendErrorDescription = 4;
+   optional Error error = 5;
+}
+
+message SendCommandResultMessage {
+  optional SendError.Enum sendError = 1;
+  optional HandlerReturnStatus.Enum handlerReturnStatus = 2;
+  repeated bytes handlerReturnStatusDatas = 3;
+  optional string commandID = 4;
+  optional PlayerPath playerPath = 5;
+  optional SendCommandResult commandResult = 6;
+}

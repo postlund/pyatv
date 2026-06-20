@@ -1,0 +1,14 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+import "types/playback/PlayerPath.proto";
+
+extend ProtocolMessage {
+  optional NotificationMessage notificationMessage = 16;
+}
+
+message NotificationMessage {
+  repeated string notifications = 1;
+  repeated bytes userInfos = 2;
+   repeated PlayerPath playerPaths = 3;
+}

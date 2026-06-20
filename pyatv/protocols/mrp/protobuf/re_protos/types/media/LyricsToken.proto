@@ -1,0 +1,7 @@
+syntax = "proto2";
+
+
+message LyricsToken {
+  optional string identifier = 1;
+  optional bytes userData = 2;
+}

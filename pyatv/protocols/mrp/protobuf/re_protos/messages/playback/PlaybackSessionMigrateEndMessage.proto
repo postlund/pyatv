@@ -1,0 +1,19 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+import "types/playback/PlayerPath.proto";
+import "messages/playback/SendCommandResultMessage.proto";
+import "types/playback/PlaybackSessionRequest.proto";
+import "foundation/Error.proto";
+extend ProtocolMessage {
+  optional PlaybackSessionMigrateEndMessage playbackSessionMigrateEndMessage = 80;
+}
+
+message PlaybackSessionMigrateEndMessage {
+  optional PlaybackSessionRequest request = 1;
+  optional PlayerPath playerPath = 2;
+  optional int64 errorCode = 3;
+  optional string errorDescription = 4;
+  optional Error error = 5;
+  optional SendCommandResultStatus setPlaybackSessionCommandStatus = 6;
+}

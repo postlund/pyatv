@@ -1,0 +1,9 @@
+syntax = "proto2";
+
+import "types/media/DataArtwork.proto";
+
+message AnimatedArtwork {
+  repeated DataArtwork frames = 1;
+  optional double frame_duration = 2;
+  optional bool loop = 3;
+}

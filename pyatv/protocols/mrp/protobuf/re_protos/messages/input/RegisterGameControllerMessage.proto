@@ -1,0 +1,11 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+import "messages/input/GameControllerPropertiesMessage.proto";
+extend ProtocolMessage {
+  optional RegisterGameControllerMessage registerGameControllerMessage = 24;
+}
+
+message RegisterGameControllerMessage {
+   optional GameControllerProperties properties = 1;
+}

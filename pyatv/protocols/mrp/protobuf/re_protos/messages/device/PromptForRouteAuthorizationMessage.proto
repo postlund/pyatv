@@ -1,0 +1,19 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+import "types/device/AVOutputDeviceDescriptor.proto";
+
+extend ProtocolMessage {
+  optional PromptForRouteAuthorizationMessage promptForRouteAuthorizationMessage = 63;
+}
+
+message PromptForRouteAuthorizationMessage {
+  enum InputType {
+    None     = 0;
+    Alphabet = 1;
+    Number   = 2;
+    Email    = 3;
+  }
+   optional AVOutputDeviceDescriptor route = 1;
+  optional InputType inputType = 2;
+}

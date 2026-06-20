@@ -1,0 +1,9 @@
+syntax = "proto2";
+
+import "messages/device/DeviceInfoMessage.proto";
+import "types/playback/NowPlayingClient.proto";
+
+message ApplicationConnectionRequestInfo {
+  optional DeviceInfoMessage device_info = 1;
+  optional NowPlayingClient client = 2;
+}

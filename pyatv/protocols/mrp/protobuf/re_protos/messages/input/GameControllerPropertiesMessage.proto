@@ -1,0 +1,20 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+
+extend ProtocolMessage {
+  optional GameControllerPropertiesMessage gameControllerPropertiesMessage = 40;
+}
+
+message GameControllerProperties {
+  optional uint32 playerIndex = 1;
+  optional string vendorName = 2;
+  optional int32 buttonAUpDelay = 3;
+  optional int32 profile = 4;
+  optional bool supportsExtendedMotion = 5;
+}
+
+message GameControllerPropertiesMessage {
+  optional uint64 controllerID = 1;
+   optional GameControllerProperties properties = 2;
+}

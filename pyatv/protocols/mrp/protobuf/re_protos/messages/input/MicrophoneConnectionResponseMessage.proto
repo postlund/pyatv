@@ -1,0 +1,13 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+
+extend ProtocolMessage {
+  optional MicrophoneConnectionResponseMessage microphoneConnectionResponseMessage = 109;
+}
+
+message MicrophoneConnectionResponseMessage {
+  optional uint32 result = 1;
+  optional string rapportIdentifier = 2;
+  optional bytes pairingData = 3;
+}

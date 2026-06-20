@@ -1,0 +1,16 @@
+syntax = "proto2";
+
+import "foundation/Color.proto";
+
+message NowPlayingClient {
+  optional int32 processIdentifier = 1;
+  optional string bundleIdentifier = 2;
+  optional string parentApplicationBundleIdentifier = 3;
+  optional int32 processUserIdentifier = 4;
+  optional int32 nowPlayingVisibility = 5;
+  optional Color tintColor = 6;
+  optional string displayName = 7;
+  repeated string extendedBundleIdentifierHierarchys = 8;
+   optional bool isEmptyDeprecated = 9;
+   optional string iconUrl = 10;
+}

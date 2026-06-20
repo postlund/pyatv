@@ -1,0 +1,176 @@
+syntax = "proto2";
+
+import "foundation/Dictionary.proto";
+
+message Error {
+  optional string domain = 1;
+  optional int32 code = 2;
+  optional string localizedDescription = 3;
+  optional string localizedFailureReason = 4;
+  repeated Error underlyingErrors = 5;
+  optional string debugMessage = 6;
+  optional Dictionary userInfo = 100;
+}
+
+enum ErrorCodes {
+    NoError = 0;                                     // "No Error"
+    UnknownError = 1;                                // "Unknown Error"
+    InvalidOperation = 2;                            // "Invalid Operation"
+    OperationNotPermitted = 3;                       // "Operation not permitted"
+    ClientDoesNotExist = 4;                          // "Client does not exist"
+    OriginDoesNotExist = 5;                          // "Origin does not exist"
+    UnsupportedOperation = 6;                        // "Unsupported operation"
+    FailedToSetPickedRoute = 7;                      // "Failed to set picked route"
+    FailedToRegisterCustomOrigin = 8;                // "Failed to register custom origin"
+    FailedToRemoveCustomOrigin = 9;                  // "Failed to remove custom origin"
+    ApplicationActivityDoesNotExist = 10;            // "The application activity does not exist"
+    AppMissingBrowsableContentEndpoint = 11;         // "The app has not setup a browsable content endpoint"
+    BrowsableContentAPINotSupported = 12;            // "The requested browsable content API is not supported"
+    NotificationNotAllowedByServer = 13;             // "The notification is not allowed by the server."
+    RequiresClientCallbackRegistered = 14;           // "Operation requires a client callback to have been registered"
+    RequiresClientDataSourceRegistered = 15;         // "Operation requires a client data source to have been registered."
+    RequestedDataOutOfDate = 16;                     // "Requested data is out of date and should be requested again"
+    DeviceEnforcedVolumeLimitExceeded = 17;          // "The device's enforced volume limit has been exceeded"
+    VolumeValueOutOfRange = 18;                      // "Volume value is out of range (must be between 0.0 and 1.0, where 1.0 is the loudest)."
+    VolumeAlreadyAtMaximum = 19;                     // "Volume is already at the maximum value."
+    VolumeAlreadyMuted = 20;                         // "Volume is already muted."
+    VoiceInputEndpointDoesNotExist = 21;             // "Voice input endpoint does not exist."
+    VoiceInputDeviceNotRegistered = 22;              // "The voice input device is not registered or does not exist."
+    EncryptionFailure = 23;                          // "Encryption failure."
+    EndpointDoesNotExist = 24;                       // "Endpoint does not exist."
+    ClientApplicationCancelled = 25;                 // "The client's application cancelled the operation."
+    OperationTimedOut = 26;                          // "The operation timed out."
+    InvalidPlayerPathObject = 27;                    // "The specified player path object was invalid. (No Now Playing Client?)"
+    AVOutputContextDeviceChangeNotAllowed = 28;      // "Adding or removing devices from the AV output context has failed."
+    CouldNotFindNowPlayingPlayer = 29;               // "Could not find the specified now playing player"
+    ContentItemDoesNotExist = 30;                    // "The specified content item does not exist."
+    InvalidOffset = 31;                              // "The specified offset is invalid."
+    InvalidOutputContext = 32;                       // "The specified output context is invalid."
+    OutputDevicesNotGroupable = 33;                  // "One or more specified output devices are not groupable."
+    OutputContextDoesNotSupportAdditions = 34;       // "The specified output context does not support adding more than one output device."
+    CouldNotFindNowPlayingClient = 35;               // "Could not find the specified now playing client"
+    EndpointVolumeControlRequiresEndpoint = 36;      // "Endpoint volume control is only possible if the endpoint is picked or remote controllable."
+    OutputDeviceVolumeControlRequiresDevice = 37;    // "Output device volume control is only possible if the endpoint is picked or remote controllable."
+    CoderMustSupportKVC = 38;                        // "Coder must support key-value coding"
+    CouldNotFindGivenOutputDevice = 39;              // "Could not find the given outputDevice"
+    FailedToPerformTopologyChanges = 40;             // "Failed to perform topology changes"
+    PlayerCouldNotBeSetActive = 41;                  // "Player could not be set as active as its currently has Picture in Picture enabled and another player has higher priority"
+    PlayerPathUnresolvedAfterResolution = 42;        // "Player path remained unresolved after resolution"
+    FailedToSetListeningMode = 43;                   // "Failed to set listening mode."
+    CommandDidNotProvideStatus = 44;                 // "The command did not provide a status"
+    QueueModificationProhibited = 45;                // "Queue modification is prohibited based on the content"
+    SystemAtPeakCapacity = 46;                       // "The system is already at peak capacity and cannot accommodate adding another stream."
+    CouldNotDiscoverOutputDevice = 47;               // "Could not discover outputDevice"
+    CouldNotDiscoverClusterLeader = 48;              // "Could not discover cluster leader"
+    FailedToSetConversationDetection = 49;           // "Failed to set conversation detection."
+       // 50..99 are pointers to cf_UnknownError
+    Reserved_50_99 = 50;                             // "Unknown error (50)"
+
+
+    FailedToConnectToRemoteDevice = 100;             // "Failed to connect to remote device."
+    AuthenticationTokenInvalid = 101;                // "Authentication token is invalid."
+    RecordingSessionAlreadyInProgress = 102;         // "Recording session is already in progress on this device."
+    DeviceNotCurrentlyRecording = 103;               // "The device is not currently recording."
+    ClientDisconnected = 104;                        // "The client has disconnected."
+    ServerDisconnected = 105;                        // "The server has disconnected."
+    ConnectionCancelledByClient = 106;               // "The connection has been cancelled by the client."
+    PairingLockedDueToSecurity = 107;                // "Pairing functionality is locked due to security reasons."
+    ClientOSVersionTooOld = 108;                     // "The client's operating system version is too old."
+    ClientAppVersionTooOld = 109;                    // "The client's application version is too old."
+    DeviceNotPaired = 110;                           // "The device is not paired"
+    PinDialogRemovedByUser = 111;                    // "The pin pairing dialog was removed by the user before pairing occoured"
+    PinDialogRemovedByTimeout = 112;                 // "The pin pairing dialog was removed by a timeout before pairing occoured"
+    PairingConnectionTimedOut = 113;                 // "The connection timed out"
+    PairingBlocked = 114;                            // "Pairing with this device is blocked"
+    DeviceGoingToSleep = 115;                        // "The device is going to sleep"
+    ConnectionBlockedByServer = 116;                 // "Connection blocked by server."
+    AVEndpointDeallocatedWaiting = 117;              // "MRAVEndpoint was deallocated while waiting for device to connect."
+    AVEndpointDeallocatedTopology = 118;             // "MRAVEndpoint was deallocated while making topology changes."
+    ConnectionFailedAuthRequest = 119;               // "Connection failed because authorization request was skipped."
+    MessageParserException = 120;                    // "The message parser threw an exception"
+    CommunicationChannelClosed = 121;                // "The communication channel was closed"
+    FailedToModifyRemoteControlOutputContext = 122;  // "Failed to modify the remote control output context"
+    ExternalDeviceDeallocated = 123;                 // "External device was deallocated"
+    ConnectionClosedDueToInactivity = 124;           // "The connection was manually closed due to inactivity"
+    OutputContextModificationTimedOut = 125;         // "OutputContext modification failed due to a timeout"
+    ApplicationRequiresUserInteraction = 126;        // "Application requires user interaction before can be programatically launched"
+    CannotFindExternalDevice = 127;                  // "Cannot find externalDevice"
+    ExternalDeviceToBeDestroyed = 128;               // "ExternalDeviceToBeDestroyed"
+    CannotDiscoverOutputDeviceInGroup = 129;         // "CannotDiscoverOutputDeviceInGroup"
+    ClientNotEntitled = 130;                         // "ClientNotEntitled"
+    NoLocalEndpointConnectionRecentReboot = 131;     // "NoLocalEndpointConnection (recent reboot detected)"
+    FeatureNotEnabled = 132;                         // "FeatureNotEnabled"
+    Interrupted_0 = 133;                             // "Interrupted"
+    Interrupted_1 = 134;                             // "Interrupted" (duplicate)
+    AirPlayClientNotAvailable = 135;                 // "AirPlayClientNotAvailable"
+    NewPlayerUsedInstead = 136;                      // "NewPlayerUsedInstead"
+    DuplicateCommandContextID = 137;                 // "DuplicateCommandContextID"
+    MissingNativeGroup = 138;                        // "MissingNativeGroup"
+    ComponentNoLongerValid = 139;                    // "The component may still be valid but it is not longer a UGL"
+    NoLocalEndpointConnectionNoRecentReboot = 140;   // "NoLocalEndpointConnection (without recent reboot detected)"
+    NoMatchingOutputDevicesFound = 141;              // "NoMatchingOutputDevicesFound"
+    MediaServerDeath = 142;                          // "MediaServerDeath"
+
+    // 143..144 are UnknownError in your dump.
+    Reserved_143_144 = 143;
+
+    InvalidRequest = 145;                             // "InvalidRequest"
+    NoSuitableDeviceAvailable = 146;                  // "NoSuitableDeviceAvailable"
+    Aggregate = 147;                                  // "Aggregate"
+
+    // 148..149 are UnknownError in your dump.
+    Reserved_148_149 = 148;
+
+    AllowMigrateFromGroupMissing = 150;               // "AllowMigrateFromGroup not present and source contains an AirPlay device"
+    AllowMigrateToGroupMissing = 151;                 // "AllowMigrateToGroup not present and destination contains more than 1 logical device"
+    SourceNoSetPlaybackSession = 152;                 // "Source does not support SetPlaybackSession command"
+    DestinationNoSetPlaybackSession = 153;            // "Destination does not support SetPlaybackSession"
+    SupportedCommandsDoNotMatch = 154;                // "Source and destination supported commands do not match"
+    ResolvedPlayerPathIsAirPlayDestination = 155;     // "Resolved playerPath is an AirPlay destination"
+    FailedToResolveSourcePlayerPath = 156;            // "Failed to resolve source player path"
+    FailedToResolveDestinationPlayerPath = 157;       // "Failed to resolve destination player path"
+
+// 158..169 are UnknownError in your dump.
+    Reserved_158_169 = 158;
+
+    CouldNotSourceEventsFromCoreDuetDB = 170;          // "Could not source an array of events from Core Duet database."
+    OriginatingAppFailedToConfirmIntent = 171;         // "The originating application failed to confirm the intent."
+    OriginatingAppFailedToHandleIntent = 172;          // "The originating application failed to handle the intent."
+    OriginatingAppConnectionCInterrupted= 173;         // "The connection to the originating application was interrupted."
+    ExpanseMigrationFailed = 175;                      // "Expanse migration failed."
+    SessionNotConfigured = 176;                        // "SessionNotConfigured"
+    AppConnectionRemoteServerLost = 177;               // "AppConnectionRemoteServerConnectionLost"
+    AppConnectionRemoteClientLost = 178;               // "AppConnectionRemoteClientConnectionLost"
+    AppConnectionServerEndpointLost = 179;             // "AppConnectionServerEndpointLost"
+    AppConnectionClientEndpointLost = 180;             // "AppConnectionClientEndpointLost"
+    AppConnectionNotSupportedByDestination = 181;      // "AppConnectionNotSupportedByDestination"
+    AppConnectionClosedByClient = 182;                 // "AppConnectionClosedByClient"
+    AppConnectionClosedByServer = 183;                 // "AppConnectionClosedByServer"
+    AppConnectionRejectedByServer = 184;               // "AppConnectionRejectedByServer"
+    HandoffSessionInvalidated = 185;                   // "HandoffSessionInvalidated"
+    HandoffSessionNotFound = 186;                      // "HandoffSessionNotFound"
+    MultipleRequestsNotSupported = 187;                // "MultipleRequestsNotSupported"
+    PlayerCommandFailed = 188;                         // "PlayerCommandFailed (The app itself reported failure)"
+    SetVolumeFailed = 189;                             // "SetVolumeFailed"
+
+// 190..200 are UnknownError in your dump.
+    Reserved_190_200 = 190;
+
+    OutputContextModCausedDeviceToNotBeProxy = 201;    // "Output context modification caused a device to no longer be a proxy group player."
+    OutputContextModCausedDeviceToBecomeAProxy  = 202; // "Output context modification caused a device to become a proxy group player."
+    OutputContextModRequestedNotTopoChange = 203;      // "Output context modification requested no topology change."
+
+// 204..300 are UnknownError in your dump.
+    Reserved_204_300 = 204;
+
+    CommandIgnored = 301;                              // "CommandIgnored"
+    CouldNotLaunchApplication = 302;                   // "CouldNotLaunchApplication"
+    ApplicationNotInstalled = 303;                     // "ApplicationNotInstalled"
+    CommandNotSupported = 304;                         // "CommandNotSupported"
+    XPC = 305;                                         // "XPC"
+    ApplicationRequiresPreflight = 306;                // "ApplicationRequiresPreflight"
+    ApplicationDisabled = 307;                         // "ApplicationDisabled"
+    TimedOutWaitingForCanBeNowPlaying = 308;           // "TimedoutWaitingForCanBeNowPlaying"
+    ApplicationTerminated = 309;                       // "ApplicationTerminated"
+    ReplyDeallocated = 310;                            // "ReplyDeallocated"
+    };

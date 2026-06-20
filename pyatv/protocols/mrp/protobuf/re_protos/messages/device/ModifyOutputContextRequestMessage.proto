@@ -1,0 +1,28 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+import "types/device/GroupTopologyModificationRequest.proto";
+extend ProtocolMessage {
+  optional ModifyOutputContextRequestMessage modifyOutputContextRequestMessage = 52;
+}
+
+
+
+message ModifyOutputContextRequestMessage {
+  enum Type {
+    Unknown = 0;
+    SharedAudioPresentation = 1;
+    SharedSystemAudio = 2;
+    SharedSystemScreen = 3;
+    iTunesAudio = 4;
+    Auxiliary = 5;
+  }
+  optional Type type = 1;
+  repeated string addingDevices = 2;
+  repeated string removingDevices = 3;
+  repeated string settingDevices = 4;
+  repeated string clusterAwareAddingDevices = 5;
+  repeated string clusterAwareRemovingDevices = 6;
+  repeated string clusterAwareSettingDevices = 7;
+  optional GroupTopologyModificationRequest request = 8;
+}

@@ -1,0 +1,12 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+
+extend ProtocolMessage {
+  optional GetVoiceInputDevicesResponseMessage getVoiceInputDevicesResponseMessage = 32;
+}
+
+message GetVoiceInputDevicesResponseMessage {
+  repeated uint32 deviceIDs = 1;
+  optional uint32 errorCode = 2;
+}

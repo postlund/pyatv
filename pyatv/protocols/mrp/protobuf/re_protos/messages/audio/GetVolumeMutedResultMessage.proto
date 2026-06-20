@@ -1,0 +1,12 @@
+syntax = "proto2";
+
+import "protocol/ProtocolMessage.proto";
+
+extend ProtocolMessage {
+  optional GetVolumeMutedResultMessage getVolumeMutedResultMessage = 99;
+}
+
+// Response with muted state of an output device
+message GetVolumeMutedResultMessage {
+  optional bool isMuted = 1;
+}

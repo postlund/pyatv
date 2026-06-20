@@ -1,0 +1,8 @@
+syntax = "proto2";
+
+
+
+message SystemPlaybackCustomDataQueue {
+  required string identifier = 1;
+  optional bytes data = 2;
+}
