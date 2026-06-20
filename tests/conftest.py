@@ -184,6 +184,30 @@ def companion_state_dispatcher_fixture(core_dispatcher):
     yield ProtocolStateDispatcher(Protocol.Companion, core_dispatcher)
 
 
+# Override pytest-httpserver's session-scoped server factory so binding does
+# not trigger a reverse-DNS lookup. werkzeug's server_bind calls
+# socket.getfqdn(host), which can block for >30s on CI runners (notably macOS
+# and Windows) where 127.0.0.1 does not reverse-resolve quickly. That stall
+# trips pytest-timeout and fails every httpserver-based test on the worker
+# (#2849 CI). Short-circuiting getfqdn while the server binds keeps startup
+# instant and deterministic.
+@pytest.fixture(scope="session")
+def make_httpserver(httpserver_listen_address, httpserver_ssl_context):
+    host, port = httpserver_listen_address
+    if not host:
+        host = HTTPServer.DEFAULT_LISTEN_HOST
+    if not port:
+        port = HTTPServer.DEFAULT_LISTEN_PORT
+
+    server = HTTPServer(host=host, port=port, ssl_context=httpserver_ssl_context)
+    with patch("socket.getfqdn", lambda name="": name or "localhost"):
+        server.start()
+    yield server
+    server.clear()
+    if server.is_running():
+        server.stop()
+
+
 # "files" is a list of filenames from tests/data directory that will be served
 # as binary files from the HTTP server
 @pytest.fixture(name="data_webserver")
