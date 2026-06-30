@@ -113,6 +113,7 @@ class DummyFeatures(Features):
 
 class DummyPower(Power):
     def __init__(self) -> None:
+        super().__init__()
         self.current_state = PowerState.Off
         self.turn_on_called = False
         self.turn_off_called = False
@@ -699,6 +700,32 @@ async def test_power_prefer_companion(feature, func, facade_dummy, register_inte
 
     assert not getattr(power_mrp, f"{func}_called")
     assert getattr(power_comp, f"{func}_called")
+
+
+async def test_power_events_forwarded_from_all_protocols(
+    facade_dummy, register_interface
+):
+    """Power events from non-main protocol must also reach the facade listener."""
+    listener = SavingPowerListener()
+
+    power_mrp, _ = register_interface(
+        FeatureName.PowerState, DummyPower(), Protocol.MRP
+    )
+    power_comp, _ = register_interface(
+        FeatureName.PowerState, DummyPower(), Protocol.Companion
+    )
+
+    await facade_dummy.connect()
+    facade_dummy.power.listener = listener
+
+    # Simulate MRP detecting a power state change
+    power_mrp.listener.powerstate_update(PowerState.Off, PowerState.On)
+    assert listener.last_update == PowerState.On
+
+    # Simulate Companion detecting a power state change
+    power_comp.listener.powerstate_update(PowerState.On, PowerState.Off)
+    assert listener.last_update == PowerState.Off
+    assert len(listener.all_updates) == 2
 
 
 @pytest_asyncio.fixture(name="power_instance")

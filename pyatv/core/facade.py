@@ -773,14 +773,12 @@ class FacadeAppleTV(interface.AppleTV):
 
         self._device_info = interface.DeviceInfo(devinfo)
 
-        # Forward power events in case an interface exists for it
-        try:
-            power = cast(
-                interface.Power, self._interfaces[interface.Power].main_instance
-            )
-            power.listener = self._interfaces[interface.Power]
-        except exceptions.NotSupportedError:
-            _LOGGER.debug("Power management not supported by any protocols")
+        # Forward power events from all protocol implementations to the facade
+        # so that events are not lost when a non-main protocol detects a change
+        # (e.g. MRP detects power state change while Companion is unavailable).
+        facade_power = self._interfaces[interface.Power]
+        for power_impl in facade_power.instances:
+            cast(interface.Power, power_impl).listener = facade_power
 
     def close(self) -> Set[asyncio.Task]:
         """Close connection and release allocated resources."""
