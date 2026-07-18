@@ -29,6 +29,22 @@ SERVICES_PER_MSG = 3
 
 SLEEP_PROXY_SERVICE = "_sleep-proxy._udp.local"
 
+# Number of consecutive resend rounds with no new (non-empty) services
+# discovered before a unicast query is considered "stable" and finished early
+# (unless every requested service has already answered, or the query has run
+# out of resend rounds - see UnicastDnsSdClientProtocol.datagram_received).
+#
+# A device can take a moment after boot/wake to re-register a dynamic-port
+# service (e.g. Companion) with its own mDNS responder, so a round with no new
+# answers isn't reliable proof nothing else is coming - only repeated quiet
+# rounds are. This value trades latency against that risk and is a heuristic,
+# not a guarantee: raise it for more confidence that a slow-to-register
+# service won't be missed (at the cost of waiting longer before concluding a
+# device genuinely doesn't have the rest of what was queried); lower it
+# (never below 1, which reduces to "one round of confirmation") for faster
+# results when that risk matters less than speed.
+UNICAST_MIN_STABLE_ROUNDS = 2
+
 # This module produces a lot of debug output, use a dedicated log level.
 # Maybe move this to top-level support later?
 TRAFFIC_LEVEL = logging.DEBUG - 5
@@ -188,6 +204,7 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
     def __init__(self, services: typing.List[str], host: str, timeout: int):
         """Initialize a new UnicastDnsSdClientProtocol."""
         self.queries = create_service_queries(services, QueryType.PTR)
+        self._requested_services: typing.FrozenSet[str] = frozenset(services)
         self.host = host
         self.timeout = timeout
         self.transport = None
@@ -195,6 +212,10 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
         self.semaphore: asyncio.Semaphore = asyncio.Semaphore(value=0)
         self.received_responses: int = 0
         self._task: typing.Optional[asyncio.Future] = None
+        self._total_rounds: int = math.ceil(timeout)
+        self._round_no: int = 0
+        self._last_known_services: typing.FrozenSet[str] = frozenset()
+        self._last_growth_round: typing.Optional[int] = None
 
     async def get_response(self) -> Response:
         """Get respoonse with a maximum timeout."""
@@ -224,7 +245,9 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
         self._task = asyncio.ensure_future(self._resend_loop())
 
     async def _resend_loop(self):
-        for _ in range(math.ceil(self.timeout)):
+        for round_no in range(self._total_rounds):
+            self._round_no = round_no
+
             for query in self.queries:
                 log_binary(
                     _LOGGER,
@@ -250,7 +273,42 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
         self.parser.add_message(DnsMessage().unpack(data))
         self.received_responses += 1
 
-        if self.received_responses == len(self.queries):
+        if self.received_responses < len(self.queries):
+            return
+
+        current_services = frozenset(self.parser.ptrs)
+
+        # If every service explicitly requested has been answered, there's
+        # nothing left that could still be pending (mDNS has no "not found"
+        # response, but it can't hide something we never asked about either)
+        # - safe to stop right away.
+        have_everything_requested = self._requested_services <= current_services
+
+        # Otherwise, a device can take a moment after boot/wake to
+        # re-register a dynamic-port service (e.g. Companion) with its own
+        # mDNS responder, so a still-missing requested service doesn't
+        # necessarily mean it doesn't exist. Track the round new services
+        # were last seen in (rather than only comparing to the immediately
+        # preceding round, which a round with multiple query packets could
+        # evaluate more than once, or which could be fooled by one round of
+        # coincidental quiet before something else answers) and only finish
+        # early once at least UNICAST_MIN_STABLE_ROUNDS have passed with
+        # nothing new showing up, or once this is the last round available
+        # and there's nothing left to gain by waiting further. An empty
+        # result is never "stable" - it's just as likely evidence the device
+        # isn't ready yet as it is evidence nothing will ever show up.
+        if current_services != self._last_known_services:
+            self._last_growth_round = self._round_no
+            self._last_known_services = current_services
+
+        is_final_round = self._round_no == self._total_rounds - 1
+        is_stable = (
+            current_services
+            and self._last_growth_round is not None
+            and self._round_no - self._last_growth_round >= UNICAST_MIN_STABLE_ROUNDS
+        )
+
+        if have_everything_requested or is_final_round or is_stable:
             self._finished()
             if self.transport:
                 self.transport.close()
