@@ -48,6 +48,7 @@ class FakeAirPlayState:
         self.airplay_responses = []
         self.has_authenticated = True
         self.always_auth_fail = False
+        self.pairing_client_names = []
         self.last_airplay_url = None
         self.last_airplay_start = None
         self.last_airplay_uuid = None
@@ -79,6 +80,20 @@ class FakeAirPlayService(AirPlayServerAuth):
     async def cleanup(self):
         if self.server:
             self.server.close()
+
+    def handle_pair_pin_start(self, request):
+        """Record and handle an incoming pairing start request."""
+        self.state.pairing_client_names.append(
+            (request.path, request.headers.get("X-Apple-Client-Name"))
+        )
+        return super().handle_pair_pin_start(request)
+
+    def handle_pair_setup(self, request):
+        """Record and handle an incoming pairing setup request."""
+        self.state.pairing_client_names.append(
+            (request.path, request.headers.get("X-Apple-Client-Name"))
+        )
+        return super().handle_pair_setup(request)
 
     def handle_airplay_play(self, request):
         """Handle AirPlay play requests."""

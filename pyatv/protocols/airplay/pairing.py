@@ -54,6 +54,7 @@ class AirPlayPairingHandler(PairingHandler):
                 else AuthenticationType.Legacy
             ),
             self.http,
+            self._name,
         )
         self._has_paired = False
         return await error_handler(
