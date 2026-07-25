@@ -81,6 +81,34 @@ async def test_pairing_exception_invalid_pin(airplay_conf, expected_credentials)
 
 
 @pytest.mark.parametrize(
+    "airplay_properties",
+    [{"features": "0x00000000,0x00010000"}],
+)
+async def test_pairing_sends_client_name(airplay_conf, airplay_state):
+    client_name = "Home Assistant"
+    pairing = await pair(
+        airplay_conf,
+        Protocol.AirPlay,
+        asyncio.get_event_loop(),
+        name=client_name,
+    )
+
+    try:
+        await pairing.begin()
+        pairing.pin(DEVICE_PIN)
+        await pairing.finish()
+
+        assert airplay_state.pairing_client_names == [
+            ("/pair-pin-start", client_name),
+            ("/pair-setup", client_name),
+            ("/pair-setup", client_name),
+            ("/pair-setup", client_name),
+        ]
+    finally:
+        await pairing.close()
+
+
+@pytest.mark.parametrize(
     "airplay_properties,expected_credentials",
     [
         ({}, DEVICE_CREDENTIALS),

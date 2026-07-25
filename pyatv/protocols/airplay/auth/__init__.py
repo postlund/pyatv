@@ -1,7 +1,7 @@
 """Pick authentication type based on device support."""
 
 import logging
-from typing import Tuple
+from typing import Optional, Tuple
 
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import (
@@ -56,9 +56,11 @@ class NullPairVerifyProcedure(PairVerifyProcedure):
 
 
 def pair_setup(
-    auth_type: AuthenticationType, connection: HttpConnection
+    auth_type: AuthenticationType,
+    connection: HttpConnection,
+    display_name: Optional[str] = None,
 ) -> PairSetupProcedure:
-    """Return procedure object used for Pair-Setup."""
+    """Return Pair-Setup procedure with an optional receiver-visible name."""
     _LOGGER.debug("Setting up new AirPlay Pair-Setup procedure with type %s", auth_type)
 
     if auth_type == AuthenticationType.Legacy:
@@ -68,7 +70,7 @@ def pair_setup(
     if auth_type == AuthenticationType.HAP:
         srp = SRPAuthHandler()
         srp.initialize()
-        return AirPlayHapPairSetupProcedure(connection, srp)
+        return AirPlayHapPairSetupProcedure(connection, srp, display_name)
 
     raise exceptions.NotSupportedError(
         f"authentication type {auth_type} does not support Pair-Setup"
