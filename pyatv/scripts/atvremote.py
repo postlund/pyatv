@@ -1019,8 +1019,13 @@ async def appstart(loop):
 
 def main():
     """Application start here."""
-    loop = asyncio.get_event_loop()
-    return loop.run_until_complete(appstart(loop))
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        return loop.run_until_complete(appstart(loop))
+    finally:
+        loop.close()
+        asyncio.set_event_loop(None)
 
 
 if __name__ == "__main__":
