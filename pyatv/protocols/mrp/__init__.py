@@ -210,10 +210,16 @@ def build_playing_instance(  # pylint: disable=too-many-locals
         elapsed_timestamp = state.metadata_field("elapsedTimeTimestamp")
 
         # If we don't have reference time, we can't do anything
-        if not elapsed_timestamp:
+        if not elapsed_timestamp or math.isnan(elapsed_timestamp):
             return None
 
-        elapsed_time: int = state.metadata_field("elapsedTime") or 0
+        # Both fields are doubles in the protobuf definition and devices do report NaN
+        # for them, which is not convertible to an integer (NaN is also truthy, so "or"
+        # does not help here).
+        elapsed_time: float = state.metadata_field("elapsedTime") or 0.0
+        if math.isnan(elapsed_time):
+            return None
+
         diff = (
             datetime.datetime.now() - _cocoa_to_timestamp(elapsed_timestamp)
         ).total_seconds()

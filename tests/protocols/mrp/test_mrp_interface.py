@@ -409,3 +409,18 @@ async def test_metadata_position_calculation(metadata, playing_metadata, player_
         player_state.playback_state = protobuf.PlaybackState.Playing
         playing_metadata["playbackRate"] = 0.0
         assert (await metadata.playing()).position == ELAPSED_TIME
+
+
+async def test_metadata_position_nan(metadata, playing_metadata, player_state):
+    # Devices sometimes report NaN as elapsed time, which cannot be converted to an
+    # integer. Treat it as no position at all instead of raising ValueError.
+    playing_metadata["elapsedTime"] = math.nan
+
+    with faketime("pyatv", NOW_TIME):
+        # Paused state
+        assert (await metadata.playing()).position is None
+
+        # Playing state
+        player_state.playback_state = protobuf.PlaybackState.Playing
+        playing_metadata["playbackRate"] = 1.0
+        assert (await metadata.playing()).position is None
