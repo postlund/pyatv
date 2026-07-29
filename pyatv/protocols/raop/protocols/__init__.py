@@ -98,6 +98,14 @@ class StreamProtocol(ABC):
     async def play_url(self, timing_server_port: int, url: str, position: float = 0.0):
         """Play media from a URL."""
 
+    async def wait_for_media_end(self) -> bool:
+        """Wait until the receiver reports that playback finished.
+
+        Returns False if this protocol cannot report it, in which case the
+        caller should fall back to polling GET /playback-info.
+        """
+        return False
+
 
 class TimingServer(asyncio.Protocol):
     """Basic timing server responding to timing requests."""

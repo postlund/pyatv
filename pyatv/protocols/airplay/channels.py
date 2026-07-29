@@ -6,7 +6,7 @@ This module only deals with AirPlay 2 related channels right now.
 from abc import ABC
 import logging
 from random import randrange
-from typing import Any, List, NamedTuple, Optional, Tuple
+from typing import Any, List, Mapping, NamedTuple, Optional, Tuple
 
 from pyatv.auth.hap_channel import AbstractHAPChannel
 from pyatv.protocols.airplay.utils import decode_plist_body, encode_plist_body
@@ -57,8 +57,23 @@ class BaseEventChannel(AbstractHAPChannel, ABC):
         return response, data[: len(data) - len(rest)], rest
 
 
+class EventChannelListener(ABC):
+    """Listener interface for EventChannel."""
+
+    def handle_event(self, event: Mapping[str, Any]) -> None:
+        """Handle an event pushed by the receiver."""
+
+
 class EventChannel(BaseEventChannel):
-    """Connection used to handle the event channel."""
+    """Connection used to handle the event channel.
+
+    The receiver pushes playback state here: `playbackState` messages carrying
+    position, duration and whether it is playing, and `notification` messages
+    such as `currentItemChanged` and `itemPlayedToEnd`. None of them expect a
+    response beyond an acknowledgement.
+    """
+
+    listener: Optional[EventChannelListener] = None
 
     def handle_received(self) -> None:
         """Handle received data that was put in buffer."""
@@ -71,6 +86,7 @@ class EventChannel(BaseEventChannel):
                     break
 
                 _LOGGER.debug("Got message on event channel: %s", request)
+                self._dispatch_event(request)
 
                 # Send a positive response to satisfy the other end of the channel
                 headers = {
@@ -95,6 +111,24 @@ class EventChannel(BaseEventChannel):
                 )
             except Exception:
                 _LOGGER.exception("Failed to handle message on event channel")
+
+    def _dispatch_event(self, request: HttpRequest) -> None:
+        """Decode an event and hand it to the listener, if any."""
+        if self.listener is None:
+            return
+
+        body = request.body if isinstance(request.body, bytes) else b""
+        if not body.startswith(b"bplist00"):
+            return
+
+        # The payload is a plist whose "data" member is itself a plist.
+        outer = decode_plist_body(body)
+        if not isinstance(outer, dict):
+            return
+        data = outer.get("params", {}).get("data")
+        event = decode_plist_body(data) if isinstance(data, bytes) else outer
+        if isinstance(event, dict):
+            self.listener.handle_event(event)
 
 
 class DataStreamListener(ABC):
