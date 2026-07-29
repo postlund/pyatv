@@ -50,6 +50,8 @@ class UpdatedState(Enum):
     OutputDeviceVolume = 5
     """Output device volume was updated."""
 
+    AirPlayFlags = 6
+    """Raw AirPlay zeroconf 'flags' bitmask was updated."""
 
 # pylint: enable=invalid-name
 
