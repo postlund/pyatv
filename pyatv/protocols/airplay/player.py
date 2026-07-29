@@ -76,6 +76,16 @@ class AirPlayPlayer:
         attempts: int = WAIT_RETRIES
         video_started: bool = False
 
+        # Receivers that report playback state themselves are not polled: the
+        # endpoint below is not part of such a session and answers with an error.
+        try:
+            if await self.stream_protocol.wait_for_media_end():
+                _LOGGER.debug("media playback ended")
+                return
+        except exceptions.ConnectionLostError:
+            _LOGGER.debug("Connection was lost, assuming video playback stopped")
+            return
+
         while True:
             # In some cases this call will fail if video was stopped by the sender,
             # e.g. stopping video via remote control. For now, handle this gracefully
