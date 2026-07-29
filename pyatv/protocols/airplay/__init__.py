@@ -3,12 +3,19 @@
 import asyncio
 import logging
 import os
-from typing import Any, Dict, Generator, Mapping, Optional, Set
+from typing import Any, Awaitable, Callable, Dict, Generator, Mapping, Optional, Set
 
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import AuthenticationType, HapCredentials, parse_credentials
-from pyatv.const import DeviceModel, FeatureName, OperatingSystem, Protocol
-from pyatv.core import Core, MutableService, SetupData, mdns
+from pyatv.const import DeviceModel, DeviceState, FeatureName, OperatingSystem, Protocol
+from pyatv.core import (
+    Core,
+    MutableService,
+    ProtocolStateDispatcher,
+    SetupData,
+    UpdatedState,
+    mdns
+)
 from pyatv.core.scan import (
     ScanHandlerDeviceInfoName,
     ScanHandlerReturn,
@@ -16,6 +23,7 @@ from pyatv.core.scan import (
 )
 from pyatv.helpers import get_unique_id
 from pyatv.interface import (
+    AirPlayStatus,
     BaseService,
     DeviceInfo,
     FeatureInfo,
@@ -34,6 +42,8 @@ from pyatv.protocols.airplay.player import AirPlayPlayer
 from pyatv.protocols.airplay.utils import (
     AirPlayFlags,
     AirPlayMajorVersion,
+    flags_to_device_state,
+    get_flags,
     get_protocol_version,
     is_remote_control_supported,
     parse_features,
@@ -51,6 +61,7 @@ from pyatv.support import net
 from pyatv.support.device_info import lookup_model, lookup_os
 from pyatv.support.http import HttpConnection, StaticFileWebServer, http_connect
 from pyatv.support.rtsp import RtspSession
+from pyatv.protocols.airplay.zeroconf_monitor import get_watcher
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -75,6 +86,22 @@ class AirPlayFeatures(Features):
 
         return FeatureInfo(FeatureState.Unavailable)
 
+class AirPlayStatusImpl(AirPlayStatus):
+    """Protocol-level implementation of AirPlayStatus."""
+
+    def __init__(self, state_dispatcher: ProtocolStateDispatcher) -> None:
+        super().__init__()
+        self._state_dispatcher = state_dispatcher
+        self._device_state = DeviceState.Idle
+
+    @property
+    def device_state(self) -> DeviceState:
+        return self._device_state
+
+    def handle_flags_update(self, properties: Mapping[str, str]) -> None:
+        flags = get_flags(properties)
+        self._device_state = flags_to_device_state(flags)
+        self._state_dispatcher.dispatch(UpdatedState.AirPlayFlags, flags)
 
 class AirPlayStream(Stream):  # pylint: disable=too-few-public-methods
     """Implementation of stream API with AirPlay."""
@@ -306,6 +333,9 @@ def setup(  # pylint: disable=too-many-locals
     """Set up a new AirPlay service."""
     # TODO: Split up in connect/protocol and Stream implementation
     stream = AirPlayStream(core)
+    status = AirPlayStatusImpl(core.state_dispatcher)
+    watcher = get_watcher(core.loop)
+    unsubscribe: Optional[Callable[[], Awaitable[None]]] = None
 
     features = parse_features(core.service.properties.get("features", "0x0"))
     credentials = extract_credentials(core.service)
@@ -314,13 +344,21 @@ def setup(  # pylint: disable=too-many-locals
         Features: AirPlayFeatures(features),
         RemoteControl: AirPlayRemoteControl(stream),
         Stream: stream,
+        AirPlayStatus: status,
     }
 
     async def _connect() -> bool:
+        nonlocal unsubscribe
+        if core.service.identifier is not None:
+            unsubscribe = await watcher.subscribe(
+                core.service.identifier, status.handle_flags_update
+            )
         return True
 
     def _close() -> Set[asyncio.Task]:
         stream.close()
+        if unsubscribe:
+            return {asyncio.ensure_future(unsubscribe())}
         return set()
 
     def _device_info() -> Dict[str, Any]:
