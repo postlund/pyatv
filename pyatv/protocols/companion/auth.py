@@ -159,7 +159,10 @@ class CompanionPairVerifyProcedure(PairVerifyProcedure):
             },
         )
 
-        # TODO: check status code
+        # check status code
+        if resp['_pd'][2] != 4:
+            _LOGGER.warning("companion pairing credentials are invalid")
+            raise exceptions.AuthenticationError("companion pairing credentials are invalid")
 
         return True
 
