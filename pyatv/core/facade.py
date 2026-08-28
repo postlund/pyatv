@@ -528,17 +528,17 @@ class FacadeAudio(Relayer, interface.Audio):
         return self.relay("output_devices")
 
     @shield.guard
-    async def add_output_devices(self, *devices: List[str]) -> None:
+    async def add_output_devices(self, *devices: str) -> None:
         """Add output devices."""
         return await self.relay("add_output_devices")(*devices)
 
     @shield.guard
-    async def remove_output_devices(self, *devices: List[str]) -> None:
+    async def remove_output_devices(self, *devices: str) -> None:
         """Remove output devices."""
         return await self.relay("remove_output_devices")(*devices)
 
     @shield.guard
-    async def set_output_devices(self, *devices: List[str]) -> None:
+    async def set_output_devices(self, *devices: str) -> None:
         """Set output devices."""
         return await self.relay("set_output_devices")(*devices)
 

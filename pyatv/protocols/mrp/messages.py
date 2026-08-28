@@ -1,7 +1,6 @@
 """Helper code for dealing with protobuf messages."""
 
 import binascii
-from typing import List
 from uuid import uuid4
 
 from pyatv import const
@@ -212,7 +211,7 @@ def set_volume(device_uid: str, volume: float) -> protobuf.ProtocolMessage:
     return message
 
 
-def add_output_devices(*device_uids: List[str]) -> protobuf.ProtocolMessage:
+def add_output_devices(*device_uids: str) -> protobuf.ProtocolMessage:
     """Add AirPlay devices to the speaker group."""
     message = create(protobuf.MODIFY_OUTPUT_CONTEXT_REQUEST_MESSAGE)
     inner = protobuf.extract_inner(message)
@@ -223,7 +222,7 @@ def add_output_devices(*device_uids: List[str]) -> protobuf.ProtocolMessage:
     return message
 
 
-def remove_output_devices(*device_uids: List[str]) -> protobuf.ProtocolMessage:
+def remove_output_devices(*device_uids: str) -> protobuf.ProtocolMessage:
     """Remove AirPlay devices from the speaker group."""
     message = create(protobuf.MODIFY_OUTPUT_CONTEXT_REQUEST_MESSAGE)
     inner = protobuf.extract_inner(message)
@@ -234,7 +233,7 @@ def remove_output_devices(*device_uids: List[str]) -> protobuf.ProtocolMessage:
     return message
 
 
-def set_output_devices(*device_uids: List[str]) -> protobuf.ProtocolMessage:
+def set_output_devices(*device_uids: str) -> protobuf.ProtocolMessage:
     """Set AirPlay devices as the speaker group."""
     message = create(protobuf.MODIFY_OUTPUT_CONTEXT_REQUEST_MESSAGE)
     inner = protobuf.extract_inner(message)

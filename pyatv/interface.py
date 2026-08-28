@@ -1218,17 +1218,17 @@ class Audio(ABC, StateProducer):
         raise exceptions.NotSupportedError()
 
     @feature(60, "AddOutputDevices", "Add output devices.")
-    async def add_output_devices(self, *devices: List[str]) -> None:
+    async def add_output_devices(self, *devices: str) -> None:
         """Add output devices."""
         raise exceptions.NotSupportedError()
 
     @feature(61, "RemoveOutputDevices", "Remove output devices.")
-    async def remove_output_devices(self, *devices: List[str]) -> None:
+    async def remove_output_devices(self, *devices: str) -> None:
         """Remove output devices."""
         raise exceptions.NotSupportedError()
 
     @feature(62, "SetOutputDevices", "Set output devices.")
-    async def set_output_devices(self, *devices: List[str]) -> None:
+    async def set_output_devices(self, *devices: str) -> None:
         """Set output devices."""
         raise exceptions.NotSupportedError()
 
