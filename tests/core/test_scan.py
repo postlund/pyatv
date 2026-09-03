@@ -111,7 +111,7 @@ RAOP_SERVICE_RECORD = DNSService(
     "Ohana.local.",
 )
 RAOP_TXT_RECORD = DNSText(
-    "Ohana._airplay._tcp.local.",
+    "54E61BF2ED74@Ohana._raop._tcp.local.",
     const._TYPE_TXT,
     const._CLASS_IN,
     const._DNS_OTHER_TTL,
