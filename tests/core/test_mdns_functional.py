@@ -152,6 +152,121 @@ async def test_unicast_resend_if_no_response(udns_server):
     assert resp.services[0].port == service.port
 
 
+async def test_unicast_catches_service_registered_after_first_round(udns_server):
+    """A service that only starts answering in a later resend round (e.g. a
+    device still re-registering a dynamic-port service with its own mDNS
+    responder after boot/wake) must still be found, not missed because the
+    first round already got replies for everything else that was asked.
+
+    Registration is gated on request count so the test deterministically
+    lands the service in the second resend round. The test suite's global
+    fake asyncio.sleep is disabled here: it collapses the ~1s spacing between
+    resend rounds, which races the client's round bookkeeping ahead of the
+    (real, unpatched) UDP round-trip to the fake server and makes the
+    scenario this test targets unreproducible.
+    """
+    udns_server.services = {}
+    original_datagram_received = udns_server.datagram_received
+
+    def _datagram_received(data, addr):
+        if udns_server.request_count >= 1:
+            udns_server.services[MEDIAREMOTE_SERVICE] = TEST_SERVICES[
+                MEDIAREMOTE_SERVICE
+            ]
+        original_datagram_received(data, addr)
+
+    udns_server.datagram_received = _datagram_received
+
+    utils.unstub_sleep()
+    try:
+        resp = await mdns.unicast(
+            asyncio.get_running_loop(),
+            "127.0.0.1",
+            [MEDIAREMOTE_SERVICE],
+            port=udns_server.port,
+            timeout=3,
+        )
+    finally:
+        utils.stub_sleep()
+
+    assert len(resp.services) == 1
+    assert resp.services[0].type == MEDIAREMOTE_SERVICE
+    assert resp.services[0].name == TEST_SERVICES[MEDIAREMOTE_SERVICE].name
+
+
+async def test_unicast_two_empty_rounds_do_not_count_as_stable(udns_server):
+    """Two consecutive rounds that both found nothing must not be treated as
+    "results have stabilized" and stop early - an empty round says nothing
+    about whether the device is still starting up versus genuinely lacking
+    the service, so only a stable *non-empty* result is meaningful evidence.
+    """
+    udns_server.services = {}
+    original_datagram_received = udns_server.datagram_received
+
+    def _datagram_received(data, addr):
+        if udns_server.request_count >= 2:
+            udns_server.services[MEDIAREMOTE_SERVICE] = TEST_SERVICES[
+                MEDIAREMOTE_SERVICE
+            ]
+        original_datagram_received(data, addr)
+
+    udns_server.datagram_received = _datagram_received
+
+    utils.unstub_sleep()
+    try:
+        resp = await mdns.unicast(
+            asyncio.get_running_loop(),
+            "127.0.0.1",
+            [MEDIAREMOTE_SERVICE],
+            port=udns_server.port,
+            timeout=4,
+        )
+    finally:
+        utils.stub_sleep()
+
+    assert len(resp.services) == 1
+    assert resp.services[0].type == MEDIAREMOTE_SERVICE
+    assert resp.services[0].name == TEST_SERVICES[MEDIAREMOTE_SERVICE].name
+
+
+async def test_unicast_catches_service_appearing_after_another_stabilizes(udns_server):
+    """One requested service (MRP) answers immediately and stays unchanged for
+    a round; a second requested service (AirPlay) only starts answering
+    later. A single round of "nothing changed" must not be treated as final
+    stability when a still-requested service is missing - min_stable_rounds
+    requires that many *consecutive* unchanged rounds, so one quiet round
+    followed by a new arrival must reset the count and keep waiting.
+    """
+    udns_server.services = {MEDIAREMOTE_SERVICE: TEST_SERVICES[MEDIAREMOTE_SERVICE]}
+    airplay_type, airplay_service = fake_udns.airplay_service(
+        "Kitchen", "AA:BB:CC:DD:EE:FF"
+    )
+
+    original_datagram_received = udns_server.datagram_received
+
+    def _datagram_received(data, addr):
+        if udns_server.request_count >= 2:
+            udns_server.services[airplay_type] = airplay_service
+        original_datagram_received(data, addr)
+
+    udns_server.datagram_received = _datagram_received
+
+    utils.unstub_sleep()
+    try:
+        resp = await mdns.unicast(
+            asyncio.get_running_loop(),
+            "127.0.0.1",
+            [MEDIAREMOTE_SERVICE, airplay_type],
+            port=udns_server.port,
+            timeout=6,
+        )
+    finally:
+        utils.stub_sleep()
+
+    found_types = {service.type for service in resp.services}
+    assert found_types == {MEDIAREMOTE_SERVICE, airplay_type}
+
+
 async def test_unicast_specific_service(udns_server):
     resp, _ = await unicast(udns_server, [SERVICE_NAME + "." + MEDIAREMOTE_SERVICE])
     assert len(resp.services) == 1
