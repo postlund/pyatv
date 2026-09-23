@@ -929,19 +929,19 @@ class MrpAudio(Audio):
         """Return current list of output device IDs."""
         return self._output_devices
 
-    async def add_output_devices(self, *devices: List[str]) -> None:
+    async def add_output_devices(self, *devices: str) -> None:
         """Add output devices."""
         await self.protocol.send(messages.add_output_devices(*devices))
         with suppress(asyncio.TimeoutError):
             await asyncio.wait_for(self._output_devices_event.wait(), timeout=5.0)
 
-    async def remove_output_devices(self, *devices: List[str]) -> None:
+    async def remove_output_devices(self, *devices: str) -> None:
         """Remove output devices."""
         await self.protocol.send(messages.remove_output_devices(*devices))
         with suppress(asyncio.TimeoutError):
             await asyncio.wait_for(self._output_devices_event.wait(), timeout=5.0)
 
-    async def set_output_devices(self, *devices: List[str]) -> None:
+    async def set_output_devices(self, *devices: str) -> None:
         """Set output devices."""
         await self.protocol.send(messages.set_output_devices(*devices))
         with suppress(asyncio.TimeoutError):
