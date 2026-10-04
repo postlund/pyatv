@@ -685,12 +685,20 @@ class MrpPower(Power):
 
     @staticmethod
     def _get_power_state(device_info_message) -> PowerState:
-        logical_device_count = protobuf.extract_inner(
-            device_info_message
-        ).logicalDeviceCount
+        info = protobuf.extract_inner(device_info_message)
+        logical_device_count = info.logicalDeviceCount
         if logical_device_count >= 1:
             return PowerState.On
         if logical_device_count == 0:
+            # The leader of a HomePod stereo pair reports zero logical devices
+            # even while it is playing, so it is identified as the leader of
+            # its cluster instead
+            if (
+                info.isClusterAware
+                and info.HasField("clusterLeaderID")
+                and info.clusterLeaderID == info.deviceUID
+            ):
+                return PowerState.On
             return PowerState.Off
         return PowerState.Unknown
 

@@ -5,10 +5,17 @@ from ipaddress import ip_address
 from deepdiff import DeepDiff
 import pytest
 
-from pyatv.const import OperatingSystem, PairingRequirement, Protocol
+from pyatv.const import OperatingSystem, PairingRequirement, PowerState, Protocol
 from pyatv.core import MutableService, mdns
 from pyatv.interface import DeviceInfo
-from pyatv.protocols.mrp import device_info, scan, service_info
+from pyatv.protocols.mrp import (
+    MrpPower,
+    device_info,
+    messages,
+    protobuf,
+    scan,
+    service_info,
+)
 from pyatv.support.device_info import lookup_version
 
 MRP_SERVICE = "_mediaremotetv._tcp.local"
@@ -113,3 +120,45 @@ async def test_disabled_service_no_pairing():
         {Protocol.MRP: mrp_service, Protocol.AirPlay: airplay_service},
     )
     assert mrp_service.pairing == PairingRequirement.NotNeeded
+
+
+def _device_info(**fields):
+    message = messages.create(protobuf.ProtocolMessage.DEVICE_INFO_MESSAGE)
+    inner = protobuf.extract_inner(message)
+    for name, value in fields.items():
+        setattr(inner, name, value)
+    return message
+
+
+@pytest.mark.parametrize(
+    "fields,expected",
+    [
+        ({"logicalDeviceCount": 1}, PowerState.On),
+        ({"logicalDeviceCount": 0}, PowerState.Off),
+        # The leader of a HomePod stereo pair reports zero logical devices
+        # while it is playing, so the cluster fields have to decide it
+        (
+            {
+                "logicalDeviceCount": 0,
+                "deviceUID": "leader",
+                "isClusterAware": True,
+                "clusterLeaderID": "leader",
+            },
+            PowerState.On,
+        ),
+        # The other member of the pair is not the leader and stays off
+        (
+            {
+                "logicalDeviceCount": 0,
+                "deviceUID": "follower",
+                "isClusterAware": True,
+                "clusterLeaderID": "leader",
+            },
+            PowerState.Off,
+        ),
+        # An Apple TV that is asleep has no cluster fields at all
+        ({"logicalDeviceCount": 0, "deviceUID": "atv"}, PowerState.Off),
+    ],
+)
+def test_power_state_from_device_info(fields, expected):
+    assert MrpPower._get_power_state(_device_info(**fields)) == expected
