@@ -76,11 +76,8 @@ def raw_tag(name, value):
 
 def string_tag(name, value):
     """Create a DMAP tag with string data."""
-    return (
-        name.encode("utf-8")
-        + len(value).to_bytes(4, byteorder="big")
-        + value.encode("utf-8")
-    )
+    encoded = value.encode("utf-8")
+    return name.encode("utf-8") + len(encoded).to_bytes(4, byteorder="big") + encoded
 
 
 def container_tag(name, data):

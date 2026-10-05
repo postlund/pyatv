@@ -63,6 +63,14 @@ def test_parse_strings():
     assert "test string" == parser.first(parsed, "strb")
 
 
+def test_parse_non_ascii_string():
+    in_data = tags.string_tag("stra", "räksmörgås") + tags.string_tag("strb", "你好")
+    parsed = parser.parse(in_data, lookup_tag)
+    assert 2 == len(parsed)
+    assert "räksmörgås" == parser.first(parsed, "stra")
+    assert "你好" == parser.first(parsed, "strb")
+
+
 def test_parse_binary_plist():
     data = {"key": "value"}
     in_data = tags.raw_tag("plst", plistlib.dumps(data, fmt=plistlib.FMT_BINARY))
