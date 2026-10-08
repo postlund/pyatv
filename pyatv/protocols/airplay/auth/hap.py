@@ -12,6 +12,7 @@ from pyatv.auth.hap_pairing import (
 )
 from pyatv.auth.hap_srp import SRPAuthHandler
 from pyatv.exceptions import InvalidResponseError
+from pyatv.protocols.airplay.auth.hap_transient import check_pairing_error
 from pyatv.support import log_binary
 from pyatv.support.http import HttpConnection, HttpResponse
 
@@ -25,11 +26,13 @@ _AIRPLAY_HEADERS = {
 }
 
 
-def _get_pairing_data(resp: HttpResponse):
+def _get_pairing_data(resp: HttpResponse, step: str = ""):
     if not isinstance(resp.body, bytes):
         raise InvalidResponseError(f"got unexpected response: {resp.body}")
 
-    return hap_tlv8.read_tlv(resp.body)
+    pairing_data = hap_tlv8.read_tlv(resp.body)
+    check_pairing_error(pairing_data, step)
+    return pairing_data
 
 
 class AirPlayHapPairSetupProcedure(PairSetupProcedure):
@@ -55,7 +58,7 @@ class AirPlayHapPairSetupProcedure(PairSetupProcedure):
         resp = await self.http.post(
             "/pair-setup", body=hap_tlv8.write_tlv(data), headers=_AIRPLAY_HEADERS
         )
-        pairing_data = _get_pairing_data(resp)
+        pairing_data = _get_pairing_data(resp, "M2")
 
         self._atv_salt = pairing_data[hap_tlv8.TlvValue.Salt]
         self._atv_pub_key = pairing_data[hap_tlv8.TlvValue.PublicKey]
@@ -77,9 +80,10 @@ class AirPlayHapPairSetupProcedure(PairSetupProcedure):
             hap_tlv8.TlvValue.PublicKey: pub_key,
             hap_tlv8.TlvValue.Proof: proof,
         }
-        await self.http.post(
+        resp = await self.http.post(
             "/pair-setup", body=hap_tlv8.write_tlv(data), headers=_AIRPLAY_HEADERS
         )
+        _get_pairing_data(resp, "M4")
 
         data = {
             hap_tlv8.TlvValue.SeqNo: b"\x05",
@@ -88,7 +92,7 @@ class AirPlayHapPairSetupProcedure(PairSetupProcedure):
         resp = await self.http.post(
             "/pair-setup", body=hap_tlv8.write_tlv(data), headers=_AIRPLAY_HEADERS
         )
-        pairing_data = _get_pairing_data(resp)
+        pairing_data = _get_pairing_data(resp, "M6")
 
         encrypted_data = pairing_data[hap_tlv8.TlvValue.EncryptedData]
         return self.srp.step4(encrypted_data)
