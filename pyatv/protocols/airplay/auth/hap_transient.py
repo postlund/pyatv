@@ -14,7 +14,7 @@ from typing import Any, Dict, Tuple
 from pyatv.auth import hap_tlv8
 from pyatv.auth.hap_pairing import PairVerifyProcedure
 from pyatv.auth.hap_srp import SRPAuthHandler, hkdf_expand
-from pyatv.exceptions import InvalidResponseError
+from pyatv.exceptions import AuthenticationError, InvalidResponseError
 from pyatv.support import log_binary
 from pyatv.support.http import HttpConnection, HttpResponse
 
@@ -28,6 +28,24 @@ _AIRPLAY_HEADERS = {
 }
 
 TRANSIENT_PIN = 3939
+
+
+def check_pairing_error(pairing_data: Dict[Any, bytes], step: str) -> None:
+    """Raise AuthenticationError if a pair-setup response carries an error TLV."""
+    error = pairing_data.get(hap_tlv8.TlvValue.Error)
+    if error is None:
+        return
+
+    code = int.from_bytes(error, byteorder="little")
+    backoff = pairing_data.get(hap_tlv8.TlvValue.BackOff)
+    delay = int.from_bytes(backoff, byteorder="little") if backoff else None
+    message = f"pair-setup {step} rejected by device (error {code}"
+    if delay is not None:
+        message += f", retry after {delay}s"
+    message += ")"
+    if code == hap_tlv8.ErrorCode.Authentication:
+        message += "; the device did not accept the transient pairing proof"
+    raise AuthenticationError(message)
 
 
 class AirPlayHapTransientPairVerifyProcedure(PairVerifyProcedure):
@@ -63,6 +81,7 @@ class AirPlayHapTransientPairVerifyProcedure(PairVerifyProcedure):
             raise InvalidResponseError(f"got unexpected response: {resp.body}")
 
         pairing_data = hap_tlv8.read_tlv(resp.body)
+        check_pairing_error(pairing_data, "M2")
 
         atv_salt = pairing_data[hap_tlv8.TlvValue.Salt]
         atv_pub_key = pairing_data[hap_tlv8.TlvValue.PublicKey]
@@ -75,9 +94,16 @@ class AirPlayHapTransientPairVerifyProcedure(PairVerifyProcedure):
             hap_tlv8.TlvValue.PublicKey: pub_key,
             hap_tlv8.TlvValue.Proof: proof,
         }
-        await self.http.post(
+        resp = await self.http.post(
             "/pair-setup", body=hap_tlv8.write_tlv(data), headers=_AIRPLAY_HEADERS
         )
+        if not isinstance(resp.body, bytes):
+            raise InvalidResponseError(f"got unexpected response: {resp.body}")
+
+        # The device answers M3 with 200 OK even when the proof is wrong. Without
+        # this check, encryption would be enabled with keys the device never
+        # derived and the next request (RTSP SETUP) would never be answered.
+        check_pairing_error(hap_tlv8.read_tlv(resp.body), "M4")
 
         return True
 
