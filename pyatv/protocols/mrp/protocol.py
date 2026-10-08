@@ -120,7 +120,9 @@ class MrpProtocol(MessageDispatcher[int, protobuf.ProtocolMessage]):
         self._outstanding: Dict[str, OutstandingMessage] = {}
         self._state: ProtocolState = ProtocolState.NOT_CONNECTED
 
-    async def start(self, skip_initial_messages: bool = False) -> None:
+    async def start(
+        self, skip_initial_messages: bool = False, skip_keyboard: bool = False
+    ) -> None:
         """Connect to device and listen to incoming messages."""
         if self._state != ProtocolState.NOT_CONNECTED:
             raise exceptions.InvalidStateError(self._state.name)
@@ -162,7 +164,8 @@ class MrpProtocol(MessageDispatcher[int, protobuf.ProtocolMessage]):
 
             # Subscribe to updates at this stage
             await self.send_and_receive(messages.client_updates_config())
-            await self.send_and_receive(messages.get_keyboard_session())
+            if not skip_keyboard:
+                await self.send_and_receive(messages.get_keyboard_session())
         except Exception:
             # Something went wrong, let's do cleanup
             self.stop()

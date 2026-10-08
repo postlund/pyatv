@@ -26,6 +26,7 @@ from pyatv.interface import (
     Stream,
 )
 from pyatv.protocols import mrp
+from pyatv.protocols.airplay import relay
 from pyatv.protocols.airplay.ap2_session import AP2Session
 from pyatv.protocols.airplay.auth import extract_credentials
 from pyatv.protocols.airplay.mrp_connection import AirPlayMrpConnection
@@ -375,6 +376,8 @@ def setup(  # pylint: disable=too-many-locals
 
     if mrp_tunnel == MrpTunnel.Disable:
         _LOGGER.debug("Remote control tunnel disabled by setting")
+    elif mrp_tunnel == MrpTunnel.Relay:
+        yield relay.setup(core, credentials)
     elif mrp_tunnel == MrpTunnel.Force:
         _LOGGER.debug("Remote control channel is supported (forced)")
         yield _create_mrp_tunnel_data(core, credentials)

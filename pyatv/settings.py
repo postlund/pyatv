@@ -68,6 +68,9 @@ class MrpTunnel(str, Enum):
     Force = "force"
     """Force set up of MRP tunnel even if remote device does not supports it."""
 
+    Relay = "relay"
+    """Use the experimental controlType-1 relay for existing sender playback."""
+
     Disable = "disable"
     """Fully disable set up of MRP tunnel."""
 

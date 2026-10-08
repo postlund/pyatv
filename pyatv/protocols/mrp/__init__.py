@@ -6,7 +6,18 @@ import datetime
 import logging
 import math
 import re
-from typing import Any, Dict, Generator, List, Mapping, Optional, Set, Tuple, cast
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    List,
+    Mapping,
+    Optional,
+    Set,
+    Tuple,
+    cast,
+)
 
 from aiohttp import ClientError, ClientSession
 
@@ -1100,6 +1111,9 @@ def create_with_connection(  # pylint: disable=too-many-locals
     core: Core,
     connection: AbstractMrpConnection,
     requires_heatbeat: bool = True,
+    skip_keyboard: bool = False,
+    remote_control_factory: Callable[..., MrpRemoteControl] = MrpRemoteControl,
+    audio_factory: Callable[..., MrpAudio] = MrpAudio,
 ) -> SetupData:
     """Set up a new MRP service from a connection."""
     protocol = MrpProtocol(
@@ -1107,13 +1121,13 @@ def create_with_connection(  # pylint: disable=too-many-locals
     )
     psm = PlayerStateManager(protocol)
 
-    remote_control = MrpRemoteControl(core.loop, psm, protocol)
+    remote_control = remote_control_factory(core.loop, psm, protocol)
     metadata = MrpMetadata(
         protocol, psm, core.config.identifier, core.session_manager.session
     )
     power = MrpPower(core.loop, protocol, remote_control)
     push_updater = MrpPushUpdater(metadata, psm, core.state_dispatcher)
-    audio = MrpAudio(protocol, core.state_dispatcher)
+    audio = audio_factory(protocol, core.state_dispatcher)
 
     interfaces = {
         RemoteControl: remote_control,
@@ -1125,7 +1139,7 @@ def create_with_connection(  # pylint: disable=too-many-locals
     }
 
     async def _connect() -> bool:
-        await protocol.start()
+        await protocol.start(skip_keyboard=skip_keyboard)
         if requires_heatbeat:
             protocol.enable_heartbeat()
         return True
