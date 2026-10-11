@@ -1,15 +1,18 @@
 """Unit tests for pyatv.protocols.airplay."""
 
 from ipaddress import ip_address
+from unittest.mock import patch
 
 from deepdiff import DeepDiff
 import pytest
 
+from pyatv import exceptions
+from pyatv.auth.hap_tlv8 import TlvValue
 from pyatv.const import DeviceModel, OperatingSystem, PairingRequirement, Protocol
-from pyatv.core import MutableService, mdns
+from pyatv.core import MutableService, create_core, mdns
 from pyatv.interface import DeviceInfo
-from pyatv.protocols.airplay import device_info, scan, service_info
-from pyatv.protocols.airplay.utils import AirPlayFlags
+from pyatv.protocols.airplay import device_info, scan, service_info, setup
+from pyatv.settings import MrpTunnel
 
 AIRPLAY_SERVICE = "_airplay._tcp.local"
 
@@ -135,3 +138,52 @@ async def test_service_info_pairing(airplay_props, devinfo, pairing_req):
     )
 
     assert airplay_service.pairing == pairing_req
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("stage", ["connect", "setup_remote_control"])
+@pytest.mark.parametrize(
+    "error,expected",
+    [
+        (exceptions.AuthenticationError("rejected"), exceptions.AuthenticationError),
+        (exceptions.BackOffError("retry later"), exceptions.BackOffError),
+        (exceptions.NoCredentialsError("missing"), exceptions.NoCredentialsError),
+        (
+            exceptions.InvalidCredentialsError("invalid"),
+            exceptions.InvalidCredentialsError,
+        ),
+        (KeyError(TlvValue.Salt), exceptions.ProtocolError),
+        (exceptions.InvalidResponseError("invalid response"), exceptions.ProtocolError),
+        (
+            exceptions.HttpError("credentials required", 470),
+            exceptions.InvalidCredentialsError,
+        ),
+        (exceptions.HttpError("server error", 500), exceptions.HttpError),
+    ],
+)
+async def test_remote_control_connection_errors(
+    airplay_conf, session_manager, stage, error, expected
+):
+    core = await create_core(
+        airplay_conf,
+        airplay_conf.get_service(Protocol.AirPlay),
+        session_manager=session_manager,
+    )
+    core.settings.protocols.airplay.mrp_tunnel = MrpTunnel.Force
+
+    with patch("pyatv.protocols.airplay.AP2Session", autospec=True) as session_class:
+        session = session_class.return_value
+        getattr(session, stage).side_effect = error
+        session.stop.return_value = set()
+        tunnel = next(data for data in setup(core) if data.protocol == Protocol.MRP)
+
+        try:
+            with pytest.raises(expected) as raised:
+                await tunnel.connect()
+            if type(error) is expected:
+                assert raised.value is error
+            else:
+                assert raised.value.__cause__ is error
+            session.start_keep_alive.assert_not_called()
+        finally:
+            tunnel.close()
