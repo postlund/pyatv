@@ -344,6 +344,7 @@ class CompanionAPI(
         y: float = float(start_y)
         await self.hid_event(int(x), int(y), TouchAction.Press)
         sleep_time = float(TOUCHPAD_DELAY_MS / 1000)
+        await asyncio.sleep(sleep_time)
         current_time = time.time_ns()
         while current_time < end_time:
             x = x + float(end_x - x) * TOUCHPAD_DELAY_MS * 1000000 / (
@@ -352,10 +353,8 @@ class CompanionAPI(
             y = y + float(end_y - y) * TOUCHPAD_DELAY_MS * 1000000 / (
                 end_time - current_time
             )
-            x = max(x, 0)
-            y = max(y, 0)
-            x = min(x, TOUCHPAD_WIDTH)
-            y = min(y, TOUCHPAD_HEIGHT)
+            x = max(min(start_x, end_x), min(x, max(start_x, end_x)))
+            y = max(min(start_y, end_y), min(y, max(start_y, end_y)))
             await self.hid_event(int(x), int(y), TouchAction.Hold)
             await asyncio.sleep(sleep_time)
             current_time = time.time_ns()
