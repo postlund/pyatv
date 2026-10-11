@@ -5,6 +5,7 @@ from ipaddress import IPv4Address, ip_address
 import logging
 import math
 import socket
+import struct
 from types import SimpleNamespace
 import typing
 import weakref
@@ -247,7 +248,13 @@ class UnicastDnsSdClientProtocol(asyncio.Protocol):
             Total=len(self.queries),
         )
 
-        self.parser.add_message(DnsMessage().unpack(data))
+        try:
+            decoded_msg = DnsMessage().unpack(data)
+        except (UnicodeDecodeError, struct.error):
+            log_binary(_LOGGER, "Failed to decode message", Msg=data)
+            return
+
+        self.parser.add_message(decoded_msg)
         self.received_responses += 1
 
         if self.received_responses == len(self.queries):
@@ -423,17 +430,13 @@ class MulticastDnsSdClientProtocol:  # pylint: disable=too-many-instance-attribu
             Data=data,
         )
 
-        query_resp = self.query_responses.setdefault(
-            addr[0], QueryResponse(count=0, deep_sleep=False, parser=ServiceParser())
-        )
-
         # Suppress decode errors for now (but still log)
         try:
             decoded_msg = DnsMessage().unpack(data)
 
             parser = ServiceParser()
             services = parser.add_message(decoded_msg).parse()
-        except UnicodeDecodeError:
+        except (UnicodeDecodeError, struct.error):
             log_binary(_LOGGER, "Failed to decode message", Msg=data)
             return
 
@@ -448,6 +451,9 @@ class MulticastDnsSdClientProtocol:  # pylint: disable=too-many-instance-attribu
             ):
                 return
 
+        query_resp = self.query_responses.setdefault(
+            addr[0], QueryResponse(count=0, deep_sleep=False, parser=ServiceParser())
+        )
         is_sleep_proxy = all(service.port == 0 for service in services)
         query_resp.count += 1
         query_resp.deep_sleep |= is_sleep_proxy
