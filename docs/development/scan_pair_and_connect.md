@@ -249,6 +249,14 @@ connecting, see next chapter.
 protocol to use. This is no longer needed as the most appropriate protocol
 will be used automatically.*
 
+## AirPlay remote control connection errors
+
+When authentication raises `AuthenticationError`, `InvalidCredentialsError`, or
+`NoCredentialsError`, the AirPlay remote control tunnel preserves that exception
+for the caller. It also preserves `BackOffError` so callers can delay reconnecting.
+Other malformed responses remain `ProtocolError`; a missing response field alone
+does not establish that credentials are invalid.
+
 ## Restoring credentials
 
 When using a storage module, credentials will be loaded automatically without any additional code.

@@ -276,6 +276,13 @@ def _create_mrp_tunnel_data(core: Core, credentials: HapCredentials):
                     "invalid or missing credentials"
                 ) from ex
             raise
+        except (
+            exceptions.AuthenticationError,
+            exceptions.BackOffError,
+            exceptions.NoCredentialsError,
+            exceptions.InvalidCredentialsError,
+        ):
+            raise
         except Exception as ex:
             raise exceptions.ProtocolError(
                 "Failed to set up remote control channel"
