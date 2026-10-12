@@ -227,6 +227,11 @@ $ atvscript -s 10.0.10.81 menu
 {"result": "success", "datetime": "2020-04-06T18:51:04.758569+02:00", "command": "menu"}
 ```
 
+`volume_up` and `volume_down` use the {% include api i="interface.Audio" %}
+interface. `turn_on` and `turn_off` are also supported through
+{% include api i="interface.Power" %}. These commands return the same success
+output as remote control buttons.
+
 ## Push, Power, Audio and Keyboard Updates
 
 Push, power, audio and keyboard updates are printed to the terminal as they happen:

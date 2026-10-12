@@ -329,6 +329,14 @@ async def _run_command(atv, args, abort_sem, loop):
         await wait_for_input(loop, abort_sem)
         return output(True, values={"push_updates": "finished"})
 
+    if args.command in ("volume_up", "volume_down"):
+        await getattr(atv.audio, args.command)()
+        return output(True, values={"command": args.command})
+
+    if args.command in ("turn_on", "turn_off"):
+        await getattr(atv.power, args.command)()
+        return output(True, values={"command": args.command})
+
     if args.command in retrieve_commands(RemoteControl):
         await getattr(atv.remote_control, args.command)()
         return output(True, values={"command": args.command})

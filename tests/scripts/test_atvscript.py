@@ -2,11 +2,14 @@
 
 import json
 import logging
+from types import SimpleNamespace
+from unittest.mock import AsyncMock
 
 from deepdiff import DeepDiff
 import pytest
 
 from pyatv.const import Protocol
+from pyatv.scripts import atvscript
 
 from tests.scripts.conftest import AIRPLAY_ID, DMAP_ID, IP_1, IP_2, MRP_ID
 
@@ -107,3 +110,36 @@ async def test_mrp_idle(scriptenv):
         },
     )
     assert exit_code == 0
+
+
+@pytest.mark.parametrize(
+    "command,interface",
+    [
+        ("volume_up", "audio"),
+        ("volume_down", "audio"),
+        ("turn_on", "power"),
+        ("turn_off", "power"),
+        ("play", "remote_control"),
+    ],
+)
+async def test_command_interface(command, interface):
+    atv = SimpleNamespace(
+        audio=AsyncMock(), power=AsyncMock(), remote_control=AsyncMock()
+    )
+    result = await atvscript._run_command(
+        atv, SimpleNamespace(command=command), None, None
+    )
+    assert_json_output(json.dumps(result), {"result": "success", "command": command})
+    getattr(getattr(atv, interface), command).assert_awaited_once_with()
+    if interface != "remote_control":
+        getattr(atv.remote_control, command).assert_not_awaited()
+
+
+@pytest.mark.parametrize("command", ["volume", "set_volume", "power_state", "unknown"])
+async def test_unsupported_command(command):
+    result = await atvscript._run_command(
+        SimpleNamespace(), SimpleNamespace(command=command), None, None
+    )
+    assert_json_output(
+        json.dumps(result), {"result": "failure", "error": "unsupported_command"}
+    )
