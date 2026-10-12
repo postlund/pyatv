@@ -264,3 +264,58 @@ def test_parse_ignore_duplicate_records():
     records = parser.table["service._abc._tcp.local"]
     assert mdns.QueryType.SRV in records
     assert len(records[mdns.QueryType.SRV]) == 1
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("length", range(12))
+@pytest.mark.parametrize("unicast", [False, True])
+async def test_truncated_dns_header_then_valid_response(length, unicast):
+    if unicast:
+        protocol = mdns.UnicastDnsSdClientProtocol(
+            [MEDIAREMOTE_SERVICE], "127.0.0.1", 1
+        )
+    else:
+        protocol = mdns.MulticastDnsSdClientProtocol(
+            asyncio.get_running_loop(), [MEDIAREMOTE_SERVICE], "224.0.0.251", 5353, None
+        )
+    address = ("127.0.0.1", 5353)
+    protocol.datagram_received(bytes(length), address)
+    if unicast:
+        assert protocol.received_responses == 0
+    else:
+        assert not protocol.query_responses
+    query = mdns.create_service_queries([MEDIAREMOTE_SERVICE], dns.QueryType.PTR)[0]
+    response = fake_udns.create_response(query, TEST_SERVICES)
+    protocol.datagram_received(response.pack(), address)
+    if unicast:
+        assert protocol.received_responses == 1
+        services = protocol.parser.parse()
+    else:
+        assert protocol.query_responses[address[0]].count == 1
+        services = protocol.query_responses[address[0]].parser.parse()
+    assert any(service.type == MEDIAREMOTE_SERVICE for service in services)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("unrelated_service", [False, True], ids=["empty", "unrelated"])
+async def test_filtered_multicast_reply_then_valid_response(unrelated_service):
+    protocol = mdns.MulticastDnsSdClientProtocol(
+        asyncio.get_running_loop(), [MEDIAREMOTE_SERVICE], "224.0.0.251", 5353, None
+    )
+    address = ("127.0.0.1", 5353)
+    response = dns.DnsMessage()
+    if unrelated_service:
+        service_type = "_unrelated._tcp.local"
+        query = mdns.create_service_queries([service_type], dns.QueryType.PTR)[0]
+        response = fake_udns.create_response(
+            query, {service_type: TEST_SERVICES[MEDIAREMOTE_SERVICE]}
+        )
+    protocol.datagram_received(response.pack(), address)
+    assert not protocol.query_responses
+
+    query = mdns.create_service_queries([MEDIAREMOTE_SERVICE], dns.QueryType.PTR)[0]
+    response = fake_udns.create_response(query, TEST_SERVICES)
+    protocol.datagram_received(response.pack(), address)
+    assert protocol.query_responses[address[0]].count == 1
+    services = protocol.query_responses[address[0]].parser.parse()
+    assert any(service.type == MEDIAREMOTE_SERVICE for service in services)
