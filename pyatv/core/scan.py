@@ -649,14 +649,21 @@ class ZeroconfUnicastScanner(ZeroconfScanner):
         # or the network is dropping multicast responses.
         # We will try to send unicast PTR queries for the missing types.
         infos_by_address_type = self.infos_by_address_type
+        # Ask for every service type registered with the scanner. Protocols
+        # register theirs after the scanner is created, so the per-host table
+        # built in __init__ only knows device info and sleep proxy. Asking for
+        # device info alone finds nothing when a device does not answer it,
+        # which is the case across subnets (#2929).
+        all_types = [f"{service_type}." for service_type in self._services]
         for host in self.hosts:
             # We do not send queries for sleep proxy because
             # sleepy proxy is not useful if multicast is broken
             # and its not required to complete service discovery.
             if needed_types := [
                 type_
-                for type_, info in infos_by_address_type[host].items()
-                if info is None and type_ != SLEEP_PROXY_TYPE
+                for type_ in all_types
+                if type_ != SLEEP_PROXY_TYPE
+                and infos_by_address_type[host].get(type_) is None
             ]:
                 _LOGGER.debug(
                     "%s: Multicast is broken or device offline, "

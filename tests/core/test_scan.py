@@ -388,10 +388,19 @@ async def test_scan_with_zeroconf_unicast_not_found():
     target = last_call[1]
     assert target == "127.0.0.1"
     dns_outgoing: DNSOutgoing = last_call[0]
-    assert len(dns_outgoing.questions) == 1
-    question = dns_outgoing.questions[0]
-    assert question.name == "_device-info._tcp.local."
-    assert question.unicast is True
+    # The fallback asks for every service type registered with the scanner, not
+    # only _device-info: a device on another subnet may answer the protocol
+    # types and never _device-info (#2929). Sleep proxy is left out on purpose.
+    names = {question.name for question in dns_outgoing.questions}
+    assert {
+        "_device-info._tcp.local.",
+        "_airplay._tcp.local.",
+        "_companion-link._tcp.local.",
+        "_raop._tcp.local.",
+        "_mediaremotetv._tcp.local.",
+    } <= names
+    assert "_sleep-proxy._udp.local." not in names
+    assert all(question.unicast for question in dns_outgoing.questions)
     assert not results
     await browser.async_cancel()
     await aiozc.async_close()
