@@ -264,3 +264,88 @@ def test_parse_ignore_duplicate_records():
     records = parser.table["service._abc._tcp.local"]
     assert mdns.QueryType.SRV in records
     assert len(records[mdns.QueryType.SRV]) == 1
+
+
+# An mDNS reflector (or repeater) between subnets forwards every device's responses with
+# its own address as source, so the packet source does not identify the device.
+REFLECTOR = ("10.0.0.1", 5353)
+AIRPLAY_SERVICE = "_airplay._tcp.local"
+
+
+def _airplay_response(
+    service: Tuple[str, fake_udns.FakeDnsService], sleep_proxy: bool = False
+) -> bytes:
+    req = mdns.create_service_queries([AIRPLAY_SERVICE], mdns.QueryType.PTR)[0]
+    return fake_udns.create_response(
+        req, dict([service]), sleep_proxy=sleep_proxy
+    ).pack()
+
+
+async def _multicast_responses(packets: List[bytes]) -> List[mdns.Response]:
+    protocol = mdns.MulticastDnsSdClientProtocol(
+        asyncio.get_running_loop(), [AIRPLAY_SERVICE], "224.0.0.251", 5353, None
+    )
+    for packet in packets:
+        protocol.datagram_received(packet, REFLECTOR)
+    return await protocol.get_response(timeout=0)
+
+
+def _by_address(responses: List[mdns.Response]) -> dict:
+    return {
+        str(service.address): response
+        for response in responses
+        for service in response.services
+        if service.address is not None
+    }
+
+
+def _airplay_names(response: mdns.Response) -> List[str]:
+    return [s.name for s in response.services if s.type == AIRPLAY_SERVICE]
+
+
+@pytest.mark.asyncio
+async def test_multicast_reflected_responses_are_kept_per_device():
+    responses = await _multicast_responses(
+        [
+            _airplay_response(
+                fake_udns.airplay_service(
+                    "Living Room", "AA:AA", addresses=["10.0.1.2"], model="AppleTV14,1"
+                )
+            ),
+            _airplay_response(
+                fake_udns.airplay_service(
+                    "Kitchen",
+                    "BB:BB",
+                    addresses=["10.0.1.3"],
+                    model="AudioAccessory5,1",
+                )
+            ),
+        ]
+    )
+
+    by_address = _by_address(responses)
+    assert len(responses) == 2
+    assert _airplay_names(by_address["10.0.1.2"]) == ["Living Room"]
+    assert _airplay_names(by_address["10.0.1.3"]) == ["Kitchen"]
+    assert by_address["10.0.1.2"].model == "AppleTV14,1"
+    assert by_address["10.0.1.3"].model == "AudioAccessory5,1"
+
+
+@pytest.mark.asyncio
+async def test_multicast_reflected_deep_sleep_only_for_sleeping_device():
+    awake = fake_udns.airplay_service("Living Room", "AA:AA", addresses=["10.0.1.2"])
+    sleeping = fake_udns.airplay_service("Kitchen", "BB:BB", addresses=["10.0.1.3"])
+
+    responses = await _multicast_responses(
+        [
+            _airplay_response(awake),
+            # The sleeping device's records first come from its sleep proxy (PTR only),
+            # then in full.
+            _airplay_response(sleeping, sleep_proxy=True),
+            _airplay_response(sleeping),
+        ]
+    )
+
+    by_address = _by_address(responses)
+    assert not by_address["10.0.1.2"].deep_sleep
+    assert by_address["10.0.1.3"].deep_sleep

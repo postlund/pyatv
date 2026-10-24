@@ -99,6 +99,21 @@ def _get_model(services: typing.List[Service]) -> typing.Optional[str]:
     return None
 
 
+def _response_key(services: typing.List[Service], source: str) -> str:
+    """Return which device a multicast response is about.
+
+    That is the address the response advertises for its services. The source address of
+    the packet is not reliable: an mDNS reflector or repeater between subnets forwards
+    the responses of every device with its own address as source. A response that
+    advertises no address (e.g. PTR records from a sleep proxy) or several falls back
+    to the source address.
+    """
+    addresses = {service.address for service in services if service.address is not None}
+    if len(addresses) == 1:
+        return str(addresses.pop())
+    return source
+
+
 def _first_rd(qtype: QueryType, entries: typing.Dict[int, typing.List[DnsResource]]):
     return entries[qtype][0].rd if qtype in entries else None
 
@@ -343,6 +358,10 @@ class MulticastDnsSdClientProtocol:  # pylint: disable=too-many-instance-attribu
         self.semaphore: asyncio.Semaphore = asyncio.Semaphore(value=0)
         self.parser = ServiceParser()
         self._unicasts: typing.Dict[IPv4Address, typing.List[bytes]] = {}
+        # (name, type) of services answered by a sleep proxy. Such a response has no
+        # address to group it by (see _response_key), so the device whose full records
+        # carry these names is flagged as sleeping, wherever those records come from.
+        self._sleeping: typing.Set[typing.Tuple[str, str]] = set()
         self._task: typing.Optional[asyncio.Future] = None
         self._receivers: typing.List[asyncio.BaseProtocol] = []
 
@@ -372,15 +391,20 @@ class MulticastDnsSdClientProtocol:  # pylint: disable=too-many-instance-attribu
                     pass
                 self._task = None
 
-        def _to_response(query_response: QueryResponse):
-            services = query_response.parser.parse()
-            return Response(
-                services=services,
-                deep_sleep=query_response.deep_sleep,
-                model=_get_model(services),
-            )
+        return [
+            self._to_response(response) for response in self.query_responses.values()
+        ]
 
-        return [_to_response(response) for response in self.query_responses.values()]
+    def _to_response(self, query_response: QueryResponse) -> Response:
+        services = query_response.parser.parse()
+        return Response(
+            services=services,
+            deep_sleep=query_response.deep_sleep
+            or any(
+                (service.name, service.type) in self._sleeping for service in services
+            ),
+            model=_get_model(services),
+        )
 
     async def _resend_loop(self, timeout):
         for _ in range(math.ceil(timeout)):
@@ -423,10 +447,6 @@ class MulticastDnsSdClientProtocol:  # pylint: disable=too-many-instance-attribu
             Data=data,
         )
 
-        query_resp = self.query_responses.setdefault(
-            addr[0], QueryResponse(count=0, deep_sleep=False, parser=ServiceParser())
-        )
-
         # Suppress decode errors for now (but still log)
         try:
             decoded_msg = DnsMessage().unpack(data)
@@ -448,26 +468,26 @@ class MulticastDnsSdClientProtocol:  # pylint: disable=too-many-instance-attribu
             ):
                 return
 
+        key = _response_key(services, addr[0])
+        query_resp = self.query_responses.setdefault(
+            key, QueryResponse(count=0, deep_sleep=False, parser=ServiceParser())
+        )
+
         is_sleep_proxy = all(service.port == 0 for service in services)
         query_resp.count += 1
         query_resp.deep_sleep |= is_sleep_proxy
         query_resp.parser.add_message(decoded_msg)
 
         if is_sleep_proxy:
+            self._sleeping.update((service.name, service.type) for service in services)
             self._unicasts[addr[0]] = create_service_queries(
                 [service.name + "." + service.type for service in services],
                 QueryType.ANY,
             )
         elif query_resp.count >= len(self.queries):
-            response = Response(
-                services=query_resp.parser.parse(),
-                deep_sleep=query_resp.deep_sleep,
-                model=_get_model(query_resp.parser.parse()),
-            )
-
-            if self.end_condition(response):
+            if self.end_condition(self._to_response(query_resp)):
                 # Matches end condition: replace everything found so far and abort
-                self.query_responses = {addr[0]: self.query_responses[addr[0]]}
+                self.query_responses = {key: query_resp}
                 self.semaphore.release()
                 self.close()
 
