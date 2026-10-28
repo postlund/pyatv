@@ -444,11 +444,12 @@ class CompanionAudio(Audio):
             self._volume = resp["_c"]["_vol"] * 100.0
             _LOGGER.debug("Volume changed to %f", self._volume)
             self._volume_event.set()
+            self.core.state_dispatcher.dispatch(UpdatedState.Volume, self.volume)
         else:
-            # No volume control means we know nothing about the volume
+            # No volume control means we know nothing about the volume. Do not
+            # dispatch it, as other protocols (e.g. RAOP) would treat 0.0 as a real
+            # level and mute audio streams.
             self._volume = 0.0
-
-        self.core.state_dispatcher.dispatch(UpdatedState.Volume, self.volume)
 
     @property
     def volume(self) -> float:
