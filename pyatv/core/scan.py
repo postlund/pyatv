@@ -24,6 +24,7 @@ from typing import (
 )
 
 from zeroconf import (
+    BadTypeInNameException,
     DNSOutgoing,
     DNSPointer,
     DNSQuestion,
@@ -413,7 +414,14 @@ class ZeroconfScanner(BaseScanner):
             zc_type = f"{type_}."
             for record in cache.async_all_by_details(zc_type, _TYPE_PTR, _CLASS_IN):
                 ptr_name = cast(DNSPointer, record).alias
-                service_info = AsyncServiceInfo(zc_type, ptr_name)
+                try:
+                    service_info = AsyncServiceInfo(zc_type, ptr_name)
+                except BadTypeInNameException:
+                    # A device on the network advertises a name zeroconf refuses
+                    # (for example one with a control character); skip it instead
+                    # of aborting the whole scan.
+                    _LOGGER.debug("Ignoring service with invalid name: %r", ptr_name)
+                    continue
                 infos.append(service_info)
                 name = _name_without_type(ptr_name, zc_type)
                 device_name = self._device_info_name[type_](name)

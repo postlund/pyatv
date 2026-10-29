@@ -326,6 +326,24 @@ async def test_scan_with_zeroconf_complete():
 
 
 @pytest.mark.asyncio
+async def test_scan_with_zeroconf_ignores_service_name_with_control_character():
+    bad_ptr_record = DNSPointer(
+        "_companion-link._tcp.local.",
+        const._TYPE_PTR,
+        const._CLASS_IN,
+        const._DNS_OTHER_TTL,
+        "Example-Mac\r._companion-link._tcp.local.",
+    )
+    aiozc, browser = await _create_zc_with_cache([*COMPLETE_RECORD_SET, bad_ptr_record])
+    results = await scan(asyncio.get_event_loop(), timeout=0, aiozc=aiozc)
+    atv: AppleTV = results[0]
+    assert isinstance(atv, AppleTV)
+    assert "_companion-link._tcp.local" in atv.properties
+    await browser.async_cancel()
+    await aiozc.async_close()
+
+
+@pytest.mark.asyncio
 async def test_scan_with_zeroconf_partial():
     aiozc, browser = await _create_zc_with_cache(PARTIAL_RECORD_SET)
     results = await scan(asyncio.get_event_loop(), timeout=0, aiozc=aiozc)
