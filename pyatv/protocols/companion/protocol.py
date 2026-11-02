@@ -173,6 +173,14 @@ class CompanionProtocol(
         if "_em" in unpacked_object:
             raise exceptions.ProtocolError(f"Command failed: {unpacked_object['_em']}")
 
+        # tvOS 27 can reject a command (e.g. _launchApp for an unknown bundle)
+        # with only an error code and domain, no "_em" message
+        if "_ec" in unpacked_object:
+            raise exceptions.ProtocolError(
+                f"Command failed: {unpacked_object.get('_ed', 'unknown domain')}"
+                f" error {unpacked_object['_ec']}"
+            )
+
         return unpacked_object
 
     def send_opack(self, frame_type: FrameType, data: Dict[str, Any]) -> None:
