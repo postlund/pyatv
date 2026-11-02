@@ -360,6 +360,26 @@ class FakeCompanionService(CompanionServerAuth, asyncio.Protocol):
     def handle__launchapp(self, message):
         bundle_id = message["_c"].get("_bundleID")
         url = message["_c"].get("_urlS")
+        if (
+            bundle_id is not None
+            and self.state.installed_apps
+            and bundle_id not in self.state.installed_apps
+        ):
+            # tvOS 27 rejects an unknown bundle with only a code and a domain,
+            # no "_em" message
+            self.send_to_client(
+                FrameType.E_OPACK,
+                {
+                    "_i": message["_i"],
+                    "_x": message["_x"],
+                    "_t": 3,
+                    "_c": {},
+                    "_ec": 4,
+                    "_ed": "FBSOpenApplicationServiceErrorDomain",
+                    "_eu": {"_ec": 4, "_ed": "FBSOpenApplicationErrorDomain"},
+                },
+            )
+            return
         if bundle_id is not None:
             self.state.active_app = bundle_id
         elif url is not None:

@@ -88,6 +88,17 @@ async def test_launch_app(companion_client, companion_state):
     await until(lambda: companion_state.active_app == TEST_APP)
 
 
+async def test_launch_app_raises_when_device_rejects_it(
+    companion_client, companion_state, companion_usecase
+):
+    companion_usecase.set_installed_apps({TEST_APP: TEST_APP_NAME})
+
+    with pytest.raises(exceptions.ProtocolError):
+        await companion_client.apps.launch_app(TEST_APP2)
+
+    assert companion_state.active_app is None
+
+
 async def test_launch_app_with_url(companion_client, companion_state):
     await companion_client.apps.launch_app(TEST_APP_URL)
     await until(lambda: companion_state.open_url == TEST_APP_URL)
