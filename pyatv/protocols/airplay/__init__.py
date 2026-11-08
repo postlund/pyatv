@@ -3,7 +3,7 @@
 import asyncio
 import logging
 import os
-from typing import Any, Dict, Generator, Mapping, Optional, Set
+from typing import Any, Dict, Generator, Mapping, Optional, Set, Union
 
 from pyatv import exceptions
 from pyatv.auth.hap_pairing import AuthenticationType, HapCredentials, parse_credentials
@@ -30,7 +30,7 @@ from pyatv.protocols.airplay.ap2_session import AP2Session
 from pyatv.protocols.airplay.auth import extract_credentials
 from pyatv.protocols.airplay.mrp_connection import AirPlayMrpConnection
 from pyatv.protocols.airplay.pairing import AirPlayPairingHandler
-from pyatv.protocols.airplay.player import AirPlayPlayer
+from pyatv.protocols.airplay.player import AirPlayPlayer, AirPlayVideoV2Player
 from pyatv.protocols.airplay.utils import (
     AirPlayFlags,
     AirPlayMajorVersion,
@@ -53,6 +53,15 @@ from pyatv.support.http import HttpConnection, StaticFileWebServer, http_connect
 from pyatv.support.rtsp import RtspSession
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def _video_v2_only(service: BaseService) -> bool:
+    """Return True if receiver supports video v2 but not v1 (/play)."""
+    features = parse_features(service.properties.get("features", "0x0"))
+    return (
+        AirPlayFlags.SupportsAirPlayVideoV2 in features
+        and AirPlayFlags.SupportsAirPlayVideoV1 not in features
+    )
 
 
 class AirPlayFeatures(Features):
@@ -131,7 +140,15 @@ class AirPlayStream(Stream):  # pylint: disable=too-few-public-methods
             )
             rtsp = RtspSession(self._connection)
             stream_protocol = self.create_airplay_protocol(self.service, rtsp)
-            player = AirPlayPlayer(rtsp, stream_protocol)
+            player: Union[AirPlayPlayer, AirPlayVideoV2Player]
+            if isinstance(stream_protocol, airplayv2.AirPlayV2) and _video_v2_only(
+                self.service
+            ):
+                player = AirPlayVideoV2Player(
+                    rtsp, stream_protocol, self.service.properties.get("deviceid", "")
+                )
+            else:
+                player = AirPlayPlayer(rtsp, stream_protocol)
             position = int(kwargs.get("position", 0))
             self._play_task = asyncio.ensure_future(player.play_url(url, position))
             return await self._play_task

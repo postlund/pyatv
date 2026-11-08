@@ -6,7 +6,7 @@ This module only deals with AirPlay 2 related channels right now.
 from abc import ABC
 import logging
 from random import randrange
-from typing import Any, List, NamedTuple, Optional, Tuple
+from typing import Any, Callable, List, NamedTuple, Optional, Tuple
 
 from pyatv.auth.hap_channel import AbstractHAPChannel
 from pyatv.protocols.airplay.utils import decode_plist_body, encode_plist_body
@@ -60,6 +60,11 @@ class BaseEventChannel(AbstractHAPChannel, ABC):
 class EventChannel(BaseEventChannel):
     """Connection used to handle the event channel."""
 
+    def __init__(self, output_key: bytes, input_key: bytes) -> None:
+        """Initialize a new EventChannel instance."""
+        super().__init__(output_key, input_key)
+        self.request_handler: Optional[Callable[[HttpRequest], None]] = None
+
     def handle_received(self) -> None:
         """Handle received data that was put in buffer."""
         self.buffer: bytes
@@ -93,6 +98,10 @@ class EventChannel(BaseEventChannel):
                         )
                     )
                 )
+
+                handler = self.request_handler
+                if handler is not None:
+                    handler(request)
             except Exception:
                 _LOGGER.exception("Failed to handle message on event channel")
 

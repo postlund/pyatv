@@ -3,9 +3,12 @@
 import asyncio
 from contextlib import asynccontextmanager
 import logging
+from typing import Any, Dict, Optional
+from uuid import uuid4
 
 from pyatv import exceptions
 from pyatv.protocols.raop.protocols import StreamProtocol, TimingServer
+from pyatv.protocols.raop.protocols.airplayv2 import AirPlayV2
 from pyatv.support.http import decode_bplist_from_body
 from pyatv.support.rtsp import RtspSession
 
@@ -116,3 +119,92 @@ class AirPlayPlayer:
                 break
 
             await asyncio.sleep(1)
+
+
+class AirPlayVideoV2Player:
+    """Play media from an URL on receivers only supporting AirPlay video v2.
+
+    Third party receivers (e.g. TVs) do not implement /play. The URL is instead added
+    to the playback queue of the receiver with commands sent to a remote control
+    stream and playback state is reported back as commands on the event channel.
+    """
+
+    def __init__(
+        self, rtsp: RtspSession, stream_protocol: AirPlayV2, receiver_id: str
+    ) -> None:
+        """Initialize a new AirPlayVideoV2Player instance."""
+        self.rtsp = rtsp
+        self.stream_protocol = stream_protocol
+        self.receiver_id = receiver_id
+        self._ended: asyncio.Event = asyncio.Event()
+        self._error: Optional[str] = None
+
+    async def play_url(self, url: str, position: float = 0) -> None:
+        """Play media from an URL on the device."""
+        async with timing_server(self.rtsp) as server:
+            await self.stream_protocol.setup_video_stream(
+                server.port, self.receiver_id, self._handle_command
+            )
+
+            await self._send(
+                {
+                    "type": "insertPlayQueueItem",
+                    "item": {
+                        "uuid": str(uuid4()).upper(),
+                        "Content-Location": url,
+                        "Start-Position": {
+                            "flags": 1,
+                            "value": int(position * 1e9),
+                            "epoch": 0,
+                            "timescale": 1000000000,
+                        },
+                        "mediaType": "file",
+                        "playbackRestrictions": 0,
+                        "referenceRestrictions": 3,
+                        "supportsIntegratedTimeline": False,
+                        "allowedCommonMediaClientDataKeys": 0,
+                        "snapTimeToPausePlayback": False,
+                        "clientBundleID": "dev.pyatv.GPU",
+                    },
+                }
+            )
+            # Pause (instead of advancing) at end of item, like iOS and macOS do
+            await self._send(
+                {"type": "setProperty", "property": "actionAtItemEnd", "value": 1}
+            )
+            await self._send({"type": "setRate", "rate": 1.0})
+
+            await self._wait_for_media_to_end()
+
+    async def _send(self, command: Dict[str, Any]) -> None:
+        resp = await self.stream_protocol.send_video_command(command)
+        if resp.code >= 400:
+            raise exceptions.PlaybackError(
+                f"command {command['type']} failed with status {resp.code}"
+            )
+
+    def _handle_command(self, command: Dict[str, Any]) -> None:
+        _LOGGER.debug("Received command from receiver: %s", command)
+        kind, name = command.get("type"), command.get("name")
+        if kind == "notification" and name == "itemPlayedToEnd":
+            self._ended.set()
+        elif kind == "notification" and name == "itemFailedToPlayToEnd":
+            self._error = str(command.get("params", "unknown error"))
+            self._ended.set()
+        elif kind == "playbackState" and name == "stopped":
+            self._ended.set()
+
+    async def _wait_for_media_to_end(self) -> None:
+        while not self._ended.is_set():
+            # Connection is closed by stop() or when the receiver goes away
+            if self.rtsp.connection.transport is None:
+                _LOGGER.debug("Connection was closed, assuming playback stopped")
+                break
+            try:
+                await asyncio.wait_for(self._ended.wait(), timeout=1.0)
+            except asyncio.TimeoutError:
+                pass
+
+        if self._error:
+            raise exceptions.PlaybackError(f"failed to play media: {self._error}")
+        _LOGGER.debug("media playback ended")

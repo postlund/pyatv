@@ -96,7 +96,7 @@ Here is a summary of what protocols various devices support:
 
 | **Protocol**    | **Devices** |
 | --------------- | ----------- |
-| AirPlay (video) | Apple TV (any)
+| AirPlay (video) | Apple TV (any), 3rd party AirPlay 2 receivers with video v2 (e.g. LG TVs)
 | Companion       | Apple TV 4(K), HomePod (mini)
 | DMAP            | Apple TV 2/3
 | MRP             | Apple TV 4(K), tvOS <=14
@@ -118,7 +118,9 @@ screen mirroring and image sharing.
 
 * Legacy pairing for older devices (e.g. Apple TV 3)
 * HAP based for AirPlay 2 features (only used for remote control)
-* Playing files with {% include api i="interface.Stream.play_url" %}
+* Playing files with {% include api i="interface.Stream.play_url" %}, also on receivers
+  only supporting AirPlay video v2 (e.g. 3rd party TVs, see
+  [AirPlay video v2](../protocols#video-v2-third-party-receivers))
 * Tunneling of MRP over AirPlay 2 to support tvOS 15 and the HomePod
 
 ### Limitations and notes
