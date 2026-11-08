@@ -96,6 +96,26 @@ async def test_play_queues_item_and_waits_for_end(rtsp):
     assert stream.commands[2]["rate"] == 1.0
 
 
+@pytest.mark.parametrize(
+    "url,position,media_type,start",
+    [
+        ("http://host/video.mp4", 0, "file", 0),
+        ("http://host/live/index.m3u8?token=x", 0, "streaming", None),
+        ("http://host/vod/index.M3U8", 1.5, "streaming", 1500000000),
+    ],
+)
+async def test_play_media_type(rtsp, url, position, media_type, start):
+    stream = FakeVideoStream(
+        rtsp, events=[{"type": "notification", "name": "itemPlayedToEnd"}]
+    )
+
+    await AirPlayVideoV2Player(rtsp, stream, RECEIVER_ID).play_url(url, position)
+
+    item = stream.commands[0]["item"]
+    assert item["mediaType"] == media_type
+    assert item.get("Start-Position", {}).get("value") == start
+
+
 async def test_play_ends_when_receiver_stops(rtsp):
     stream = FakeVideoStream(
         rtsp, events=[{"type": "playbackState", "name": "stopped", "reason": "ended"}]

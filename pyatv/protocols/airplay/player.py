@@ -4,6 +4,7 @@ import asyncio
 from contextlib import asynccontextmanager
 import logging
 from typing import Any, Dict, Optional
+from urllib.parse import urlparse
 from uuid import uuid4
 
 from pyatv import exceptions
@@ -121,6 +122,36 @@ class AirPlayPlayer:
             await asyncio.sleep(1)
 
 
+INVALID_TIME = {"flags": 0, "value": 0, "epoch": 0, "timescale": 0}
+
+
+def _queue_item(url: str, position: float) -> Dict[str, Any]:
+    """Return item for insertPlayQueueItem, as sent by macOS."""
+    item: Dict[str, Any] = {
+        "uuid": str(uuid4()).upper(),
+        "Content-Location": url,
+        "playbackRestrictions": 0,
+        "referenceRestrictions": 3,
+        "supportsIntegratedTimeline": False,
+        "allowedCommonMediaClientDataKeys": 0,
+        "snapTimeToPausePlayback": False,
+        "clientBundleID": "dev.pyatv.GPU",
+    }
+    start = {"flags": 1, "value": int(position * 1e9), "epoch": 0, "timescale": 10**9}
+
+    # HLS must be "streaming": live playlists never start as "file"
+    if urlparse(url).path.lower().endswith((".m3u8", ".m3u")):
+        item["mediaType"] = "streaming"
+        item["timeToPausePlayback"] = INVALID_TIME
+        item["timeToPauseBuffering"] = INVALID_TIME
+        if position > 0:
+            item["Start-Position"] = start
+    else:
+        item["mediaType"] = "file"
+        item["Start-Position"] = start
+    return item
+
+
 class AirPlayVideoV2Player:
     """Play media from an URL on receivers only supporting AirPlay video v2.
 
@@ -147,26 +178,7 @@ class AirPlayVideoV2Player:
             )
 
             await self._send(
-                {
-                    "type": "insertPlayQueueItem",
-                    "item": {
-                        "uuid": str(uuid4()).upper(),
-                        "Content-Location": url,
-                        "Start-Position": {
-                            "flags": 1,
-                            "value": int(position * 1e9),
-                            "epoch": 0,
-                            "timescale": 1000000000,
-                        },
-                        "mediaType": "file",
-                        "playbackRestrictions": 0,
-                        "referenceRestrictions": 3,
-                        "supportsIntegratedTimeline": False,
-                        "allowedCommonMediaClientDataKeys": 0,
-                        "snapTimeToPausePlayback": False,
-                        "clientBundleID": "dev.pyatv.GPU",
-                    },
-                }
+                {"type": "insertPlayQueueItem", "item": _queue_item(url, position)}
             )
             # Pause (instead of advancing) at end of item, like iOS and macOS do
             await self._send(

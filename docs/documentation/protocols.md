@@ -1506,6 +1506,11 @@ Commands sent by macOS (as decoded `params.data`):
 {'type': 'playbackInfo', 'kind': 'request', 'messageID': 1}
 ```
 
+For HLS, macOS uses `'mediaType': 'streaming'` instead of `'file'`, adds
+`timeToPausePlayback` and `timeToPauseBuffering` (both an invalid time, i.e. all zeros)
+and, for live streams, sends `Start-Date` (a date) instead of `Start-Position`. A live
+playlist sent with `'mediaType': 'file'` stays in `loading` and never starts.
+
 The receiver reports changes with the same kind of commands on the event channel, e.g.
 `{'type': 'playbackState', 'name': 'playing', 'params': {...}}` (with position, duration
 and seekable ranges), `{'type': 'notification', 'name': 'itemPlayedToEnd'}` and
