@@ -1463,6 +1463,60 @@ CSeq: 3
 
 This section deals with the "video part" of AirPlay. TBD
 
+### Video v2 (third party receivers)
+
+Third party receivers (e.g. LG TVs) announce `SupportsAirPlayVideoV2` (bit 49) but not
+`SupportsAirPlayVideoV1` (bit 0) and respond with 404 to `/play` and `/playback-info`.
+Instead, an URL is added to the playback queue of the receiver via commands sent to a
+remote control stream. This is the flow macOS uses when playing a video from Safari:
+
+1. Pair-Verify, `SETUP` (session) and connect to the event channel, as for audio.
+2. `RECORD` and start sending `POST /feedback` regularly.
+3. `SETUP` a remote control stream:
+   ```javascript
+   {'streams': [{'type': 130,
+                 'controlType': 1,
+                 'channelID': '<deviceid of receiver>-RCS-2',
+                 'clientUUID': '<random UUID>',
+                 'clientTypeUUID': 'A6B27562-B43A-4F2D-B75F-82391E250194'}]}
+   ```
+   The receiver responds with a `streamID`, e.g. `{'streams': [{'streamID': 6, 'type': 130}]}`.
+4. Send commands with `POST /command` and `X-Apple-StreamID: <streamID>`. The body is a binary
+   plist with the command, itself a binary plist, in `params.data`:
+   ```javascript
+   {'params': {'data': <binary plist of command>}}
+   ```
+
+Commands sent by macOS (as decoded `params.data`):
+
+```javascript
+{'type': 'insertPlayQueueItem',
+ 'item': {'uuid': 'BBF9E22B-7369-4F13-AF5E-C997F559968A',
+          'Content-Location': 'http://10.0.0.2:8765/video.mp4',
+          'Start-Position': {'flags': 1, 'value': 0, 'epoch': 0, 'timescale': 1000000000},
+          'mediaType': 'file',
+          'playbackRestrictions': 0,
+          'referenceRestrictions': 3,
+          'supportsIntegratedTimeline': False,
+          'allowedCommonMediaClientDataKeys': 0,
+          'snapTimeToPausePlayback': False,
+          'clientBundleID': 'com.apple.WebKit.GPU'}}
+{'type': 'setProperty', 'property': 'actionAtItemEnd', 'value': 1}
+{'type': 'setRate', 'rate': 1.0}  # 0.0 pauses
+{'type': 'playbackInfo', 'kind': 'request', 'messageID': 1}
+```
+
+For HLS, macOS uses `'mediaType': 'streaming'` instead of `'file'`, adds
+`timeToPausePlayback` and `timeToPauseBuffering` (both an invalid time, i.e. all zeros)
+and, for live streams, sends `Start-Date` (a date) instead of `Start-Position`. A live
+playlist sent with `'mediaType': 'file'` stays in `loading` and never starts.
+
+The receiver reports changes with the same kind of commands on the event channel, e.g.
+`{'type': 'playbackState', 'name': 'playing', 'params': {...}}` (with position, duration
+and seekable ranges), `{'type': 'notification', 'name': 'itemPlayedToEnd'}` and
+`{'type': 'playbackState', 'name': 'stopped', 'reason': 'ended'}`. Closing the connection
+stops playback.
+
 ### Commands
 
 #### /auth-setup

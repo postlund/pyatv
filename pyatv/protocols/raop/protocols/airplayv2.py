@@ -3,7 +3,7 @@
 import asyncio
 import logging
 import plistlib
-from typing import Optional, Tuple
+from typing import Any, Callable, Dict, Optional, Tuple, cast
 from uuid import uuid4
 
 from pyatv import exceptions
@@ -13,7 +13,7 @@ from pyatv.protocols.airplay.auth import verify_connection
 from pyatv.protocols.airplay.channels import EventChannel
 from pyatv.protocols.raop.protocols import StreamContext, StreamProtocol
 from pyatv.support.chacha20 import Chacha20Cipher, Chacha20Cipher8byteNonce
-from pyatv.support.http import decode_bplist_from_body
+from pyatv.support.http import HttpRequest, HttpResponse, decode_bplist_from_body
 from pyatv.support.rtsp import RtspSession
 
 _LOGGER = logging.getLogger(__name__)
@@ -23,6 +23,28 @@ EVENTS_WRITE_INFO = "Events-Write-Encryption-Key"
 EVENTS_READ_INFO = "Events-Read-Encryption-Key"
 
 FEEDBACK_INTERVAL = 2.0  # Seconds
+
+# AirPlay video v2: media is queued with commands sent to a remote control stream
+REMOTE_CONTROL_STREAM_TYPE = 130
+VIDEO_CONTROL_TYPE = 1
+VIDEO_CLIENT_TYPE_UUID = "A6B27562-B43A-4F2D-B75F-82391E250194"
+
+
+def decode_video_command(request: HttpRequest) -> Optional[Dict[str, Any]]:
+    """Decode a video v2 command, i.e. a binary plist wrapped in params.data."""
+    if request.path != "/command" or not request.body:
+        return None
+
+    body = request.body
+    try:
+        outer = plistlib.loads(body if isinstance(body, bytes) else body.encode())
+        data = outer.get("params", {}).get("data")
+        if isinstance(data, bytes):
+            return plistlib.loads(data)
+    except (plistlib.InvalidFileException, AttributeError, ValueError):
+        _LOGGER.debug("Failed to decode command: %s", body)
+    return None
+
 
 HEADERS = {
     "User-Agent": "AirPlay/550.10",
@@ -42,6 +64,8 @@ class AirPlayV2(StreamProtocol):
         self.context = context
         self.rtsp = rtsp
         self.event_channel: Optional[asyncio.BaseTransport] = None
+        self.event_protocol: Optional[EventChannel] = None
+        self._video_stream_id: Optional[int] = None
         self._verifier: Optional[PairVerifyProcedure] = None
         self._cipher: Optional[Chacha20Cipher] = None
         self._feedback_task: Optional[asyncio.Task] = None
@@ -85,7 +109,7 @@ class AirPlayV2(StreamProtocol):
         transport = None
         while transport is None:
             try:
-                transport, _ = await setup_channel(
+                transport, protocol = await setup_channel(
                     EventChannel,
                     self._verifier,
                     self.rtsp.connection.remote_ip,
@@ -103,6 +127,7 @@ class AirPlayV2(StreamProtocol):
                 await asyncio.sleep(1.0)
 
         self.event_channel = transport
+        self.event_protocol = cast(EventChannel, protocol)
 
     async def setup(self, timing_server_port: int, control_client_port: int) -> None:
         """To setup connection prior to starting to stream."""
@@ -271,3 +296,64 @@ class AirPlayV2(StreamProtocol):
         )
 
         return resp
+
+    async def setup_video_stream(
+        self,
+        timing_server_port: int,
+        receiver_id: str,
+        command_handler: Callable[[Dict[str, Any]], None],
+    ) -> None:
+        """Set up a session for AirPlay video v2.
+
+        Receivers only supporting video v2 (e.g. third party TVs) do not implement
+        /play. Media is instead queued with commands sent to a remote control stream
+        and the receiver reports changes as commands on the event channel, which are
+        passed to command_handler.
+        """
+        await self._setup_base(timing_server_port)
+
+        def _handle_request(request: HttpRequest) -> None:
+            command = decode_video_command(request)
+            if command is not None:
+                command_handler(command)
+
+        if self.event_protocol:
+            self.event_protocol.request_handler = _handle_request
+
+        await self.start_feedback()
+        await self.rtsp.record()
+
+        setup_resp = await self.rtsp.setup(
+            body={
+                "streams": [
+                    {
+                        "type": REMOTE_CONTROL_STREAM_TYPE,
+                        "controlType": VIDEO_CONTROL_TYPE,
+                        "channelID": f"{receiver_id}-RCS-2",
+                        "clientUUID": str(uuid4()).upper(),
+                        "clientTypeUUID": VIDEO_CLIENT_TYPE_UUID,
+                    }
+                ]
+            }
+        )
+        resp = decode_bplist_from_body(setup_resp)
+        _LOGGER.debug("Setup video stream response: %s", resp)
+        self._video_stream_id = resp["streams"][0]["streamID"]
+
+    async def send_video_command(self, command: Dict[str, Any]) -> HttpResponse:
+        """Send a command to the stream set up by setup_video_stream."""
+        if self._video_stream_id is None:
+            raise exceptions.InvalidStateError("video stream not set up")
+
+        return await self.rtsp.exchange(
+            "POST",
+            uri="/command",
+            headers={"X-Apple-StreamID": self._video_stream_id},
+            body={
+                "params": {
+                    "data": plistlib.dumps(
+                        command, fmt=plistlib.FMT_BINARY  # pylint: disable=no-member
+                    )
+                }
+            },
+        )
