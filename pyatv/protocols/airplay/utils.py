@@ -114,7 +114,8 @@ def parse_features(features: str) -> AirPlayFlags:
 
     value, upper = match.groups()
     if upper is not None:
-        value = upper + value
+        # Lower word is not always zero-padded, e.g. 0x7F8AD0,0xB8BCF46
+        value = upper + value.zfill(8)
     return AirPlayFlags(int(value, 16))
 
 

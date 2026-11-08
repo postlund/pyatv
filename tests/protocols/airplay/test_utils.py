@@ -43,6 +43,9 @@ LEGACY_CREDS = parse_credentials(":aa::bb")
             | AirPlayFlags.SupportsAirPlayPhoto
             | AirPlayFlags.SupportsAirPlayVideoV1,
         ),
+        # Lower word without zero-padding (seen on LG TVs)
+        ("0x1,0x20000", AirPlayFlags(1 << 49 | 1)),
+        ("0x7F8AD0,0xB8BCF46", AirPlayFlags(0xB8BCF46 << 32 | 0x7F8AD0)),
     ],
 )
 def test_parse_features(flags, output):
