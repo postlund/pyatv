@@ -197,3 +197,17 @@ async def test_wizard(scriptenv):
     )
     assert all_in(stdout, DEVICE_AUTH_KEY.lower())
     assert exit_code == 0
+
+
+async def test_help_unknown_command(scriptenv):
+    stdout, stderr, exit_code = await scriptenv(
+        "atvremote", "help", "no_such_command"
+    )
+    assert exit_code == 1
+    assert "no_such_command" in stdout + stderr
+
+
+async def test_help_known_command(scriptenv):
+    stdout, stderr, exit_code = await scriptenv("atvremote", "help", "commands")
+    assert exit_code == 0
+    assert "COMMAND:" in stdout
