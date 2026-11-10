@@ -130,11 +130,13 @@ class GlobalCommands:
             self.__class__,
             DeviceCommands,
         ]
+        found = False
         for cmd in iface:
             for key, value in cmd.__dict__.items():
                 if key.startswith("_") or key != self.args.command[1]:
                     continue
 
+                found = True
                 if inspect.isfunction(value):
                     signature = inspect.signature(value)
                 else:
@@ -143,6 +145,10 @@ class GlobalCommands:
                 print(
                     f"COMMAND:\n>> {key}{signature}\n\nHELP:\n{inspect.getdoc(value)}"
                 )
+
+        if not found:
+            print(f"Unknown command: {self.args.command[1]}", file=sys.stderr)
+            return 1
         return 0
 
     async def scan(self):
