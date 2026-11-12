@@ -88,6 +88,7 @@ Here are a few projects known to use pyatv:
 * [node-red-contrib-apple-tv-x](https://github.com/twocolors/node-red-contrib-apple-tv-x) - Apple TV control from inside Node-RED
 * [c4-pyatv-remote](https://github.com/13mralex/c4-pyatv-remote) - Control4 remote control integration
 * [atv-desktop-remote](https://github.com/bsharper/atv-desktop-remote) - Desktop remote control for Apple TV
+* [tv-remote-mac](https://github.com/bpetrynski/tv-remote-mac) - Native macOS remote for Apple TV, Android TV and Philips TVs (window, menu bar, keyboard and media keys)
 
 If you are maintaining a project using pyatv, feel free to add it to the list (open a PR
 or [issue](https://github.com/postlund/pyatv/issues/new?assignees=&labels=question,documentation&template=question-or-idea.md&title=Add+my+pyatv+project+to+list&assignees=postlund)).
