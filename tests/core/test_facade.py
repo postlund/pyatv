@@ -6,7 +6,7 @@ import inspect
 from ipaddress import IPv4Address
 import logging
 import math
-from typing import Any, Dict, List, Mapping, Set
+from typing import Any, Dict, List, Mapping, Optional, Set
 from unittest.mock import MagicMock
 
 import pytest
@@ -76,10 +76,13 @@ class SetupDataGenerator:
         self.features: set = set(features)
         self.pending_tasks: set = set()
         self.connect_succeeded = True
+        self.connect_exception: Optional[BaseException] = None
         self.device_info = {}
 
     async def connect(self):
         self.connect_called = True
+        if self.connect_exception:
+            raise self.connect_exception
         return self.connect_succeeded
 
     def close(self):
@@ -449,6 +452,30 @@ async def test_close_only_once(facade_dummy, register_interface):
 
     facade_dummy.close()
     assert sdg.close_calls == 1
+
+
+@pytest.mark.parametrize(
+    "exception", [exceptions.ConnectionFailedError(), asyncio.CancelledError()]
+)
+async def test_connect_failure_closes_protocols(
+    facade_dummy, register_interface, exception
+):
+    _, connected_sdg = register_interface(
+        FeatureName.Play, DummyFeatures(FeatureName.Play), Protocol.DMAP
+    )
+    _, failing_sdg = register_interface(
+        FeatureName.Pause, DummyFeatures(FeatureName.Pause), Protocol.MRP
+    )
+    failing_task = MagicMock()
+    failing_sdg.pending_tasks.add(failing_task)
+    failing_sdg.connect_exception = exception
+
+    with pytest.raises(type(exception)):
+        await facade_dummy.connect()
+
+    assert connected_sdg.close_calls == 1
+    assert failing_sdg.close_calls == 1
+    assert failing_task in facade_dummy.close()
 
 
 async def test_close_returns_pending_tasks_from_previous_close(

@@ -761,7 +761,14 @@ class FacadeAppleTV(interface.AppleTV):
                 continue
 
             _LOGGER.debug("Connecting to protocol: %s", setup_data.protocol)
-            if await setup_data.connect():
+            try:
+                connected = await setup_data.connect()
+            except BaseException:
+                # Also close the failing protocol as it may have opened connections
+                self.close().update(setup_data.close())
+                raise
+
+            if connected:
                 _LOGGER.debug("Connected to protocol: %s", setup_data.protocol)
                 self._protocol_handlers[setup_data.protocol] = setup_data
 
