@@ -154,7 +154,11 @@ async def connect(  # pylint: disable=too-many-locals
 
         await atv.connect()
     except Exception:
-        await session_manager.close()
+        await asyncio.gather(*atv.close(), return_exceptions=True)
+        raise
+    except BaseException:
+        # Don't hold up cancellation, the close tasks finish in the background
+        atv.close()
         raise
     return atv
 
