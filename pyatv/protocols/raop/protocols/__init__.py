@@ -114,6 +114,11 @@ class StreamProtocol(ABC):
         """Return whether playback state is reported by the stream."""
         return False
 
+    @property
+    def url_load_error(self) -> Optional[str]:
+        """Return why the media URL could not be loaded, if known."""
+        return None
+
 
 class TimingServer(asyncio.Protocol):
     """Basic timing server responding to timing requests."""

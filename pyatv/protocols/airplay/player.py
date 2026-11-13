@@ -87,6 +87,11 @@ class AirPlayPlayer:
                 return
 
             if not video_started:
+                error = self.stream_protocol.url_load_error
+                if error is not None:
+                    raise exceptions.PlaybackError(
+                        f"media playback did not start: {error}"
+                    )
                 if attempts == 0:
                     raise exceptions.PlaybackError("media playback did not start")
                 attempts -= 1

@@ -3,8 +3,21 @@
 import asyncio
 import logging
 import plistlib
-from typing import Any, Dict, List, Optional, Tuple, cast
+from typing import (
+    Any,
+    Awaitable,
+    Callable,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    Set,
+    Tuple,
+    cast,
+)
 from uuid import uuid4
+
+import aiohttp
 
 from pyatv import exceptions
 from pyatv.auth.hap_channel import setup_channel
@@ -27,6 +40,57 @@ FEEDBACK_INTERVAL = 2.0  # Seconds
 COMMAND_USER_AGENT = "AirPlay/870.14.1"
 REMOTE_CONTROL_CLIENT_TYPE = "A6B27562-B43A-4F2D-B75F-82391E250194"
 
+# A receiver that cannot load a URL itself (e.g. the server refuses it) sends an
+# "unhandledURL" request (FCUP) and lets the sender fetch it. This is meant for
+# playlists and content keys, so responses are kept in memory and capped.
+FCUP_MAX_RESPONSE_SIZE = 8 * 1024 * 1024
+FCUP_FETCH_TIMEOUT = 20.0  # Seconds
+FCUP_FETCH_FAILED = 502
+_FCUP_SKIPPED_REQUEST_HEADERS = {"accept-encoding", "host"}
+_FCUP_SKIPPED_RESPONSE_HEADERS = {
+    "connection",
+    "content-encoding",
+    "content-length",
+    "keep-alive",
+    "transfer-encoding",
+}
+
+# (status code, response headers, response body)
+UrlFetchResult = Tuple[int, Dict[str, str], bytes]
+UrlFetcher = Callable[[str, Mapping[str, str]], Awaitable[UrlFetchResult]]
+
+
+async def fetch_unhandled_url(url: str, headers: Mapping[str, str]) -> UrlFetchResult:
+    """Fetch a URL on behalf of the receiver.
+
+    The body is decoded (no content encoding) and headers that no longer apply to
+    the decoded body are left out.
+    """
+    timeout = aiohttp.ClientTimeout(total=FCUP_FETCH_TIMEOUT)
+    async with aiohttp.ClientSession(timeout=timeout) as session:
+        async with session.get(url, headers=dict(headers)) as resp:
+            if (
+                resp.content_length is not None
+                and resp.content_length > FCUP_MAX_RESPONSE_SIZE
+            ):
+                raise exceptions.ProtocolError(
+                    f"response too large ({resp.content_length} bytes)"
+                )
+            data = bytearray()
+            async for chunk in resp.content.iter_chunked(64 * 1024):
+                data += chunk
+                if len(data) > FCUP_MAX_RESPONSE_SIZE:
+                    raise exceptions.ProtocolError(
+                        f"response larger than {FCUP_MAX_RESPONSE_SIZE} bytes"
+                    )
+            response_headers = {
+                key: value
+                for key, value in resp.headers.items()
+                if key.lower() not in _FCUP_SKIPPED_RESPONSE_HEADERS
+            }
+            response_headers["Content-Length"] = str(len(data))
+            return resp.status, response_headers, bytes(data)
+
 
 class AirPlayV2(StreamProtocol):
     """Stream protocol used for AirPlay v2 support."""
@@ -48,6 +112,9 @@ class AirPlayV2(StreamProtocol):
         sender_bytes[0] = (sender_bytes[0] & 0xFC) | 0x02
         self._sender_device_id = ":".join(f"{byte:02X}" for byte in sender_bytes)
         self._stream_id: Optional[int] = None
+        self.url_fetcher: UrlFetcher = fetch_unhandled_url
+        self._fcup_tasks: Set[asyncio.Task] = set()
+        self._url_load_error: Optional[str] = None
 
     async def _setup_base(self, timing_server_port: int) -> None:
         self._verifier = await verify_connection(
@@ -109,6 +176,12 @@ class AirPlayV2(StreamProtocol):
         self.event_channel.set_event_listener(self._handle_event)
 
     def _handle_event(self, event: Dict[str, Any]) -> None:
+        if event.get("type") == "unhandledURL" and event.get("kind") == "request":
+            task = asyncio.ensure_future(self._answer_unhandled_url(event))
+            self._fcup_tasks.add(task)
+            task.add_done_callback(self._fcup_tasks.discard)
+            return
+
         if event.get("type") != "playbackState":
             return
 
@@ -121,6 +194,84 @@ class AirPlayV2(StreamProtocol):
             if normalized_state != self._playback_state:
                 self._playback_state = normalized_state
                 self._playback_state_changed.set()
+
+    async def _answer_unhandled_url(self, event: Dict[str, Any]) -> None:
+        """Fetch a URL the receiver could not load and send the result back."""
+        request = event.get("request")
+        message_id = event.get("messageID")
+        url = request.get("FCUP_Response_URL") if isinstance(request, dict) else None
+        if not isinstance(url, str) or message_id is None:
+            _LOGGER.warning("Ignoring malformed unhandledURL request: %s", event)
+            return
+        assert isinstance(request, dict)
+
+        request_headers = request.get("FCUP_Response_Headers")
+        headers = {
+            str(key): str(value)
+            for key, value in (
+                request_headers.items() if isinstance(request_headers, dict) else []
+            )
+            if str(key).lower() not in _FCUP_SKIPPED_REQUEST_HEADERS
+        }
+
+        _LOGGER.debug("Receiver asked sender to fetch %s", url)
+        try:
+            status, response_headers, data = await self.url_fetcher(url, headers)
+        except (
+            aiohttp.ClientError,
+            asyncio.TimeoutError,
+            exceptions.ProtocolError,
+        ) as ex:
+            _LOGGER.warning("Failed to fetch %s for receiver", url, exc_info=True)
+            status, response_headers, data = FCUP_FETCH_FAILED, {}, b""
+            self._set_url_load_error(f"{url} could not be fetched: {ex!r}")
+        else:
+            _LOGGER.debug(
+                "Fetched %s for receiver: %d (%d bytes)", url, status, len(data)
+            )
+            if not 200 <= status < 300:
+                self._set_url_load_error(f"{url} returned HTTP {status}")
+            elif not request.get("FCUP_Response_IsContentKeyRequest") and not (
+                data.lstrip().startswith(b"#EXTM3U")
+            ):
+                # Seen on tvOS 27: a plain media file passed this way never plays
+                _LOGGER.warning(
+                    "Receiver could not load %s itself and it is not an HLS "
+                    "playlist; playback will probably not start",
+                    url,
+                )
+
+        reply = {
+            "kind": "response",
+            "messageID": message_id,
+            "type": "unhandledURL",
+            "response": {
+                "FCUP_Response_URL": url,
+                "FCUP_Response_RequestID": request.get("FCUP_Response_RequestID", 0),
+                "FCUP_Response_StatusCode": status,
+                "FCUP_Response_Headers": response_headers,
+                "FCUP_Response_Data": data,
+            },
+        }
+        try:
+            response = await self._send_url_command(reply)
+        except Exception:  # pylint: disable=broad-except
+            # Runs as a detached task, so nobody else would see the error
+            _LOGGER.exception("Failed to answer unhandledURL request for %s", url)
+            return
+        if not 200 <= response.code < 300:
+            _LOGGER.warning(
+                "Receiver rejected unhandledURL response: %d", response.code
+            )
+
+    def _set_url_load_error(self, error: str) -> None:
+        self._url_load_error = error
+        self._playback_state_changed.set()
+
+    @property
+    def url_load_error(self) -> Optional[str]:
+        """Return why the receiver could not load the media URL, if known."""
+        return self._url_load_error
 
     async def setup(self, timing_server_port: int, control_client_port: int) -> None:
         """To setup connection prior to starting to stream."""
@@ -178,6 +329,9 @@ class AirPlayV2(StreamProtocol):
         if self._feedback_task:
             self._feedback_task.cancel()
             self._feedback_task = None
+        for task in self._fcup_tasks:
+            task.cancel()
+        self._fcup_tasks.clear()
         if self.event_transport:
             self.event_transport.close()
             self.event_transport = None
@@ -286,6 +440,7 @@ class AirPlayV2(StreamProtocol):
         await self.rtsp.info()
         await self.rtsp.record()
         await self._setup_url_stream()
+        self._url_load_error = None
 
         item = {
             "uuid": str(uuid4()).upper(),
