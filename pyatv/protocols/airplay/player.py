@@ -13,6 +13,7 @@ _LOGGER = logging.getLogger(__name__)
 
 PLAY_RETRIES = 3
 WAIT_RETRIES = 5
+EVENT_WAIT_RETRIES = 30
 HEADERS = {
     "User-Agent": "AirPlay/550.10",
     "Content-Type": "application/x-apple-binary-plist",
@@ -65,10 +66,39 @@ class AirPlayPlayer:
                 if 400 <= resp.code < 600:
                     raise exceptions.AuthenticationError(f"status code: {resp.code}")
 
-                await self._wait_for_media_to_end()
+                if self.stream_protocol.supports_playback_state:
+                    await self._wait_for_media_to_end_from_events()
+                else:
+                    await self._wait_for_media_to_end()
                 return
 
         raise exceptions.PlaybackError("Max retries exceeded")
+
+    async def _wait_for_media_to_end_from_events(self) -> None:
+        attempts = EVENT_WAIT_RETRIES
+        video_started = False
+        state = self.stream_protocol.playback_state
+
+        while True:
+            if state == "playing":
+                video_started = True
+            elif video_started and state in ("idle", "stopped"):
+                _LOGGER.debug("media playback ended")
+                return
+
+            if not video_started:
+                error = self.stream_protocol.url_load_error
+                if error is not None:
+                    raise exceptions.PlaybackError(
+                        f"media playback did not start: {error}"
+                    )
+                if attempts == 0:
+                    raise exceptions.PlaybackError("media playback did not start")
+                attempts -= 1
+
+            state = await self.stream_protocol.wait_for_playback_state_change(
+                state, 1.0
+            )
 
     # Poll playback-info to find out if something is playing. It might take
     # some time until the media starts playing, give it 5 seconds (attempts)

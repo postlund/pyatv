@@ -6,7 +6,7 @@ This module only deals with AirPlay 2 related channels right now.
 from abc import ABC
 import logging
 from random import randrange
-from typing import Any, List, NamedTuple, Optional, Tuple
+from typing import Any, Callable, List, NamedTuple, Optional, Tuple
 
 from pyatv.auth.hap_channel import AbstractHAPChannel
 from pyatv.protocols.airplay.utils import decode_plist_body, encode_plist_body
@@ -60,6 +60,28 @@ class BaseEventChannel(AbstractHAPChannel, ABC):
 class EventChannel(BaseEventChannel):
     """Connection used to handle the event channel."""
 
+    def __init__(self, output_key: bytes, input_key: bytes) -> None:
+        """Initialize a new EventChannel instance."""
+        super().__init__(output_key, input_key)
+        self._event_listener: Optional[Callable[[dict], None]] = None
+
+    def set_event_listener(self, listener: Callable[[dict], None]) -> None:
+        """Set listener for decoded AirPlay event messages."""
+        self._event_listener = listener
+
+    def _process_event(self, request: HttpRequest) -> None:
+        payload = decode_plist_body(request.body)
+        if not isinstance(payload, dict):
+            return
+
+        params = payload.get("params")
+        nested_payload = params.get("data") if isinstance(params, dict) else None
+        if nested_payload is not None:
+            payload = decode_plist_body(nested_payload)
+
+        if isinstance(payload, dict) and self._event_listener:
+            self._event_listener(payload)
+
     def handle_received(self) -> None:
         """Handle received data that was put in buffer."""
         self.buffer: bytes
@@ -71,6 +93,8 @@ class EventChannel(BaseEventChannel):
                     break
 
                 _LOGGER.debug("Got message on event channel: %s", request)
+
+                self._process_event(request)
 
                 # Send a positive response to satisfy the other end of the channel
                 headers = {

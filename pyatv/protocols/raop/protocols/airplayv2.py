@@ -3,8 +3,21 @@
 import asyncio
 import logging
 import plistlib
-from typing import Optional, Tuple
+from typing import (
+    Any,
+    Awaitable,
+    Callable,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    Set,
+    Tuple,
+    cast,
+)
 from uuid import uuid4
+
+import aiohttp
 
 from pyatv import exceptions
 from pyatv.auth.hap_channel import setup_channel
@@ -13,8 +26,8 @@ from pyatv.protocols.airplay.auth import verify_connection
 from pyatv.protocols.airplay.channels import EventChannel
 from pyatv.protocols.raop.protocols import StreamContext, StreamProtocol
 from pyatv.support.chacha20 import Chacha20Cipher, Chacha20Cipher8byteNonce
-from pyatv.support.http import decode_bplist_from_body
-from pyatv.support.rtsp import RtspSession
+from pyatv.support.http import HttpResponse, decode_bplist_from_body
+from pyatv.support.rtsp import HTTP_PROTOCOL, RtspSession
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -24,29 +37,84 @@ EVENTS_READ_INFO = "Events-Read-Encryption-Key"
 
 FEEDBACK_INTERVAL = 2.0  # Seconds
 
-HEADERS = {
-    "User-Agent": "AirPlay/550.10",
-    "Content-Type": "application/x-apple-binary-plist",
-    "X-Apple-ProtocolVersion": "1",
-    "X-Apple-Session-ID": str(uuid4()).lower(),
-    "X-Apple-Stream-ID": "1",
+COMMAND_USER_AGENT = "AirPlay/870.14.1"
+REMOTE_CONTROL_CLIENT_TYPE = "A6B27562-B43A-4F2D-B75F-82391E250194"
+
+# A receiver that cannot load a URL itself (e.g. the server refuses it) sends an
+# "unhandledURL" request (FCUP) and lets the sender fetch it. This is meant for
+# playlists and content keys, so responses are kept in memory and capped.
+FCUP_MAX_RESPONSE_SIZE = 8 * 1024 * 1024
+FCUP_FETCH_TIMEOUT = 20.0  # Seconds
+FCUP_FETCH_FAILED = 502
+_FCUP_SKIPPED_REQUEST_HEADERS = {"accept-encoding", "host"}
+_FCUP_SKIPPED_RESPONSE_HEADERS = {
+    "connection",
+    "content-encoding",
+    "content-length",
+    "keep-alive",
+    "transfer-encoding",
 }
+
+# (status code, response headers, response body)
+UrlFetchResult = Tuple[int, Dict[str, str], bytes]
+UrlFetcher = Callable[[str, Mapping[str, str]], Awaitable[UrlFetchResult]]
+
+
+async def fetch_unhandled_url(url: str, headers: Mapping[str, str]) -> UrlFetchResult:
+    """Fetch a URL on behalf of the receiver.
+
+    The body is decoded (no content encoding) and headers that no longer apply to
+    the decoded body are left out.
+    """
+    timeout = aiohttp.ClientTimeout(total=FCUP_FETCH_TIMEOUT)
+    async with aiohttp.ClientSession(timeout=timeout) as session:
+        async with session.get(url, headers=dict(headers)) as resp:
+            if (
+                resp.content_length is not None
+                and resp.content_length > FCUP_MAX_RESPONSE_SIZE
+            ):
+                raise exceptions.ProtocolError(
+                    f"response too large ({resp.content_length} bytes)"
+                )
+            data = bytearray()
+            async for chunk in resp.content.iter_chunked(64 * 1024):
+                data += chunk
+                if len(data) > FCUP_MAX_RESPONSE_SIZE:
+                    raise exceptions.ProtocolError(
+                        f"response larger than {FCUP_MAX_RESPONSE_SIZE} bytes"
+                    )
+            response_headers = {
+                key: value
+                for key, value in resp.headers.items()
+                if key.lower() not in _FCUP_SKIPPED_RESPONSE_HEADERS
+            }
+            response_headers["Content-Length"] = str(len(data))
+            return resp.status, response_headers, bytes(data)
 
 
 class AirPlayV2(StreamProtocol):
-    """Stream protocol used for AirPlay v1 support."""
+    """Stream protocol used for AirPlay v2 support."""
 
     def __init__(self, context: StreamContext, rtsp: RtspSession) -> None:
         """Initialize a new AirPlayV2 instance."""
         super().__init__()
         self.context = context
         self.rtsp = rtsp
-        self.event_channel: Optional[asyncio.BaseTransport] = None
+        self.event_transport: Optional[asyncio.BaseTransport] = None
+        self.event_channel: Optional[EventChannel] = None
         self._verifier: Optional[PairVerifyProcedure] = None
         self._cipher: Optional[Chacha20Cipher] = None
         self._feedback_task: Optional[asyncio.Task] = None
-
-        self.uuid = str(uuid4())
+        self._playback_state: Optional[str] = None
+        self._playback_state_changed = asyncio.Event()
+        self._session_id = str(uuid4()).upper()
+        sender_bytes = bytearray(uuid4().bytes[:6])
+        sender_bytes[0] = (sender_bytes[0] & 0xFC) | 0x02
+        self._sender_device_id = ":".join(f"{byte:02X}" for byte in sender_bytes)
+        self._stream_id: Optional[int] = None
+        self.url_fetcher: UrlFetcher = fetch_unhandled_url
+        self._fcup_tasks: Set[asyncio.Task] = set()
+        self._url_load_error: Optional[str] = None
 
     async def _setup_base(self, timing_server_port: int) -> None:
         self._verifier = await verify_connection(
@@ -55,13 +123,14 @@ class AirPlayV2(StreamProtocol):
 
         setup_resp = await self.rtsp.setup(
             body={
-                "deviceID": "AA:BB:CC:DD:EE:FF",
-                "sessionUUID": str(uuid4()).upper(),
+                "deviceID": self._sender_device_id,
+                "sessionUUID": self._session_id,
+                "sessionCorrelationUUID": str(uuid4()).upper(),
                 "timingPort": timing_server_port,
                 "timingProtocol": "NTP",
                 "isMultiSelectAirPlay": True,
                 "groupContainsGroupLeader": False,
-                "macAddress": "AA:BB:CC:DD:EE:FF",
+                "macAddress": self._sender_device_id,
                 "model": "iPhone14,3",
                 "name": "pyatv",
                 "osBuildVersion": "20F66",
@@ -85,7 +154,7 @@ class AirPlayV2(StreamProtocol):
         transport = None
         while transport is None:
             try:
-                transport, _ = await setup_channel(
+                transport, protocol = await setup_channel(
                     EventChannel,
                     self._verifier,
                     self.rtsp.connection.remote_ip,
@@ -94,7 +163,7 @@ class AirPlayV2(StreamProtocol):
                     EVENTS_READ_INFO,
                     EVENTS_WRITE_INFO,
                 )
-            except ConnectionRefusedError:
+            except (ConnectionRefusedError, OSError):
                 retries -= 1
                 if retries == 0:
                     raise
@@ -102,7 +171,107 @@ class AirPlayV2(StreamProtocol):
                 _LOGGER.debug("Connect failed, retrying")
                 await asyncio.sleep(1.0)
 
-        self.event_channel = transport
+        self.event_transport = transport
+        self.event_channel = cast(EventChannel, protocol)
+        self.event_channel.set_event_listener(self._handle_event)
+
+    def _handle_event(self, event: Dict[str, Any]) -> None:
+        if event.get("type") == "unhandledURL" and event.get("kind") == "request":
+            task = asyncio.ensure_future(self._answer_unhandled_url(event))
+            self._fcup_tasks.add(task)
+            task.add_done_callback(self._fcup_tasks.discard)
+            return
+
+        if event.get("type") != "playbackState":
+            return
+
+        params = event.get("params")
+        state = params.get("playbackState") if isinstance(params, dict) else None
+        if state is None:
+            state = event.get("name")
+        if isinstance(state, str):
+            normalized_state = state.lower()
+            if normalized_state != self._playback_state:
+                self._playback_state = normalized_state
+                self._playback_state_changed.set()
+
+    async def _answer_unhandled_url(self, event: Dict[str, Any]) -> None:
+        """Fetch a URL the receiver could not load and send the result back."""
+        request = event.get("request")
+        message_id = event.get("messageID")
+        url = request.get("FCUP_Response_URL") if isinstance(request, dict) else None
+        if not isinstance(url, str) or message_id is None:
+            _LOGGER.warning("Ignoring malformed unhandledURL request: %s", event)
+            return
+        assert isinstance(request, dict)
+
+        request_headers = request.get("FCUP_Response_Headers")
+        headers = {
+            str(key): str(value)
+            for key, value in (
+                request_headers.items() if isinstance(request_headers, dict) else []
+            )
+            if str(key).lower() not in _FCUP_SKIPPED_REQUEST_HEADERS
+        }
+
+        _LOGGER.debug("Receiver asked sender to fetch %s", url)
+        try:
+            status, response_headers, data = await self.url_fetcher(url, headers)
+        except (
+            aiohttp.ClientError,
+            asyncio.TimeoutError,
+            exceptions.ProtocolError,
+        ) as ex:
+            _LOGGER.warning("Failed to fetch %s for receiver", url, exc_info=True)
+            status, response_headers, data = FCUP_FETCH_FAILED, {}, b""
+            self._set_url_load_error(f"{url} could not be fetched: {ex!r}")
+        else:
+            _LOGGER.debug(
+                "Fetched %s for receiver: %d (%d bytes)", url, status, len(data)
+            )
+            if not 200 <= status < 300:
+                self._set_url_load_error(f"{url} returned HTTP {status}")
+            elif not request.get("FCUP_Response_IsContentKeyRequest") and not (
+                data.lstrip().startswith(b"#EXTM3U")
+            ):
+                # Seen on tvOS 27: a plain media file passed this way never plays
+                _LOGGER.warning(
+                    "Receiver could not load %s itself and it is not an HLS "
+                    "playlist; playback will probably not start",
+                    url,
+                )
+
+        reply = {
+            "kind": "response",
+            "messageID": message_id,
+            "type": "unhandledURL",
+            "response": {
+                "FCUP_Response_URL": url,
+                "FCUP_Response_RequestID": request.get("FCUP_Response_RequestID", 0),
+                "FCUP_Response_StatusCode": status,
+                "FCUP_Response_Headers": response_headers,
+                "FCUP_Response_Data": data,
+            },
+        }
+        try:
+            response = await self._send_url_command(reply)
+        except Exception:  # pylint: disable=broad-except
+            # Runs as a detached task, so nobody else would see the error
+            _LOGGER.exception("Failed to answer unhandledURL request for %s", url)
+            return
+        if not 200 <= response.code < 300:
+            _LOGGER.warning(
+                "Receiver rejected unhandledURL response: %d", response.code
+            )
+
+    def _set_url_load_error(self, error: str) -> None:
+        self._url_load_error = error
+        self._playback_state_changed.set()
+
+    @property
+    def url_load_error(self) -> Optional[str]:
+        """Return why the receiver could not load the media URL, if known."""
+        return self._url_load_error
 
     async def setup(self, timing_server_port: int, control_client_port: int) -> None:
         """To setup connection prior to starting to stream."""
@@ -160,8 +329,13 @@ class AirPlayV2(StreamProtocol):
         if self._feedback_task:
             self._feedback_task.cancel()
             self._feedback_task = None
+        for task in self._fcup_tasks:
+            task.cancel()
+        self._fcup_tasks.clear()
+        if self.event_transport:
+            self.event_transport.close()
+            self.event_transport = None
         if self.event_channel:
-            self.event_channel.close()
             self.event_channel = None
 
     async def start_feedback(self) -> None:
@@ -207,67 +381,113 @@ class AirPlayV2(StreamProtocol):
 
         return self.context.rtpseq, packet
 
-    async def play_url(self, timing_server_port: int, url: str, position: float = 0.0):
-        """Play media from a URL."""
-        await self._setup_base(timing_server_port)
-        await self.start_feedback()
-        await self.rtsp.record()
+    async def _setup_url_stream(self) -> None:
+        response = await self.rtsp.setup(
+            body={
+                "streams": [
+                    {
+                        "clientUUID": str(uuid4()).upper(),
+                        "clientTypeUUID": REMOTE_CONTROL_CLIENT_TYPE,
+                        "channelID": f"{self._sender_device_id}-RCS-1",
+                        "controlType": 1,
+                        "type": 130,
+                    }
+                ]
+            }
+        )
+        payload = decode_bplist_from_body(response)
+        streams = payload.get("streams", [])
+        if not streams or "streamID" not in streams[0]:
+            raise exceptions.ProtocolError(
+                "missing URL control stream in SETUP response"
+            )
+        self._stream_id = int(streams[0]["streamID"])
 
-        # Most fields are not needed here, but keeping them for reference
+    async def _send_url_command(self, command: Dict[str, Any]) -> HttpResponse:
+        if self._stream_id is None:
+            raise exceptions.InvalidStateError("URL control stream not set up")
+
         body = {
-            "Content-Location": url,
-            "Start-Position-Seconds": position,
-            "uuid": self.uuid,
-            "streamType": 1,
-            "mediaType": "file",
-            "mightSupportStorePastisKeyRequests": True,
-            "playbackRestrictions": 0,
-            "secureConnectionMs": 22,
-            "volume": 1.0,
-            "infoMs": 122,
-            "connectMs": 18,
-            "authMs": 0,
-            "bonjourMs": 0,
-            "referenceRestrictions": 3,
-            "SenderMACAddress": "AA:BB:CC:DD:EE:FF",
-            "model": "iPhone14,3",
-            "postAuthMs": 0,
-            "clientBundleID": "dev.pyatv.GPU",
-            "clientProcName": "dev.pyatv.GPU",
-            "osBuildVersion": "20G1116",
-            "rate": 1.0,
+            "params": {
+                "data": plistlib.dumps(
+                    command,
+                    fmt=plistlib.FMT_BINARY,  # pylint: disable=no-member
+                    sort_keys=False,
+                )
+            }
         }
-
-        # Actually start the stream
-        resp = await self.rtsp.connection.post(
-            "/play",
-            headers=HEADERS,
-            body=plistlib.dumps(
-                body, fmt=plistlib.FMT_BINARY  # pylint: disable=no-member
-            ),
+        return await self.rtsp.exchange(
+            "POST",
+            uri="/command",
+            protocol=HTTP_PROTOCOL,
+            headers={
+                "User-Agent": COMMAND_USER_AGENT,
+                "X-Apple-ProtocolVersion": "1",
+                "X-Apple-Session-ID": self._session_id,
+                "X-Apple-StreamID": self._stream_id,
+            },
+            body=body,
             allow_error=True,
         )
 
-        # Various commands, most of which are probably not needed for pyatv. Doing them
-        # anyways, just to be sure things work. Most important command is "/rate" as
-        # that sets playback rate to 100% (will start paused otherwise).
-        # TODO: Maybe check some return values?
-        await self.rtsp.exchange(
-            "PUT", uri="/setProperty?isInterestedInDateRange", body={"value": True}
-        )
-        await self.rtsp.exchange(
-            "PUT", uri="/setProperty?actionAtItemEnd", body={"value": 0}
-        )
-        await self.rtsp.exchange("POST", uri="/rate?value=1.000000")
-        await self.rtsp.exchange(
-            "PUT",
-            uri="/setProperty?forwardEndTime",
-            body={"value": {"flags": 0, "value": 0, "epoch": 0, "timescale": 0}},
-        )
-        await self.rtsp.exchange(
-            "PUT",
-            uri="/setProperty?reverseEndTime",
-            body={"value": {"flags": 0, "value": 0, "epoch": 0, "timescale": 0}},
-        )
+    async def play_url(
+        self, timing_server_port: int, url: str, position: float = 0.0
+    ) -> HttpResponse:
+        """Play media from a URL."""
+        if self._verifier is None:
+            await self._setup_base(timing_server_port)
+            await self.start_feedback()
+        await self.rtsp.info()
+        await self.rtsp.record()
+        await self._setup_url_stream()
+        self._url_load_error = None
 
-        return resp
+        item = {
+            "uuid": str(uuid4()).upper(),
+            "mediaType": "file",
+            "Content-Location": url,
+            "Start-Position-Seconds": position,
+        }
+        commands: List[Dict[str, Any]] = [
+            {"type": "insertPlayQueueItem", "item": item},
+            {
+                "type": "setProperty",
+                "value": True,
+                "property": "isInterestedInDateRange",
+                "item": {"uuid": item["uuid"]},
+            },
+            {"type": "setProperty", "value": 1, "property": "actionAtItemEnd"},
+            {"type": "setRate", "rate": 1.0},
+        ]
+
+        response: Optional[HttpResponse] = None
+        for command in commands:
+            response = await self._send_url_command(command)
+            if not 200 <= response.code < 300:
+                return response
+
+        assert response is not None
+        return response
+
+    @property
+    def playback_state(self) -> Optional[str]:
+        """Return the latest playback state from the event channel."""
+        return self._playback_state
+
+    async def wait_for_playback_state_change(
+        self, previous_state: Optional[str], timeout: float
+    ) -> Optional[str]:
+        """Wait for the event channel to report a new playback state."""
+        self._playback_state_changed.clear()
+        if self._playback_state != previous_state:
+            return self._playback_state
+        try:
+            await asyncio.wait_for(self._playback_state_changed.wait(), timeout)
+        except asyncio.TimeoutError:
+            pass
+        return self._playback_state
+
+    @property
+    def supports_playback_state(self) -> bool:
+        """Return whether playback state is reported by this stream."""
+        return True

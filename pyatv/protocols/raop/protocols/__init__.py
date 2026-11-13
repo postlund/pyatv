@@ -98,6 +98,27 @@ class StreamProtocol(ABC):
     async def play_url(self, timing_server_port: int, url: str, position: float = 0.0):
         """Play media from a URL."""
 
+    @property
+    def playback_state(self) -> Optional[str]:
+        """Return playback state reported by the stream, if supported."""
+        return None
+
+    async def wait_for_playback_state_change(
+        self, previous_state: Optional[str], timeout: float
+    ) -> Optional[str]:
+        """Wait for playback state to change, if supported by the stream."""
+        return None
+
+    @property
+    def supports_playback_state(self) -> bool:
+        """Return whether playback state is reported by the stream."""
+        return False
+
+    @property
+    def url_load_error(self) -> Optional[str]:
+        """Return why the media URL could not be loaded, if known."""
+        return None
+
 
 class TimingServer(asyncio.Protocol):
     """Basic timing server responding to timing requests."""
