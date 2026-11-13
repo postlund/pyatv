@@ -8,7 +8,7 @@ miniaudio==1.71
 protobuf==6.33.6
 pydantic==2.13.4
 requests==2.32.5
-srptools==1.0.1
+srptools==2.0.0
 tabulate==0.9.0
 tinytag==2.2.1
 zeroconf==0.148.0

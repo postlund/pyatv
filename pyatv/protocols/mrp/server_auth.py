@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 import binascii
 from collections import namedtuple
 import hashlib
+import hmac
 import logging
 
 from cryptography.hazmat.primitives import serialization
@@ -66,7 +67,9 @@ def new_server_session(keys, pin):
     )
 
     session = SRPServerSession(
-        context_server, verifier, binascii.hexlify(keys.auth).decode()
+        context_server,
+        password_verifier=verifier,
+        private=binascii.hexlify(keys.auth).decode(),
     )
 
     return session, salt
@@ -190,7 +193,11 @@ class MrpServerAuth(ABC):
         self.session.process(pubkey, self.salt)
 
         proof = binascii.unhexlify(self.session.key_proof_hash)
-        if self.session.verify_proof(binascii.hexlify(pairing_data[TlvValue.Proof])):
+        # Compare raw bytes ourselves: srptools 2.0 reads a bytes argument to
+        # verify_proof as the raw proof, 1.x as hex, so neither form suits both.
+        if hmac.compare_digest(
+            pairing_data[TlvValue.Proof], binascii.unhexlify(self.session.key_proof)
+        ):
             msg = messages.crypto_pairing(
                 {TlvValue.Proof: proof, TlvValue.SeqNo: b"\x04"}
             )

@@ -145,7 +145,7 @@ class SRPAuthHandler:
             hash_func=hashlib.sha512,
         )
         self._session = SRPClientSession(
-            context, binascii.hexlify(self._auth_private).decode()
+            context, private=binascii.hexlify(self._auth_private).decode()
         )
 
     def step2(self, atv_pub_key, atv_salt):
