@@ -157,7 +157,7 @@ class LegacySRPAuthHandler:
             generator=constants.PRIME_2048_GEN,
         )
         self.session = SRPClientSession(
-            context, binascii.hexlify(self._auth_private).decode()
+            context, private=binascii.hexlify(self._auth_private).decode()
         )
 
     def step2(self, pub_key, salt):
