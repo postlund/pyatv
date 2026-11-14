@@ -12,7 +12,7 @@ from ipaddress import ip_address
 
 import pytest
 
-from pyatv.const import DeviceModel, Protocol
+from pyatv.const import DeviceModel, OperatingSystem, Protocol
 
 from tests import fake_udns
 from tests.conftest import Scanner
@@ -114,14 +114,43 @@ async def test_multicast_scan_device_info(udns_server, multicast_scan: Scanner):
     assert device_info.mac == SERVICE_2_ID
 
 
-async def test_multicast_scan_device_model(udns_server, multicast_scan: Scanner):
-    udns_server.add_service(service1(model="J105aAP"))
+@pytest.mark.parametrize(
+    "model,expected_model",
+    [("J105aAP", DeviceModel.Gen4K), ("J265AP", DeviceModel.AppleTV4KGen4)],
+)
+async def test_multicast_scan_device_model(
+    udns_server, multicast_scan: Scanner, model, expected_model
+):
+    udns_server.add_service(service1(model=model))
 
     atvs = await multicast_scan(protocol=Protocol.MRP)
     assert len(atvs) == 1
 
     device_info = atvs[0].device_info
-    assert device_info.model == DeviceModel.Gen4K
+    assert device_info.model == expected_model
+    assert device_info.operating_system == OperatingSystem.TvOS
+
+
+@pytest.mark.parametrize("use_unicast", [False, True], ids=["multicast", "unicast"])
+async def test_scan_appletv_4k_gen4_airplay(
+    udns_server, multicast_scan: Scanner, unicast_scan: Scanner, use_unicast
+):
+    udns_server.add_service(
+        fake_udns.airplay_service(
+            SERVICE_2_NAME,
+            SERVICE_2_ID,
+            addresses=[SERVICE_1_IP],
+            model="AppleTV18,1",
+        )
+    )
+
+    atvs = await (unicast_scan if use_unicast else multicast_scan)()
+    assert len(atvs) == 1
+
+    device_info = atvs[0].device_info
+    assert device_info.model == DeviceModel.AppleTV4KGen4
+    assert device_info.operating_system == OperatingSystem.TvOS
+    assert device_info.model_str == "Apple TV 4K (gen 4)"
 
 
 async def test_multicast_filter_multiple_protocols(
@@ -184,14 +213,21 @@ async def test_unicast_scan_device_info(udns_server, unicast_scan: Scanner):
     assert device_info.mac == SERVICE_2_ID
 
 
-async def test_unicast_scan_device_model(udns_server, unicast_scan: Scanner):
-    udns_server.add_service(service1(model="J105aAP"))
+@pytest.mark.parametrize(
+    "model,expected_model",
+    [("J105aAP", DeviceModel.Gen4K), ("J265AP", DeviceModel.AppleTV4KGen4)],
+)
+async def test_unicast_scan_device_model(
+    udns_server, unicast_scan: Scanner, model, expected_model
+):
+    udns_server.add_service(service1(model=model))
 
     atvs = await unicast_scan()
     assert len(atvs) == 1
 
     device_info = atvs[0].device_info
-    assert device_info.model == DeviceModel.Gen4K
+    assert device_info.model == expected_model
+    assert device_info.operating_system == OperatingSystem.TvOS
 
 
 async def test_unicast_scan_port_knock(unicast_scan: Scanner, stub_knock_server):

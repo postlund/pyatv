@@ -997,6 +997,7 @@ class DeviceInfo:
             DeviceModel.Gen4K,
             DeviceModel.AppleTV4KGen2,
             DeviceModel.AppleTV4KGen3,
+            DeviceModel.AppleTV4KGen4,
         ]:
             return OperatingSystem.TvOS
 
