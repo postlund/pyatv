@@ -16,6 +16,7 @@ _MODEL_LIST: Dict[str, DeviceModel] = {
     "AppleTV6,2": DeviceModel.Gen4K,
     "AppleTV11,1": DeviceModel.AppleTV4KGen2,
     "AppleTV14,1": DeviceModel.AppleTV4KGen3,
+    "AppleTV18,1": DeviceModel.AppleTV4KGen4,
     "AudioAccessory1,1": DeviceModel.HomePod,
     "AudioAccessory1,2": DeviceModel.HomePod,
     "AudioAccessory5,1": DeviceModel.HomePodMini,
@@ -32,6 +33,7 @@ _INTERNAL_NAME_LIST: Dict[str, DeviceModel] = {
     "J105aAP": DeviceModel.Gen4K,
     "J305AP": DeviceModel.AppleTV4KGen2,
     "J255AP": DeviceModel.AppleTV4KGen3,
+    "J265AP": DeviceModel.AppleTV4KGen4,
 }
 
 # Incomplete list here! Only Apple TV version numbers for now.
@@ -157,6 +159,7 @@ def lookup_os(id_or_model: Union[str, DeviceModel]) -> OperatingSystem:
         DeviceModel.Gen4K,
         DeviceModel.AppleTV4KGen2,
         DeviceModel.AppleTV4KGen3,
+        DeviceModel.AppleTV4KGen4,
     ]:
         return OperatingSystem.TvOS
 

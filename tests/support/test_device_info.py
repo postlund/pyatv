@@ -15,6 +15,7 @@ from pyatv.support.device_info import (
     "model_str,expected_model",
     [
         ("AppleTV6,2", DeviceModel.Gen4K),
+        ("AppleTV18,1", DeviceModel.AppleTV4KGen4),
         ("AudioAccessory5,1", DeviceModel.HomePodMini),
         ("bad_model", DeviceModel.Unknown),
     ],
@@ -27,6 +28,7 @@ def test_lookup_model(model_str, expected_model):
     "internal_name,expected_model",
     [
         ("J105aAP", DeviceModel.Gen4K),
+        ("J265AP", DeviceModel.AppleTV4KGen4),
         ("bad_name", DeviceModel.Unknown),
     ],
 )
@@ -70,6 +72,7 @@ def test_lookup_existing_version(version, expected_version):
         (DeviceModel.Gen4K, OperatingSystem.TvOS),
         (DeviceModel.AppleTV4KGen2, OperatingSystem.TvOS),
         (DeviceModel.AppleTV4KGen3, OperatingSystem.TvOS),
+        (DeviceModel.AppleTV4KGen4, OperatingSystem.TvOS),
     ],
 )
 def test_lookup_os(id_or_model, expected_os):
