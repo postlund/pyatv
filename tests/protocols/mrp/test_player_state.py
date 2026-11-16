@@ -240,13 +240,73 @@ async def test_set_now_playing_client(psm, protocol_mock, listener):
 
 
 async def test_set_now_playing_player_when_no_client(psm, protocol_mock, listener):
+    # tvOS 27.2 never sends SET_NOW_PLAYING_CLIENT_MESSAGE, so the client of the
+    # now playing player becomes the active client
     msg = set_path(messages.create(pb.SET_NOW_PLAYING_PLAYER_MESSAGE))
+    await protocol_mock.inject(msg)
+
+    assert listener.call_count == 1
+
+    assert psm.client.bundle_identifier == CLIENT_ID_1
+    assert psm.playing.identifier == PLAYER_ID_1
+    assert psm.playing.display_name == PLAYER_NAME_1
+
+
+async def test_set_now_playing_player_without_bundle_identifier(
+    psm, protocol_mock, listener
+):
+    msg = set_path(messages.create(pb.SET_NOW_PLAYING_PLAYER_MESSAGE), client_id="")
     await protocol_mock.inject(msg)
 
     assert listener.call_count == 0
 
+    assert psm.client is None
     assert not psm.playing.identifier
-    assert not psm.playing.display_name
+
+
+async def test_set_state_without_now_playing_client(psm, protocol_mock, listener):
+    msg = set_path(messages.create(pb.SET_NOW_PLAYING_PLAYER_MESSAGE))
+    await protocol_mock.inject(msg)
+
+    msg = set_path(messages.create(pb.SET_STATE_MESSAGE))
+    pb.extract_inner(msg).playbackState = pb.PlaybackState.Playing
+    await protocol_mock.inject(msg)
+
+    assert listener.call_count == 2
+
+    assert psm.playing.playback_state == pb.PlaybackState.Playing
+
+
+async def test_now_playing_player_follows_app_switch_without_client(
+    psm, protocol_mock, listener
+):
+    msg = set_path(messages.create(pb.SET_NOW_PLAYING_PLAYER_MESSAGE))
+    await protocol_mock.inject(msg)
+
+    msg = set_path(
+        messages.create(pb.SET_NOW_PLAYING_PLAYER_MESSAGE),
+        client_id=CLIENT_ID_2,
+        player_id="player_id_2",
+    )
+    await protocol_mock.inject(msg)
+
+    assert psm.client.bundle_identifier == CLIENT_ID_2
+    assert psm.playing.identifier == "player_id_2"
+
+
+async def test_now_playing_player_does_not_override_now_playing_client(
+    psm, protocol_mock, listener
+):
+    msg = messages.create(pb.SET_NOW_PLAYING_CLIENT_MESSAGE)
+    pb.extract_inner(msg).client.bundleIdentifier = CLIENT_ID_1
+    await protocol_mock.inject(msg)
+
+    msg = set_path(
+        messages.create(pb.SET_NOW_PLAYING_PLAYER_MESSAGE), client_id=CLIENT_ID_2
+    )
+    await protocol_mock.inject(msg)
+
+    assert psm.client.bundle_identifier == CLIENT_ID_1
 
 
 async def test_set_now_playing_player_for_active_client(psm, protocol_mock, listener):
@@ -429,13 +489,14 @@ async def test_remove_active_player_reverts_to_default(psm, protocol_mock, liste
     client.bundleIdentifier = CLIENT_ID_1
     await protocol_mock.inject(msg)
 
-    assert listener.call_count == 2
+    # The now playing player already made CLIENT_ID_1 active (one extra update)
+    assert listener.call_count == 3
     assert psm.playing.identifier == PLAYER_ID_1
 
     remove = set_path(messages.create(pb.REMOVE_PLAYER_MESSAGE))
     await protocol_mock.inject(remove)
 
-    assert listener.call_count == 3
+    assert listener.call_count == 4
     assert psm.playing.identifier == DEFAULT_PLAYER
 
 
