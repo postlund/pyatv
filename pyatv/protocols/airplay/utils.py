@@ -159,9 +159,9 @@ def get_pairing_requirement(service: BaseService) -> PairingRequirement:
 
 # TODO: It is not fully understood how to determine if a device supports remote control
 # over AirPlay, so this method makes a pure guess. We know that Apple TVs running tvOS
-# X (X>=13?) support it as well as HomePods, something we can identify from the model
-# string. This implementation should however be improved when it's properly known how
-# to check for support.
+# X (X>=13?) support it as well as HomePods and HomeViews, something we can identify
+# from the model string. This implementation should however be improved when it's
+# properly known how to check for support.
 def is_remote_control_supported(
     service: BaseService, credentials: HapCredentials
 ) -> bool:
@@ -172,10 +172,11 @@ def is_remote_control_supported(
     if model.startswith("AudioAccessory"):
         return credentials == TRANSIENT_CREDENTIALS
 
-    if not model.startswith("AppleTV"):
+    # HomeView (HomeAccessory) runs tvOS and requires HAP credentials, like Apple TV
+    if not model.startswith(("AppleTV", "HomeAccessory")):
         return False
 
-    # tvOS must be at least version 13 and HAP credentials are required by Apple TV
+    # tvOS must be at least version 13 and HAP credentials are required
     version = service.properties.get("osvers", "0.0").split(".", maxsplit=1)[0]
     return float(version) >= 13.0 and credentials.type == AuthenticationType.HAP
 

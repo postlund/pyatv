@@ -302,6 +302,7 @@ def test_device_info_bad_types(properties):
         ({DeviceInfo.MODEL: DeviceModel.AirPortExpressGen2}, OperatingSystem.AirPortOS),
         ({DeviceInfo.MODEL: DeviceModel.HomePod}, OperatingSystem.TvOS),
         ({DeviceInfo.MODEL: DeviceModel.HomePodMini}, OperatingSystem.TvOS),
+        ({DeviceInfo.MODEL: DeviceModel.HomeView}, OperatingSystem.TvOS),
         ({DeviceInfo.MODEL: DeviceModel.Gen2}, OperatingSystem.TvOS),
         ({DeviceInfo.MODEL: DeviceModel.Gen3}, OperatingSystem.TvOS),
         ({DeviceInfo.MODEL: DeviceModel.Gen4}, OperatingSystem.TvOS),

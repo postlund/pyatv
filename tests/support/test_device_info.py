@@ -16,6 +16,7 @@ from pyatv.support.device_info import (
     [
         ("AppleTV6,2", DeviceModel.Gen4K),
         ("AudioAccessory5,1", DeviceModel.HomePodMini),
+        ("HomeAccessory17,1", DeviceModel.HomeView),
         ("bad_model", DeviceModel.Unknown),
     ],
 )
@@ -63,6 +64,7 @@ def test_lookup_existing_version(version, expected_version):
         (DeviceModel.HomePod, OperatingSystem.TvOS),
         (DeviceModel.HomePodGen2, OperatingSystem.TvOS),
         (DeviceModel.HomePodMini, OperatingSystem.TvOS),
+        (DeviceModel.HomeView, OperatingSystem.TvOS),
         (DeviceModel.AppleTVGen1, OperatingSystem.Legacy),
         (DeviceModel.Gen2, OperatingSystem.Legacy),
         (DeviceModel.Gen3, OperatingSystem.Legacy),

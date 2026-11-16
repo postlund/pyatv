@@ -112,6 +112,14 @@ async def test_get_pairing_requirement(props, expected_req):
         ({"osvers": "13.0", "model": "AppleTV5,6"}, LEGACY_CREDS, False),
         ({"osvers": "13.0", "model": "AppleTV5,6"}, HAP_CREDS, True),
         ({"osvers": "8.4.4", "model": "AppleTV5,6"}, NO_CREDENTIALS, False),
+        ({"osvers": "27.2", "model": "HomeAccessory17,1"}, NO_CREDENTIALS, False),
+        (
+            {"osvers": "27.2", "model": "HomeAccessory17,1"},
+            TRANSIENT_CREDENTIALS,
+            False,
+        ),
+        ({"osvers": "27.2", "model": "HomeAccessory17,1"}, LEGACY_CREDS, False),
+        ({"osvers": "27.2", "model": "HomeAccessory17,1"}, HAP_CREDS, True),
     ],
 )
 def test_is_remote_control_supported(props, credentials, expected_supported):
