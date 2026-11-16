@@ -988,7 +988,11 @@ class DeviceInfo:
 
         if self.model in [DeviceModel.AirPortExpress, DeviceModel.AirPortExpressGen2]:
             return OperatingSystem.AirPortOS
-        if self.model in [DeviceModel.HomePod, DeviceModel.HomePodMini]:
+        if self.model in [
+            DeviceModel.HomePod,
+            DeviceModel.HomePodMini,
+            DeviceModel.HomeView,
+        ]:
             return OperatingSystem.TvOS
         if self.model in [
             DeviceModel.Gen2,

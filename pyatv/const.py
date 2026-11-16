@@ -196,6 +196,9 @@ class DeviceModel(Enum):
     AppleTVGen1 = 13
     """Device model is first generation Apple TV."""
 
+    HomeView = 14
+    """Device model is HomeView (first generation)."""
+
 
 class InputAction(Enum):
     """Type of input when pressing a button."""

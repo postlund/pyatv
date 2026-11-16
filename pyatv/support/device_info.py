@@ -21,6 +21,7 @@ _MODEL_LIST: Dict[str, DeviceModel] = {
     "AudioAccessory5,1": DeviceModel.HomePodMini,
     "AudioAccessorySingle5,1": DeviceModel.HomePodMini,
     "AudioAccessory6,1": DeviceModel.HomePodGen2,
+    "HomeAccessory17,1": DeviceModel.HomeView,
 }
 
 
@@ -148,6 +149,7 @@ def lookup_os(id_or_model: Union[str, DeviceModel]) -> OperatingSystem:
         DeviceModel.HomePod,
         DeviceModel.HomePodMini,
         DeviceModel.HomePodGen2,
+        DeviceModel.HomeView,
     ]:
         return OperatingSystem.TvOS
     if id_or_model in [DeviceModel.AppleTVGen1, DeviceModel.Gen2, DeviceModel.Gen3]:

@@ -100,6 +100,7 @@ def test_protocol_str(protocol, output):
         (DeviceModel.Music, "Music/iTunes"),
         (DeviceModel.AppleTV4KGen3, "Apple TV 4K (gen 3)"),
         (DeviceModel.HomePodGen2, "HomePod (gen 2)"),
+        (DeviceModel.HomeView, "HomeView"),
         (1234, "Unknown"),
     ],
 )
