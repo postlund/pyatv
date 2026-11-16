@@ -190,6 +190,7 @@ class PlayerStateManager:
         self.protocol = protocol
         self.volume_controls_available = None
         self._active_client = None
+        self._now_playing_client_received = False
         self._clients: Dict[str, Client] = {}
         self._listener = None
         self._add_listeners()
@@ -263,6 +264,7 @@ class PlayerStateManager:
         await self._state_updated(player=player)
 
     async def _handle_set_now_playing_client(self, message):
+        self._now_playing_client_received = True
         self._active_client = self.get_client(pb.extract_inner(message).client)
 
         _LOGGER.debug("Active client is now %s", self._active_client.bundle_identifier)
@@ -274,6 +276,20 @@ class PlayerStateManager:
 
         client = self.get_client(set_now_playing.playerPath.client)
         client.handle_set_now_playing_player(set_now_playing.playerPath.player)
+
+        # tvOS 27.2 no longer sends SET_NOW_PLAYING_CLIENT_MESSAGE, so the active
+        # client would never be set and all state updates would be dropped. Until
+        # that message has been seen on this connection, treat the client of the
+        # now playing player as the active one.
+        if (
+            not self._now_playing_client_received
+            and set_now_playing.playerPath.client.bundleIdentifier
+        ):
+            self._active_client = client
+            _LOGGER.debug(
+                "Active client is now %s (from now playing player)",
+                client.bundle_identifier,
+            )
 
         await self._state_updated(client=client)
 
