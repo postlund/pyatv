@@ -72,6 +72,30 @@ from pyatv.support.url import is_url
 
 _LOGGER = logging.getLogger(__name__)
 
+# Size used when requesting remote artwork without a requested size
+_DEFAULT_REMOTE_ARTWORK_SIZE = 600
+
+# Base URL for artwork identifiers that only contain the path part
+_ITUNES_ARTWORK_BASE_URL = "https://is1-ssl.mzstatic.com/image/thumb/"
+_ITUNES_ARTWORK_PATH = re.compile(r"^[A-Za-z]+\d*/v\d+/.+\.(jpg|jpeg|png|heic|webp)$")
+
+
+def _remote_artwork_size(width: int, height: int) -> Tuple[int, int]:
+    """Return concrete dimensions to use in a remote artwork URL.
+
+    The Apple image server rejects absurd placeholder dimensions (like 999999), so
+    a real size must always be requested. Artwork is square in practice, so the
+    known dimension is mirrored when only one of them is specified.
+    """
+    if width < 1 and height < 1:
+        return _DEFAULT_REMOTE_ARTWORK_SIZE, _DEFAULT_REMOTE_ARTWORK_SIZE
+    if width < 1:
+        return height, height
+    if height < 1:
+        return width, width
+    return width, height
+
+
 _DEFAULT_SKIP_TIME = 15
 
 # Source: https://github.com/Daij-Djan/DDHidLib/blob/master/usb_hid_usages.txt
@@ -547,15 +571,21 @@ class MrpMetadata(Metadata):
         if metadata.HasField("artworkIdentifier"):
             # appears to be a template to itunes artwork, but let's validate
             url_template = metadata.artworkIdentifier
+            if not is_url(url_template) and _ITUNES_ARTWORK_PATH.match(url_template):
+                # Some devices (e.g. HomePod) send only the path part of the
+                # artwork, e.g. "Music115/v4/.../093624942788.jpg"
+                url_template = (
+                    _ITUNES_ARTWORK_BASE_URL + url_template + "/{w}x{h}{c}.{f}"
+                )
+            url_width, url_height = _remote_artwork_size(width, height)
             try:
                 url = url_template.format(
-                    # the itunes image server preserves aspect ratio
-                    w=999999 if width < 1 else width,
-                    h=999999 if height < 1 else height,
+                    w=url_width,
+                    h=url_height,
                     c="bb",
                     f="png",
                 )
-            except KeyError:
+            except (KeyError, IndexError, ValueError):
                 url = None
             if is_url(url):
                 urls.append(url)

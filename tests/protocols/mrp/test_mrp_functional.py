@@ -269,6 +269,41 @@ class MRPFunctionalTest(common_functional_tests.CommonFunctionalTests):
         self.assertEqual(artwork.bytes, ARTWORK_BYTES)
         self.assertEqual(artwork.mimetype, ARTWORK_MIMETYPE)
 
+    async def test_metadata_artwork_url_in_identifier_default_height(self):
+        # Height not specified (default call): mirror width instead of using a
+        # placeholder dimension that the image server rejects
+        port = await self.serve_artwork("/test/512x512bb.png")
+
+        self.usecase.example_video()
+        self.usecase.change_artwork(
+            b"",
+            "",
+            identifier=f"http://localhost:{port}/test/{{w}}x{{h}}{{c}}.{{f}}",
+            url=f"http://localhost:{port}/missing.heic",
+        )
+
+        await self.playing(title="dummy")
+
+        artwork = await self.atv.metadata.artwork()
+        self.assertEqual(artwork.bytes, ARTWORK_BYTES)
+        self.assertEqual(artwork.mimetype, ARTWORK_MIMETYPE)
+
+    async def test_metadata_artwork_url_in_identifier_no_size(self):
+        port = await self.serve_artwork("/test/600x600bb.png")
+
+        self.usecase.example_video()
+        self.usecase.change_artwork(
+            b"",
+            "",
+            identifier=f"http://localhost:{port}/test/{{w}}x{{h}}{{c}}.{{f}}",
+            url=f"http://localhost:{port}/missing.heic",
+        )
+
+        await self.playing(title="dummy")
+
+        artwork = await self.atv.metadata.artwork(width=None, height=None)
+        self.assertEqual(artwork.bytes, ARTWORK_BYTES)
+
     async def test_item_updates(self):
         self.usecase.video_playing(
             False, "dummy", 100, 1, identifier="id", artist="some artist"
