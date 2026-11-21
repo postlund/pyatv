@@ -48,6 +48,27 @@ SRP_INPUT_INFO = "ServerEncrypt-main"
 # order.
 FrameIdType = Union[int, FrameType]
 
+
+def _opack_xid(xid: int) -> int:
+    """Serialize a positive Companion XID without changing its signed value.
+
+    tvOS reads fixed-width OPACK integers as signed, so a positive XID must
+    fit in the signed range of its serialized width. Ordinary OPACK integer
+    fields are intentionally unaffected by this Companion-specific choice.
+    """
+    if xid < 0:
+        raise ValueError("Companion XID must be non-negative")
+    if xid <= 0x7F:
+        return xid
+    if xid <= 0x7FFF:
+        return opack.sized_int(xid, 2)
+    if xid <= 0x7FFFFFFF:
+        return opack.sized_int(xid, 4)
+    if xid <= 0x7FFFFFFFFFFFFFFF:
+        return opack.sized_int(xid, 8)
+    raise OverflowError("Companion XID exceeds signed 64-bit range")
+
+
 # pylint: disable=invalid-name
 
 
@@ -147,7 +168,7 @@ class CompanionProtocol(
         timeout: float = DEFAULT_TIMEOUT,
     ) -> Dict[str, object]:
         """Send data as OPACK and decode result as OPACK."""
-        data["_x"] = self._xid
+        data["_x"] = _opack_xid(self._xid)
         identifier = self._xid
         self._xid += 1
         return await self._exchange_generic_opack(frame_type, data, identifier, timeout)
@@ -179,7 +200,7 @@ class CompanionProtocol(
         """Send data encoded with OPACK."""
         # Add XID if not present
         if "_x" not in data:
-            data["_x"] = self._xid
+            data["_x"] = _opack_xid(self._xid)
             self._xid += 1
 
         _LOGGER.debug("Send OPACK: %s", data)
