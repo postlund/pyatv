@@ -30,6 +30,16 @@ def _sized_int(value: int, size: int) -> int:
     return type_(value)
 
 
+def sized_int(value: int, size: int) -> int:
+    """Return an integer serialized with an explicit OPACK width.
+
+    Args:
+        value: The integer value.
+        size: The size of the integer in bytes (1, 2, 4, or 8).
+    """
+    return _sized_int(value, size)
+
+
 def pack(data: object) -> bytes:
     """Pack data structure with OPACK and return bytes."""
     return _pack(data, [])
