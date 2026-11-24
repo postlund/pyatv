@@ -33,7 +33,11 @@ PERCENTAGE_MAX = 100.0
 
 UNSUPPORTED_MODELS = [r"^Mac\d+,\d+$"]
 
+# Bit set in the "flags"/"sf" TXT record when the device is playing audio. This
+# is a best-effort assumption based on observations of AirPort Express (2nd gen)
+# in issue #1419; no other states are exposed by these flags.
 FLAG_PLAYING = 0x800
+
 
 class AirPlayMajorVersion(Enum):
     """Major AirPlay protocol version."""
@@ -43,7 +47,11 @@ class AirPlayMajorVersion(Enum):
 
 
 def get_flags(properties: Mapping[str, str]) -> int:
-    # Flags are either present via "sf" or "flags"
+    """Return raw AirPlay status flags from zeroconf properties.
+
+    Flags are announced as "sf" (AirPlay v1) or "flags" (AirPlay v2). The
+    first available property wins and 0x0 is used when neither is present.
+    """
     flags = properties.get("sf") or properties.get("flags") or "0x0"
     return int(flags, 16)
 
@@ -119,9 +127,14 @@ def parse_features(features: str) -> AirPlayFlags:
     return AirPlayFlags(int(value, 16))
 
 
-def flags_to_device_state(flags: int) -> const.DeviceState:
-    """Decode raw AirPlay zeroconf 'flags' bitmask into a DeviceState."""
-    return const.DeviceState.Playing if flags & FLAG_PLAYING else const.DeviceState.Idle
+def flags_to_device_state(flags: int) -> DeviceState:
+    """Decode raw AirPlay zeroconf "flags" bitmask into a DeviceState.
+
+    Only Playing and Idle can be derived, as the flags do not expose any
+    information about e.g. paused or stopped state.
+    """
+    return DeviceState.Playing if flags & FLAG_PLAYING else DeviceState.Idle
+
 
 def is_password_required(service: BaseService) -> bool:
     """Return if password is required by AirPlay service.

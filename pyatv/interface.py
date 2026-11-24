@@ -1598,17 +1598,23 @@ class AppleTV(ABC, StateProducer[DeviceListener]):
     def touch(self) -> TouchGestures:
         """Return touch gestures interface."""
 
+
 class AirPlayListener(ABC):  # pylint: disable=too-few-public-methods
     """Listener interface for AirPlay zeroconf status updates."""
 
     @abstractmethod
     def flags_update(self, device_state: const.DeviceState) -> None:
-        """AirPlay zeroconf status flags changed to a new device state."""
+        """Handle updated AirPlay zeroconf status flags."""
         raise NotImplementedError()
 
 
-class AirPlayStatus(ABC, StateProducer):
+class AirPlayStatus(ABC, StateProducer[AirPlayListener]):
     """Raw AirPlay zeroconf status, independent of Metadata.
+
+    The AirPlay zeroconf TXT record announces a raw "flags" bitmask that, among
+    other things, reveals if audio is currently playing. This interface exposes
+    that information directly, independent of what metadata protocols report,
+    which is useful for e.g. AirPort Express devices.
 
     Listener interface: `pyatv.interface.AirPlayListener`
     """
@@ -1616,5 +1622,9 @@ class AirPlayStatus(ABC, StateProducer):
     @property
     @abstractmethod
     def device_state(self) -> const.DeviceState:
-        """Best-effort playing state derived from AirPlay zeroconf flags."""
+        """Best-effort playing state derived from AirPlay zeroconf flags.
+
+        Only `pyatv.const.DeviceState.Playing` and
+        `pyatv.const.DeviceState.Idle` can be returned.
+        """
         raise NotImplementedError()

@@ -28,6 +28,7 @@ from pyatv.core import (
 )
 from pyatv.core.relayer import Relayer
 from pyatv.interface import OutputDevice
+from pyatv.protocols.airplay.utils import flags_to_device_state
 from pyatv.settings import Settings
 from pyatv.support import deprecated, shield
 from pyatv.support.collections import dict_merge
@@ -612,6 +613,9 @@ class FacadeAirPlayStatus(Relayer, interface.AirPlayStatus):
         old_state = self._device_state
         new_state = self._device_state = flags_to_device_state(flags)
         if new_state != old_state:
+            _LOGGER.debug(
+                "AirPlay flags state changed from %s to %s", old_state, new_state
+            )
             self.listener.flags_update(new_state)
 
     @property  # type: ignore
@@ -953,7 +957,6 @@ class FacadeAppleTV(interface.AppleTV):
         be torn down.
         """
         self.close()
-
 
     @property  # type: ignore
     @shield.guard

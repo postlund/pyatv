@@ -53,6 +53,7 @@ class UpdatedState(Enum):
     AirPlayFlags = 6
     """Raw AirPlay zeroconf 'flags' bitmask was updated."""
 
+
 # pylint: enable=invalid-name
 
 

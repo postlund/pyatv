@@ -23,6 +23,18 @@ link_group: api
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
+<h4><code><a title="pyatv.interface.AirPlayListener" href="#pyatv.interface.AirPlayListener">AirPlayListener</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.interface.AirPlayListener.flags_update" href="#pyatv.interface.AirPlayListener.flags_update">flags_update</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="pyatv.interface.AirPlayStatus" href="#pyatv.interface.AirPlayStatus">AirPlayStatus</a></code></h4>
+<ul class="">
+<li><code><a title="pyatv.interface.AirPlayStatus.device_state" href="#pyatv.interface.AirPlayStatus.device_state">device_state</a></code></li>
+</ul>
+</li>
+<li>
 <h4><code><a title="pyatv.interface.App" href="#pyatv.interface.App">App</a></code></h4>
 <ul class="">
 <li><code><a title="pyatv.interface.App.identifier" href="#pyatv.interface.App.identifier">identifier</a></code></li>
@@ -350,7 +362,7 @@ link_group: api
 <p>Public interface exposed by library.</p>
 <p>This module contains all the interfaces that represents a generic Apple TV device and
 all its features.</p>
-<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1-L1599" class="git-link">Browse git</a></div>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1-L1630" class="git-link">Browse git</a></div>
 </section>
 <section>
 </section>
@@ -373,6 +385,64 @@ all its features.</p>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
+<dt id="pyatv.interface.AirPlayListener"><code class="flex name class">
+<span>class <span class="ident">AirPlayListener</span></span>
+</code></dt>
+<dd>
+<section class="desc"><p>Listener interface for AirPlay zeroconf status updates.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1602-L1608" class="git-link">Browse git</a></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>abc.ABC</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="pyatv.interface.AirPlayListener.flags_update">
+<code class="name flex">
+<span>def <span class="ident">flags_update</span></span>(<span>self, device_state: <a title="pyatv.const.DeviceState" href="../const#pyatv.const.DeviceState">DeviceState</a>) -> None</span>
+</code>
+</dt>
+<dd>
+<section class="desc"><p>Handle updated AirPlay zeroconf status flags.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1605-L1608" class="git-link">Browse git</a></div>
+</dd>
+</dl>
+</dd>
+<dt id="pyatv.interface.AirPlayStatus"><code class="flex name class">
+<span>class <span class="ident">AirPlayStatus</span></span>
+<span>(</span><span>max_calls: int = 0)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Raw AirPlay zeroconf status, independent of Metadata.</p>
+<p>The AirPlay zeroconf TXT record announces a raw "flags" bitmask that, among
+other things, reveals if audio is currently playing. This interface exposes
+that information directly, independent of what metadata protocols report,
+which is useful for e.g. AirPort Express devices.</p>
+<p>Listener interface: <code><a title="pyatv.interface.AirPlayListener" href="#pyatv.interface.AirPlayListener">AirPlayListener</a></code></p>
+<p>Initialize a new StateProducer instance.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1611-L1630" class="git-link">Browse git</a></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>abc.ABC</li>
+<li>pyatv.support.state_producer.StateProducer</li>
+<li>typing.Generic</li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li>pyatv.core.facade.FacadeAirPlayStatus</li>
+<li>pyatv.protocols.airplay.AirPlayStatusImpl</li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="pyatv.interface.AirPlayStatus.device_state"><code class="name">var <span class="ident">device_state</span> -> <a title="pyatv.const.DeviceState" href="../const#pyatv.const.DeviceState">DeviceState</a></code></dt>
+<dd>
+<section class="desc"><p>Best-effort playing state derived from AirPlay zeroconf flags.</p>
+<p>Only <code><a title="pyatv.const.DeviceState.Playing" href="../const#pyatv.const.DeviceState.Playing">DeviceState.Playing</a></code> and
+<code><a title="pyatv.const.DeviceState.Idle" href="../const#pyatv.const.DeviceState.Idle">DeviceState.Idle</a></code> can be returned.</p></section>
+<div class="git-link-div"><a href="https://github.com/postlund/pyatv/blob/master/pyatv/interface.py#L1622-L1630" class="git-link">Browse git</a></div>
+</dd>
+</dl>
+</dd>
 <dt id="pyatv.interface.App"><code class="flex name class">
 <span>class <span class="ident">App</span></span>
 <span>(</span><span>name: str | None, identifier: str)</span>
@@ -981,7 +1051,7 @@ original value).</p></section>
 <dl>
 <dt id="pyatv.interface.DeviceInfo.OUTPUT_DEVICE_ID"><code class="name">var <span class="ident">OUTPUT_DEVICE_ID</span></code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 </dl>
 <h3>Instance variables</h3>
@@ -1266,23 +1336,23 @@ interface: <code>pyatv.interfaces.KeyboardListener</code></p>
 <dl>
 <dt id="pyatv.interface.MediaMetadata.album"><code class="name">var <span class="ident">album</span> -> str | None</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.interface.MediaMetadata.artist"><code class="name">var <span class="ident">artist</span> -> str | None</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.interface.MediaMetadata.artwork"><code class="name">var <span class="ident">artwork</span> -> bytes | None</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.interface.MediaMetadata.duration"><code class="name">var <span class="ident">duration</span> -> float | None</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.interface.MediaMetadata.title"><code class="name">var <span class="ident">title</span> -> str | None</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 </dl>
 </dd>
@@ -1362,15 +1432,15 @@ aspect ratio.</p></section>
 <dl>
 <dt id="pyatv.interface.OutputDevice.identifier"><code class="name">var <span class="ident">identifier</span> -> str</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.interface.OutputDevice.name"><code class="name">var <span class="ident">name</span> -> str | None</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 <dt id="pyatv.interface.OutputDevice.volume"><code class="name">var <span class="ident">volume</span> -> float</code></dt>
 <dd>
-<section class="desc"><p>The type of the None singleton.</p></section>
+<section class="desc"></section>
 </dd>
 </dl>
 </dd>
