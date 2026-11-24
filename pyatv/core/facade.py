@@ -28,6 +28,7 @@ from pyatv.core import (
 )
 from pyatv.core.relayer import Relayer
 from pyatv.interface import OutputDevice
+from pyatv.protocols.airplay.utils import flags_to_device_state
 from pyatv.settings import Settings
 from pyatv.support import deprecated, shield
 from pyatv.support.collections import dict_merge
@@ -594,6 +595,36 @@ class FacadeKeyboard(Relayer, interface.Keyboard):
         return await self.relay("text_set")(text=text)
 
 
+class FacadeAirPlayStatus(Relayer, interface.AirPlayStatus):
+    """Facade implementation for raw AirPlay zeroconf status.
+
+    Listener interface: `pyatv.interface.AirPlayListener`
+    """
+
+    def __init__(self, core_dispatcher: CoreStateDispatcher):
+        """Initialize a new FacadeAirPlayStatus instance."""
+        Relayer.__init__(self, interface.AirPlayStatus, DEFAULT_PRIORITIES)
+        interface.AirPlayStatus.__init__(self)
+        self._device_state: const.DeviceState = const.DeviceState.Idle
+        core_dispatcher.listen_to(UpdatedState.AirPlayFlags, self._flags_changed)
+
+    def _flags_changed(self, message: StateMessage) -> None:
+        flags = cast(int, message.value)
+        old_state = self._device_state
+        new_state = self._device_state = flags_to_device_state(flags)
+        if new_state != old_state:
+            _LOGGER.debug(
+                "AirPlay flags state changed from %s to %s", old_state, new_state
+            )
+            self.listener.flags_update(new_state)
+
+    @property  # type: ignore
+    @shield.guard
+    def device_state(self) -> const.DeviceState:
+        """Best-effort playing state derived from AirPlay zeroconf flags."""
+        return self._device_state
+
+
 class FacadePushUpdater(
     Relayer[interface.PushUpdater], interface.PushUpdater, interface.PushListener
 ):
@@ -711,6 +742,7 @@ class FacadeAppleTV(interface.AppleTV):
             interface.Audio: FacadeAudio(core_dispatcher),
             interface.Keyboard: FacadeKeyboard(core_dispatcher),
             interface.TouchGestures: FacadeTouchGestures(core_dispatcher),
+            interface.AirPlayStatus: FacadeAirPlayStatus(core_dispatcher),
         }
         self._settings = settings
         self._shield_everything()
@@ -925,3 +957,9 @@ class FacadeAppleTV(interface.AppleTV):
         be torn down.
         """
         self.close()
+
+    @property  # type: ignore
+    @shield.guard
+    def airplay_status(self) -> interface.AirPlayStatus:
+        """Return API for raw AirPlay zeroconf status."""
+        return cast(interface.AirPlayStatus, self._interfaces[interface.AirPlayStatus])

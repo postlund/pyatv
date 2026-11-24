@@ -7,11 +7,14 @@ from pyatv.auth.hap_pairing import (
     TRANSIENT_CREDENTIALS,
     parse_credentials,
 )
-from pyatv.const import PairingRequirement, Protocol
+from pyatv.const import DeviceState, PairingRequirement, Protocol
 from pyatv.core import MutableService
 from pyatv.protocols.airplay.utils import (
+    FLAG_PLAYING,
     AirPlayFlags,
     AirPlayMajorVersion,
+    flags_to_device_state,
+    get_flags,
     get_pairing_requirement,
     get_protocol_version,
     is_password_required,
@@ -56,6 +59,36 @@ def test_parse_features(flags, output):
 def test_bad_input(value):
     with pytest.raises(ValueError):
         parse_features(value)
+
+
+@pytest.mark.parametrize(
+    "properties,expected_flags",
+    [
+        ({}, 0x0),
+        ({"sf": "0x800"}, 0x800),
+        ({"flags": "0x800"}, 0x800),
+        # "sf" (AirPlay v1) takes precedence over "flags" (AirPlay v2)
+        ({"sf": "0x4", "flags": "0x800"}, 0x4),
+        # Empty "sf" falls back to "flags"
+        ({"sf": "", "flags": "0x800"}, 0x800),
+    ],
+)
+def test_get_flags(properties, expected_flags):
+    assert get_flags(properties) == expected_flags
+
+
+@pytest.mark.parametrize(
+    "flags,expected_state",
+    [
+        (0, DeviceState.Idle),
+        (0x7FF, DeviceState.Idle),
+        (FLAG_PLAYING, DeviceState.Playing),
+        (0x800, DeviceState.Playing),
+        (0x804, DeviceState.Playing),
+    ],
+)
+def test_flags_to_device_state(flags, expected_state):
+    assert flags_to_device_state(flags) == expected_state
 
 
 @pytest.mark.parametrize(

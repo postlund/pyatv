@@ -23,9 +23,17 @@ from pyatv.const import (
     PowerState,
     Protocol,
 )
-from pyatv.core import AbstractPushUpdater, OutputDeviceState, SetupData, UpdatedState
+from pyatv.core import (
+    AbstractPushUpdater,
+    OutputDeviceState,
+    ProtocolStateDispatcher,
+    SetupData,
+    UpdatedState,
+)
 from pyatv.core.facade import FacadeAppleTV, SetupData
 from pyatv.interface import (
+    AirPlayListener,
+    AirPlayStatus,
     AppleTV,
     Apps,
     Audio,
@@ -232,6 +240,26 @@ class SavingKeyboardListener(KeyboardListener):
     ):
         self.last_update = new_state
         self.all_updates.append(new_state)
+
+
+class SavingAirPlayListener(AirPlayListener):
+    def __init__(self):
+        self.last_update = None
+        self.all_updates = []
+
+    def flags_update(self, device_state: DeviceState) -> None:
+        self.last_update = device_state
+        self.all_updates.append(device_state)
+
+
+class DummyAirPlayStatus(AirPlayStatus):
+    def __init__(self, device_state: DeviceState = DeviceState.Idle) -> None:
+        super().__init__()
+        self._device_state = device_state
+
+    @property
+    def device_state(self) -> DeviceState:
+        return self._device_state
 
 
 @pytest.fixture(name="register_interface")
@@ -951,6 +979,93 @@ async def test_keyboard_no_listener_duplicates(
     assert keyboard_setup.listener.last_update == KeyboardFocusState.Focused
 
 
+# AIRPLAY STATUS RELATED TESTS
+
+
+@pytest.fixture(name="airplay_state_dispatcher")
+def airplay_state_dispatcher_fixture(core_dispatcher):
+    yield ProtocolStateDispatcher(Protocol.AirPlay, core_dispatcher)
+
+
+@pytest_asyncio.fixture(name="airplay_status_setup")
+async def airplay_status_setup_fixture(facade_dummy, register_interface):
+    listener = SavingAirPlayListener()
+
+    sdg = register_basic_interfaces(register_interface, Protocol.AirPlay)
+    sdg.interfaces[AirPlayStatus] = DummyAirPlayStatus()
+
+    await facade_dummy.connect()
+    facade_dummy.airplay_status.listener = listener
+
+    yield facade_dummy.airplay_status
+
+
+async def dispatch_flags_update(airplay_state_dispatcher, flags):
+    event = asyncio.Event()
+
+    # Add a listener last in the last and make it set an asyncio.Event. That way we
+    # can synchronize and know that all other listeners have been called.
+    airplay_state_dispatcher.listen_to(
+        UpdatedState.AirPlayFlags, lambda message: event.set()
+    )
+    airplay_state_dispatcher.dispatch(UpdatedState.AirPlayFlags, flags)
+
+    await event.wait()
+
+
+async def test_airplay_status_listener_updates(
+    airplay_state_dispatcher, airplay_status_setup
+):
+    await dispatch_flags_update(airplay_state_dispatcher, 0x800)
+    assert airplay_status_setup.listener.last_update == DeviceState.Playing
+    await dispatch_flags_update(airplay_state_dispatcher, 0x0)
+    assert airplay_status_setup.listener.last_update == DeviceState.Idle
+
+
+async def test_airplay_status_device_state(
+    airplay_state_dispatcher, airplay_status_setup
+):
+    assert airplay_status_setup.device_state == DeviceState.Idle
+
+    await dispatch_flags_update(airplay_state_dispatcher, 0x7FF)
+    assert airplay_status_setup.device_state == DeviceState.Idle
+
+    await dispatch_flags_update(airplay_state_dispatcher, 0x800)
+    assert airplay_status_setup.device_state == DeviceState.Playing
+
+    await dispatch_flags_update(airplay_state_dispatcher, 0x804)
+    assert airplay_status_setup.device_state == DeviceState.Playing
+
+    await dispatch_flags_update(airplay_state_dispatcher, 0x0)
+    assert airplay_status_setup.device_state == DeviceState.Idle
+
+
+async def test_airplay_status_no_listener_duplicates(
+    airplay_state_dispatcher, airplay_status_setup
+):
+    # Both flags derive Idle, i.e. no state change and no update
+    await dispatch_flags_update(airplay_state_dispatcher, 0x0)
+    await dispatch_flags_update(airplay_state_dispatcher, 0x7FF)
+    assert len(airplay_status_setup.listener.all_updates) == 0
+
+    # First Playing update, followed by flags still being Playing
+    await dispatch_flags_update(airplay_state_dispatcher, 0x800)
+    await dispatch_flags_update(airplay_state_dispatcher, 0x804)
+    assert len(airplay_status_setup.listener.all_updates) == 1
+    assert airplay_status_setup.listener.last_update == DeviceState.Playing
+
+
+async def test_airplay_status_exposed(facade_dummy, register_interface):
+    instance, _ = register_interface(
+        FeatureName.Play, DummyAirPlayStatus(), Protocol.AirPlay
+    )
+
+    await facade_dummy.connect()
+
+    assert isinstance(facade_dummy.airplay_status, AirPlayStatus)
+    assert facade_dummy.airplay_status.main_instance is instance
+
+
 # GUARD CALLS AFTER CLOSE
 
 
@@ -1005,6 +1120,7 @@ async def test_base_methods_guarded_after_close(facade_dummy, register_interface
         (Features, "features", {"in_state"}),
         (Apps, "apps", {}),
         (Audio, "audio", {}),
+        (AirPlayStatus, "airplay_status", {}),
     ],
 )
 async def test_interface_methods_guarded_after_close(
