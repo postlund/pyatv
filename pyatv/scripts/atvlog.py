@@ -315,8 +315,7 @@ async def appstart():
 
 def main():
     """Application start here."""
-    loop = asyncio.get_event_loop()
-    return loop.run_until_complete(appstart())
+    return asyncio.run(appstart())
 
 
 if __name__ == "__main__":
