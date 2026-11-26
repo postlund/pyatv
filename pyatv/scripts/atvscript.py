@@ -421,9 +421,12 @@ async def appstart(loop):
 
 def main():
     """Application start here."""
-    loop = asyncio.get_event_loop()
+
+    async def _run():
+        return await appstart(asyncio.get_running_loop())
+
     try:
-        return loop.run_until_complete(appstart(loop))
+        return asyncio.run(_run())
     except KeyboardInterrupt:
         return 0
 
